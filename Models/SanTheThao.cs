@@ -1,3 +1,8 @@
+/*
+ * Họ và tên: Lê Ngọc Hải Nam
+ * Mã sinh viên: 23103100219
+ * Nội dung thực hiện: Khởi tạo Entity dùng chung tối thiểu để Module 4 kiểm tra sân còn khả dụng khi xác nhận đơn.
+ */
 using System.ComponentModel.DataAnnotations;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Models.Enums;
 
