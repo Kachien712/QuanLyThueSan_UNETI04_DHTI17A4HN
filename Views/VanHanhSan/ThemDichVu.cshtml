@@ -1,0 +1,37 @@
+@*
+    Họ và tên: Lê Ngọc Hải Nam
+    Mã sinh viên: 23103100219
+    Nội dung thực hiện: Biểu mẫu thêm dịch vụ; người dùng chỉ chọn dịch vụ và số lượng.
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.ThemDichVuViewModel
+@{
+    ViewData["Title"] = "Thêm dịch vụ";
+}
+
+<h1 class="h3 mb-4">Thêm dịch vụ cho đơn #@Model.MaDatSan</h1>
+
+<form asp-action="ThemDichVu" method="post" class="col-md-6">
+    <input asp-for="MaDatSan" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+    <div class="mb-3">
+        <label asp-for="MaDichVu" class="form-label"></label>
+        <select asp-for="MaDichVu" asp-items="Model.DichVuOptions" class="form-select">
+            <option value="">-- Chọn dịch vụ --</option>
+        </select>
+        <span asp-validation-for="MaDichVu" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="SoLuong" class="form-label"></label>
+        <input asp-for="SoLuong" class="form-control" min="1" />
+        <span asp-validation-for="SoLuong" class="text-danger"></span>
+    </div>
+    <p class="text-muted small">Đơn giá và thành tiền do hệ thống lấy từ cơ sở dữ liệu và tự tính.</p>
+    <div class="d-flex gap-2">
+        <button class="btn btn-primary" type="submit">Lưu dịch vụ</button>
+        <a class="btn btn-outline-secondary" asp-action="ChiTiet" asp-route-id="@Model.MaDatSan">Hủy</a>
+    </div>
+</form>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
