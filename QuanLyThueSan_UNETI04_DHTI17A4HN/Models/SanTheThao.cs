@@ -1,5 +1,5 @@
-// Họ và tên: [Họ tên SV2]
-// Mã sinh viên: [MSSV SV2]
+// Họ và tên: [Đào Duy Khánh]
+// Mã sinh viên: [MSSV 23103100220]
 // Nội dung thực hiện: Module 2 - Entity Sân thể thao
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
