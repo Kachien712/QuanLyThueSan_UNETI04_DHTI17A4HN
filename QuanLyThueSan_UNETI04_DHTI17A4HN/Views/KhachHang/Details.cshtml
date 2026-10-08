@@ -1,0 +1,109 @@
+@* 
+    Họ và tên: Đào Đức Kiên
+    Mã sinh viên: 23103100220
+    Nội dung thực hiện: Module 3 - Giao diện chi tiết khách hàng và lịch sử đặt sân
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.Models.KhachHang
+
+@{
+    ViewData["Title"] = "Chi tiết Khách hàng - " + Model.HoTen;
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="text-primary mb-1">Hồ sơ Khách hàng: @Model.HoTen</h3>
+            <span class="badge @(Model.TrangThai ? "bg-success" : "bg-danger")">
+                @(Model.TrangThai ? "Đang hoạt động" : "Bị khóa")
+            </span>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.MaKhachHang" class="btn btn-primary">Chỉnh sửa</a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Thông tin cá nhân -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light fw-bold py-3">
+                    <i class="bi bi-person-lines-fill"></i> Thông tin liên hệ
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Mã khách hàng:</span>
+                            <strong>#@Model.MaKhachHang</strong>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Số điện thoại:</span>
+                            <strong class="text-primary">@Model.SoDienThoai</strong>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Email:</span>
+                            <span>@(Model.Email ?? "Chưa cung cấp")</span>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Địa chỉ:</span>
+                            <span>@(Model.DiaChi ?? "Chưa cung cấp")</span>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Tài khoản hệ thống:</span>
+                            <span>@(Model.MaTaiKhoan.HasValue ? $"Tài khoản #{Model.MaTaiKhoan}" : "Khách vãng lai")</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Lịch sử các đơn đặt sân của khách hàng -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
+                    <span class="fw-bold"><i class="bi bi-calendar-check"></i> Lịch sử đặt sân (@(Model.DatSans?.Count ?? 0) đơn)</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Mã đơn</th>
+                                    <th>Sân</th>
+                                    <th>Ngày sử dụng</th>
+                                    <th>Khung giờ</th>
+                                    <th class="text-center">Trạng thái</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.DatSans != null && Model.DatSans.Any())
+                                {
+                                    foreach (var datSan in Model.DatSans.OrderByDescending(d => d.NgaySuDung))
+                                    {
+                                        <tr>
+                                            <td class="ps-3 fw-bold">#@datSan.MaDatSan</td>
+                                            <td>@(datSan.SanTheThao?.TenSan ?? $"Sân #{datSan.MaSan}")</td>
+                                            <td>@datSan.NgaySuDung.ToString("dd/MM/yyyy")</td>
+                                            <td>@datSan.GioBatDau.ToString(@"hh\:mm") - @datSan.GioKetThuc.ToString(@"hh\:mm")</td>
+                                            <td class="text-center">
+                                                <span class="badge bg-secondary">@datSan.TrangThai</span>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="5" class="text-center py-4 text-muted">
+                                            Khách hàng này chưa có đơn đặt sân nào.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
