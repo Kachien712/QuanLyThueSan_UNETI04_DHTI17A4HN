@@ -27,6 +27,24 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
 
             var app = builder.Build();
 
+            // 3. Khởi tạo dữ liệu mẫu (Mục 16 file Word)
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                try
+                {
+                    var context = services.GetRequiredService<ApplicationDbContext>();
+                    // Tự động kiểm tra và tạo CSDL + chạy Migration nếu chưa có
+                    context.Database.Migrate();
+                    DbInitializer.Initialize(context);
+                }
+                catch (Exception ex)
+                {
+                    var logger = services.GetRequiredService<ILogger<Program>>();
+                    logger.LogError(ex, "Lỗi xảy ra trong quá trình nạp dữ liệu mẫu.");
+                }
+            }
+
             // Configure the HTTP request pipeline.
             if (!app.Environment.IsDevelopment())
             {
