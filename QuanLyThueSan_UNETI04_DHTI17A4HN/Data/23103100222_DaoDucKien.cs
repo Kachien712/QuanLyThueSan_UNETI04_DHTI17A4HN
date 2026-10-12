@@ -1,14 +1,19 @@
 // Họ và tên: Đào Đức Kiên
-// Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 3 - Khởi tạo dữ liệu mẫu 25 khách hàng phục vụ kiểm thử phân trang (Mục 16 file Word)
+// Mã sinh viên: 23103100222
+// Nội dung thực hiện: Module 3 - Nạp dữ liệu mẫu 25 khách hàng phục vụ kiểm thử phân trang (Mục 16 file Word)
 
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Models;
 
 namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
 {
-    public static class DbInitializer
+    public static class _23103100222_DaoDucKien
     {
         public static void Initialize(ApplicationDbContext context)
+        {
+            Seed(context);
+        }
+
+        public static void Seed(ApplicationDbContext context)
         {
             // Tự động kiểm tra và khởi tạo dữ liệu mẫu cho bảng Khách hàng
             if (!context.KhachHangs.Any())

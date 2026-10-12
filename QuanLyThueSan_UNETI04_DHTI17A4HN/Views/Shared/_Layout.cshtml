@@ -26,6 +26,30 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark fw-bold text-primary" asp-area="" asp-controller="KhachHang" asp-action="Index">Quản lý Khách hàng</a>
                         </li>
+                        <!-- Menu Quản lý Đặt sân (Dropdown gom nhóm các chức năng) -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark fw-bold text-success" href="#" id="datSanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Quản lý Đặt sân
+                            </a>
+                            <ul class="dropdown-menu shadow-sm" aria-labelledby="datSanDropdown">
+                                <li>
+                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="Index">
+                                        📋 Danh sách đặt sân
+                                    </a>
+                                </li>
+                                <li>
+                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="TimSanTrong">
+                                        🔍 Tra cứu &amp; Tìm sân trống
+                                    </a>
+                                </li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li>
+                                    <a class="dropdown-item text-success fw-bold" asp-controller="DatSan" asp-action="Create">
+                                        ➕ Đặt sân mới
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách</a>
                         </li>

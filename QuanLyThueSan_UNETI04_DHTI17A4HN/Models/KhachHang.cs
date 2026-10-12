@@ -1,5 +1,5 @@
 // Họ và tên: Đào Đức Kiên
-// Mã sinh viên: 23103100220
+// Mã sinh viên: 23103100222
 // Nội dung thực hiện: Module 3 - Entity Khách hàng
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
