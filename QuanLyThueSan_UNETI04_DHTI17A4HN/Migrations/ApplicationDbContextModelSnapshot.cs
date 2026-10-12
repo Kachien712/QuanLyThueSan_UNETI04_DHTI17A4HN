@@ -96,6 +96,9 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Migrations
                     b.Property<int>("SoNguoi")
                         .HasColumnType("int");
 
+                    b.Property<DateTime?>("ThoiDiemNhanSanThucTe")
+                        .HasColumnType("datetime2");
+
                     b.Property<string>("TrangThai")
                         .IsRequired()
                         .HasMaxLength(50)

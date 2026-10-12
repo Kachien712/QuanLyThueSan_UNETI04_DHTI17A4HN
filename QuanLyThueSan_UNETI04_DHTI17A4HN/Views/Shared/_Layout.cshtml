@@ -26,6 +26,13 @@
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
                         </li>
+                        @* Lê Ngọc Hải Nam - 23103100219 - Module 4 tuần 2: lối vào trang nhận sân. *@
+                        @if (Context.Session.GetString("VaiTro") is "Admin" or "NhanVien")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="NhanSan" asp-action="Index">Nhận sân</a>
+                            </li>
+                        }
                     </ul>
                 </div>
             </div>

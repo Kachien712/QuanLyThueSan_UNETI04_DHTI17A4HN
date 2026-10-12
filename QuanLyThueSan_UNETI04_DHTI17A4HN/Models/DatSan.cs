@@ -40,6 +40,9 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Models
         [StringLength(500)]
         public string? GhiChu { get; set; }
 
+        // Lê Ngọc Hải Nam - 23103100219 - Module 4 tuần 2: thời điểm nhận sân thực tế.
+        public DateTime? ThoiDiemNhanSanThucTe { get; set; }
+
         [ForeignKey("MaKhachHang")]
         public virtual KhachHang? KhachHang { get; set; }
 

@@ -26,6 +26,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
             // Add services to the container.
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<XacNhanDatSanService>();
+            builder.Services.AddScoped<NhanSanService>();
 
             var app = builder.Build();
 
@@ -38,7 +39,6 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     // Tự động kiểm tra và tạo CSDL + chạy Migration nếu chưa có
                     context.Database.Migrate();
-                    DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)
                 {
