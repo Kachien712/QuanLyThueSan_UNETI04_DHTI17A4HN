@@ -1,5 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Data;
+using QuanLyThueSan_UNETI04_DHTI17A4HN.Services;
 
 namespace QuanLyThueSan_UNETI04_DHTI17A4HN
 {
@@ -24,6 +25,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<XacNhanDatSanService>();
 
             var app = builder.Build();
 
