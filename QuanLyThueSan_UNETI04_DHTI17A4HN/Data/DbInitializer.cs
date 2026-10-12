@@ -1,7 +1,9 @@
 // Họ và tên: Đào Đức Kiên
 // Mã sinh viên: 23103100220
 // Nội dung thực hiện: Module 3 - Khởi tạo dữ liệu mẫu 25 khách hàng phục vụ kiểm thử phân trang (Mục 16 file Word)
+// Bổ sung: Khuất Anh Chiến - 23103100234 - Module 1 - Seed tài khoản Admin/Nhân viên và liên kết MaTaiKhoan cho khách hàng
 
+using QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Models;
 
 namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
@@ -43,6 +45,77 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
                 };
 
                 context.KhachHangs.AddRange(danhSachKhachHang);
+                context.SaveChanges();
+            }
+
+            // ===== PHẦN BỔ SUNG - MODULE 1 (Khuất Anh Chiến - 23103100234) =====
+
+            // 1. Tài khoản quản trị mặc định để kiểm thử phân quyền (Mục 16 file Word)
+            if (!context.TaiKhoans.Any(t => t.VaiTro == "Admin"))
+            {
+                context.TaiKhoans.AddRange(
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "admin",
+                        MatKhau = MatKhauHelper.MaHoa("123456"),
+                        HoTen = "Quản trị viên",
+                        Email = "admin@quanyttt.edu.vn",
+                        VaiTro = "Admin",
+                        TrangThai = true
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "nhanvien",
+                        MatKhau = MatKhauHelper.MaHoa("123456"),
+                        HoTen = "Nhân viên trực sân",
+                        Email = "nhanvien@quanyttt.edu.vn",
+                        VaiTro = "NhanVien",
+                        TrangThai = true
+                    });
+                context.SaveChanges();
+            }
+
+            // 2. Khách hàng chưa liên kết tài khoản (MaTaiKhoan null) -> tạo tài khoản và ghép mã
+            var khachChuaCoTaiKhoan = context.KhachHangs
+                .Where(k => k.MaTaiKhoan == null)
+                .ToList();
+
+            foreach (var khach in khachChuaCoTaiKhoan)
+            {
+                // Ưu tiên dùng email làm tên đăng nhập; email null hoặc đã bị chiếm thì dùng mã khách hàng
+                string tenDangNhap;
+                if (!string.IsNullOrWhiteSpace(khach.Email)
+                    && !context.TaiKhoans.Any(t => t.TenDangNhap == khach.Email))
+                {
+                    tenDangNhap = khach.Email!;
+                }
+                else
+                {
+                    tenDangNhap = $"kh{khach.MaKhachHang}";
+                    int soThuTu = 1;
+                    while (context.TaiKhoans.Any(t => t.TenDangNhap == tenDangNhap))
+                    {
+                        tenDangNhap = $"kh{khach.MaKhachHang}_{soThuTu++}";
+                    }
+                }
+
+                var taiKhoan = new TaiKhoan
+                {
+                    TenDangNhap = tenDangNhap,
+                    MatKhau = MatKhauHelper.MaHoa("123456"),
+                    HoTen = khach.HoTen,
+                    Email = khach.Email ?? $"kh{khach.MaKhachHang}@khachhang.vn",
+                    VaiTro = "KhachHang",
+                    TrangThai = khach.TrangThai
+                };
+                context.TaiKhoans.Add(taiKhoan);
+                context.SaveChanges(); // Lưu ngay để lấy MaTaiKhoan
+
+                khach.MaTaiKhoan = taiKhoan.MaTaiKhoan;
+            }
+
+            if (khachChuaCoTaiKhoan.Count > 0)
+            {
                 context.SaveChanges();
             }
         }
