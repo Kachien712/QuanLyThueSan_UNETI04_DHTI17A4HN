@@ -1,5 +1,5 @@
-// Họ và tên: [Họ tên SV3]
-// Mã sinh viên: [MSSV SV3]
+// Họ và tên: Đào Đức Kiên
+// Mã sinh viên: 23103100220
 // Nội dung thực hiện: Module 3 - Entity Đơn đặt sân
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
