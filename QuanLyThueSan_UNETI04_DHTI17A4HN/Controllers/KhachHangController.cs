@@ -1,17 +1,20 @@
 // Họ và tên: Đào Đức Kiên
 // Mã sinh viên: 23103100220
 // Nội dung thực hiện: Module 3 - Controller Quản lý Khách hàng (CRUD, Tìm kiếm, Lọc, Phân trang LINQ, Khóa/Mở khóa)
+// Bổ sung phân quyền: Khuất Anh Chiến - 23103100234 - Module 1 - Thêm [PhanQuyen] kiểm tra vai trò tại Controller
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Data;
+using QuanLyThueSan_UNETI04_DHTI17A4HN.Filters;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Models;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels;
 
 namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 {
+    [PhanQuyen("Admin", "NhanVien")]
     public class KhachHangController : Controller
     {
         private readonly ApplicationDbContext _context;

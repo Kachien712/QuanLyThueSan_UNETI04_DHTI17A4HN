@@ -1,0 +1,49 @@
+@*
+    Họ và tên: Khuất Anh Chiến
+    Mã sinh viên: 23103100234
+    Nội dung thực hiện: Module 1 - Giao diện đăng nhập
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.DangNhapViewModel
+
+@{
+    ViewData["Title"] = "Đăng nhập";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="card-title mb-0">Đăng nhập hệ thống</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="DangNhap" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
+                        <input asp-for="TenDangNhap" class="form-control" autofocus placeholder="Nhập tên đăng nhập..." />
+                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="MatKhau" class="form-label fw-semibold"></label>
+                        <input asp-for="MatKhau" class="form-control" placeholder="Nhập mật khẩu..." />
+                        <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                    </div>
+
+                    <button type="submit" class="btn btn-primary w-100 py-2">Đăng nhập</button>
+                </form>
+                <hr />
+                <p class="mb-0 text-center small">
+                    Chưa có tài khoản? <a asp-action="DangKy">Đăng ký ngay</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

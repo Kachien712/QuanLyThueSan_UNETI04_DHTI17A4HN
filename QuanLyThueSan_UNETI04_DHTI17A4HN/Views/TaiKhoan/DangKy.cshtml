@@ -1,0 +1,72 @@
+@*
+    Họ và tên: Khuất Anh Chiến
+    Mã sinh viên: 23103100234
+    Nội dung thực hiện: Module 1 - Giao diện đăng ký tài khoản khách hàng
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.DangKyViewModel
+
+@{
+    ViewData["Title"] = "Đăng ký tài khoản";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-success text-white py-3">
+                <h5 class="card-title mb-0">Đăng ký tài khoản khách hàng</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="DangKy" method="post">
+                    @Html.AntiForgeryToken()
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
+                        <input asp-for="TenDangNhap" class="form-control" placeholder="Từ 3 - 50 ký tự..." />
+                        <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MatKhau" class="form-label fw-semibold"></label>
+                            <input asp-for="MatKhau" class="form-control" placeholder="Từ 6 ký tự..." />
+                            <span asp-validation-for="MatKhau" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="XacNhanMatKhau" class="form-label fw-semibold"></label>
+                            <input asp-for="XacNhanMatKhau" class="form-control" placeholder="Nhập lại mật khẩu..." />
+                            <span asp-validation-for="XacNhanMatKhau" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="HoTen" class="form-label fw-semibold"></label>
+                        <input asp-for="HoTen" class="form-control" placeholder="Nhập họ và tên đầy đủ..." />
+                        <span asp-validation-for="HoTen" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Ví dụ: nguyenan@gmail.com" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-4">
+                        <label asp-for="SoDienThoai" class="form-label fw-semibold"></label>
+                        <input asp-for="SoDienThoai" class="form-control" placeholder="Ví dụ: 0912345678" />
+                        <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="DangNhap" class="btn btn-outline-secondary">Đã có tài khoản</a>
+                        <button type="submit" class="btn btn-success px-4">Đăng ký</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
