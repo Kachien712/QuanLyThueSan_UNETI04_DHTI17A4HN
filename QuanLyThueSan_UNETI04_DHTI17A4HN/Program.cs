@@ -34,6 +34,8 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
                 try
                 {
                     var context = services.GetRequiredService<ApplicationDbContext>();
+                    // Tự động kiểm tra và tạo CSDL + chạy Migration nếu chưa có
+                    context.Database.Migrate();
                     DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)
