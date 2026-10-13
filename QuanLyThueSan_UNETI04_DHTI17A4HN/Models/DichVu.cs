@@ -1,5 +1,5 @@
-// Họ và tên: [Họ tên SV4]
-// Mã sinh viên: [MSSV SV4]
+// Họ và tên: Lê Ngọc Hải Nam
+// Mã sinh viên: 23103100219
 // Nội dung thực hiện: Module 4 - Entity Danh mục dịch vụ
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
@@ -23,6 +23,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Models
         [Column(TypeName = "decimal(18,2)")]
         public decimal DonGia { get; set; }
 
+        [Range(0, int.MaxValue, ErrorMessage = "Số lượng tồn không được âm")]
         public int? SoLuongTon { get; set; }
 
         public bool TrangThai { get; set; } = true;
