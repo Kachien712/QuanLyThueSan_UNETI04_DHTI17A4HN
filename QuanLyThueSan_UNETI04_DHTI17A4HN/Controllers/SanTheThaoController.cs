@@ -1,6 +1,6 @@
 // Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp và Phân trang)
+// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới)
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -134,6 +134,82 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             };
 
             return View(viewModel);
+        }
+
+        // =========================================================================================
+        // GET: /SanTheThao/Create
+        // Nghiệp vụ: Hiển thị form thêm mới sân thể thao (Mục 6.3 file Word)
+        // =========================================================================================
+        public async Task<IActionResult> Create()
+        {
+            var vm = new SanTheThaoFormViewModel
+            {
+                DanhSachLoaiSan = new SelectList(
+                    await _context.LoaiSans
+                        .Where(l => l.TrangThai)
+                        .OrderBy(l => l.TenLoaiSan)
+                        .AsNoTracking()
+                        .ToListAsync(),
+                    "MaLoaiSan", "TenLoaiSan"),
+
+                DanhSachKhuVuc = new SelectList(
+                    await _context.KhuVucs
+                        .Where(k => k.TrangThai)
+                        .OrderBy(k => k.TenKhuVuc)
+                        .AsNoTracking()
+                        .ToListAsync(),
+                    "MaKhuVuc", "TenKhuVuc")
+            };
+
+            return View(vm);
+        }
+
+        // =========================================================================================
+        // POST: /SanTheThao/Create
+        // Nghiệp vụ: Tiếp nhận form, validate, kiểm tra tên trùng, lưu sân mới vào DB (Mục 6.3, 13)
+        // =========================================================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Create(SanTheThaoFormViewModel vm)
+        {
+            // Kiểm tra tên sân không được trùng (Mục 13 file Word)
+            bool tenBiTrung = await _context.SanTheThaos
+                .AnyAsync(s => s.TenSan.ToLower() == vm.TenSan.Trim().ToLower());
+
+            if (tenBiTrung)
+            {
+                ModelState.AddModelError(nameof(vm.TenSan), "Tên sân này đã tồn tại. Vui lòng nhập tên khác.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                // Nạp lại dropdown khi form lỗi
+                vm.DanhSachLoaiSan = new SelectList(
+                    await _context.LoaiSans.Where(l => l.TrangThai).OrderBy(l => l.TenLoaiSan).AsNoTracking().ToListAsync(),
+                    "MaLoaiSan", "TenLoaiSan", vm.MaLoaiSan);
+
+                vm.DanhSachKhuVuc = new SelectList(
+                    await _context.KhuVucs.Where(k => k.TrangThai).OrderBy(k => k.TenKhuVuc).AsNoTracking().ToListAsync(),
+                    "MaKhuVuc", "TenKhuVuc", vm.MaKhuVuc);
+
+                return View(vm);
+            }
+
+            var sanMoi = new SanTheThao
+            {
+                TenSan     = vm.TenSan.Trim(),
+                MaLoaiSan  = vm.MaLoaiSan,
+                MaKhuVuc   = vm.MaKhuVuc,
+                SucChua    = vm.SucChua,
+                MoTa       = vm.MoTa?.Trim(),
+                TinhTrang  = vm.TinhTrang
+            };
+
+            _context.SanTheThaos.Add(sanMoi);
+            await _context.SaveChangesAsync();
+
+            TempData["ThanhCong"] = $"Đã thêm sân \"{sanMoi.TenSan}\" thành công!";
+            return RedirectToAction(nameof(Index));
         }
     }
 }
