@@ -1,7 +1,7 @@
 @* 
     Họ và tên: Đào Duy Khánh
     Mã sinh viên: 23103100220
-    Nội dung thực hiện: Module 2 - Giao diện Thêm mới Sân thể thao (Mục 6.3 file Word)
+    Nội dung thực hiện: Module 2 - Giao diện Thêm mới Sân thể thao (Minimalism style)
 *@
 @model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.SanTheThaoFormViewModel
 
@@ -9,105 +9,96 @@
     ViewData["Title"] = "Thêm sân thể thao mới";
 }
 
-<div class="container py-4">
+<div class="container pt-0 pb-4">
     <div class="row justify-content-center">
         <div class="col-lg-8 col-md-10">
             <!-- Nút quay lại & Tiêu đề -->
-            <div class="d-flex align-items-center mb-3">
-                <a asp-action="Index" class="btn btn-outline-secondary me-3">
-                    <i class="bi bi-arrow-left me-1"></i> Quay lại danh sách
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="fw-bold text-uppercase small text-muted tracking-wide">Thêm sân thể thao mới</span>
+                <a asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-1 px-3">
+                    Quay lại
                 </a>
-                <h3 class="fw-bold text-primary mb-0">
-                    <i class="bi bi-plus-circle me-2"></i>Thêm sân thể thao mới
-                </h3>
             </div>
 
-            <div class="card shadow-sm border-0">
-                <div class="card-header bg-white py-3 border-bottom">
-                    <h5 class="card-title mb-0 fw-semibold text-secondary">
-                        <i class="bi bi-info-circle me-1"></i> Thông tin sân thể thao
-                    </h5>
-                </div>
-                <div class="card-body p-4">
-                    <form asp-action="Create" method="post">
-                        @Html.AntiForgeryToken()
+            <div class="border rounded-2 bg-white p-4">
+                <form asp-action="Create" method="post">
+                    @Html.AntiForgeryToken()
 
-                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+                    <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
-                        <!-- Tên sân -->
-                        <div class="mb-3">
-                            <label asp-for="TenSan" class="form-label fw-semibold">
-                                Tên sân <span class="text-danger">*</span>
+                    <!-- Tên sân -->
+                    <div class="mb-3">
+                        <label asp-for="TenSan" class="form-label small text-muted mb-1">
+                            Tên sân <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="TenSan" class="form-control rounded-1" placeholder="Ví dụ: Sân Bóng Đá Mini A1, Sân Cầu Lông C1..." />
+                        <span asp-validation-for="TenSan" class="text-danger small"></span>
+                    </div>
+
+                    <div class="row">
+                        <!-- Loại sân -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MaLoaiSan" class="form-label small text-muted mb-1">
+                                Loại sân <span class="text-danger">*</span>
                             </label>
-                            <input asp-for="TenSan" class="form-control" placeholder="Ví dụ: Sân Bóng Đá Mini A1, Sân Cầu Lông C1..." />
-                            <span asp-validation-for="TenSan" class="text-danger small"></span>
+                            <select asp-for="MaLoaiSan" asp-items="Model.DanhSachLoaiSan" class="form-select rounded-1">
+                                <option value="">-- Chọn loại sân --</option>
+                            </select>
+                            <span asp-validation-for="MaLoaiSan" class="text-danger small"></span>
                         </div>
 
-                        <div class="row">
-                            <!-- Loại sân -->
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="MaLoaiSan" class="form-label fw-semibold">
-                                    Loại sân <span class="text-danger">*</span>
-                                </label>
-                                <select asp-for="MaLoaiSan" asp-items="Model.DanhSachLoaiSan" class="form-select">
-                                    <option value="">-- Chọn loại sân --</option>
-                                </select>
-                                <span asp-validation-for="MaLoaiSan" class="text-danger small"></span>
-                            </div>
+                        <!-- Khu vực -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="MaKhuVuc" class="form-label small text-muted mb-1">
+                                Khu vực <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="MaKhuVuc" asp-items="Model.DanhSachKhuVuc" class="form-select rounded-1">
+                                <option value="">-- Chọn khu vực --</option>
+                            </select>
+                            <span asp-validation-for="MaKhuVuc" class="text-danger small"></span>
+                        </div>
+                    </div>
 
-                            <!-- Khu vực -->
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="MaKhuVuc" class="form-label fw-semibold">
-                                    Khu vực <span class="text-danger">*</span>
-                                </label>
-                                <select asp-for="MaKhuVuc" asp-items="Model.DanhSachKhuVuc" class="form-select">
-                                    <option value="">-- Chọn khu vực --</option>
-                                </select>
-                                <span asp-validation-for="MaKhuVuc" class="text-danger small"></span>
-                            </div>
+                    <div class="row">
+                        <!-- Sức chứa -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="SucChua" class="form-label small text-muted mb-1">
+                                Sức chứa (người) <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="SucChua" type="number" min="1" max="1000" class="form-control rounded-1" />
+                            <span asp-validation-for="SucChua" class="text-danger small"></span>
                         </div>
 
-                        <div class="row">
-                            <!-- Sức chứa -->
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="SucChua" class="form-label fw-semibold">
-                                    Sức chứa (người) <span class="text-danger">*</span>
-                                </label>
-                                <input asp-for="SucChua" type="number" min="1" max="1000" class="form-control" placeholder="Ví dụ: 10, 14..." />
-                                <span asp-validation-for="SucChua" class="text-danger small"></span>
-                            </div>
-
-                            <!-- Tình trạng sân -->
-                            <div class="col-md-6 mb-3">
-                                <label asp-for="TinhTrang" class="form-label fw-semibold">
-                                    Tình trạng <span class="text-danger">*</span>
-                                </label>
-                                <select asp-for="TinhTrang" class="form-select">
-                                    @foreach (var tt in QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.SanTheThaoFormViewModel.DanhSachTinhTrangCoDinh)
-                                    {
-                                        <option value="@tt">@tt</option>
-                                    }
-                                </select>
-                                <span asp-validation-for="TinhTrang" class="text-danger small"></span>
-                            </div>
+                        <!-- Tình trạng sân -->
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="TinhTrang" class="form-label small text-muted mb-1">
+                                Tình trạng <span class="text-danger">*</span>
+                            </label>
+                            <select asp-for="TinhTrang" class="form-select rounded-1">
+                                @foreach (var tt in QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.SanTheThaoFormViewModel.DanhSachTinhTrangCoDinh)
+                                {
+                                    <option value="@tt">@tt</option>
+                                }
+                            </select>
+                            <span asp-validation-for="TinhTrang" class="text-danger small"></span>
                         </div>
+                    </div>
 
-                        <!-- Mô tả -->
-                        <div class="mb-4">
-                            <label asp-for="MoTa" class="form-label fw-semibold">Mô tả đặc điểm sân</label>
-                            <textarea asp-for="MoTa" rows="3" class="form-control" placeholder="Mặt cỏ, đèn chiếu sáng, thiết bị đi kèm..."></textarea>
-                            <span asp-validation-for="MoTa" class="text-danger small"></span>
-                        </div>
+                    <!-- Mô tả -->
+                    <div class="mb-4">
+                        <label asp-for="MoTa" class="form-label small text-muted mb-1">Mô tả đặc điểm sân</label>
+                        <textarea asp-for="MoTa" rows="3" class="form-control rounded-1" placeholder="Mặt cỏ, đèn chiếu sáng, thiết bị đi kèm..."></textarea>
+                        <span asp-validation-for="MoTa" class="text-danger small"></span>
+                    </div>
 
-                        <!-- Nút hành động -->
-                        <div class="d-flex justify-content-end gap-2">
-                            <a asp-action="Index" class="btn btn-light border">Hủy bỏ</a>
-                            <button type="submit" class="btn btn-primary px-4">
-                                <i class="bi bi-check-circle me-1"></i> Lưu sân mới
-                            </button>
-                        </div>
-                    </form>
-                </div>
+                    <!-- Nút hành động -->
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <a asp-action="Index" class="btn btn-outline-secondary rounded-1 px-4">Hủy</a>
+                        <button type="submit" class="btn btn-dark rounded-1 px-4">
+                            Lưu sân
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>

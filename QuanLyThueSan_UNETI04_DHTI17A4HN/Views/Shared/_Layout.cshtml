@@ -12,27 +12,25 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
-            <div class="container-fluid">
-                <a class="navbar-brand fw-bold text-primary" asp-area="" asp-controller="Home" asp-action="Index">
-                    <i class="bi bi-trophy-fill text-warning me-1"></i>QuanLyThueSan
+        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-2">
+            <div class="container">
+                <a class="navbar-brand fw-bold text-dark fs-5 tracking-wide me-4" asp-area="" asp-controller="Home" asp-action="Index">
+                    QUẢN LÝ THUÊ SÂN
                 </a>
-                <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav flex-grow-1">
+                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                            <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark fw-semibold text-primary" asp-area="" asp-controller="SanTheThao" asp-action="Index">
-                                <i class="bi bi-grid-3x3-gap-fill me-1"></i>Quản lý Sân thể thao
-                            </a>
+                            <a class="nav-link px-3 py-2 text-dark fw-semibold rounded" asp-area="" asp-controller="SanTheThao" asp-action="Index">Quản lý sân thể thao</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách</a>
                         </li>
                     </ul>
                 </div>
