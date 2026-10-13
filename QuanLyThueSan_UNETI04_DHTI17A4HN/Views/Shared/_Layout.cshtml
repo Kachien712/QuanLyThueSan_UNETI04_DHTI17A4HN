@@ -1,4 +1,12 @@
-﻿<!DOCTYPE html>
+@*
+    Họ và tên: Khuất Anh Chiến
+    Mã sinh viên: 23103100234
+    Nội dung thực hiện: Bổ sung vùng trạng thái đăng nhập/đăng xuất trên thanh điều hướng (Module 1)
+    Họ và tên: Lê Ngọc Hải Nam
+    Mã sinh viên: 23103100219
+    Nội dung thực hiện: Module 4 - Bổ sung liên kết nhận sân và quản lý dịch vụ.
+*@
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -21,16 +29,48 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+                            <a class="nav-link text-dark fw-bold text-primary" asp-area="" asp-controller="KhachHang" asp-action="Index">Quản lý Khách hàng</a>
                         </li>
-                        @* Lê Ngọc Hải Nam - 23103100219 - Module 4 tuần 2: lối vào trang nhận sân. *@
-                        @if (Context.Session.GetString("VaiTro") is "Admin" or "NhanVien")
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách</a>
+                        </li>
+                        @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
                         {
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="NhanSan" asp-action="Index">Nhận sân</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="DichVu" asp-action="Index">Dịch vụ</a>
+                            </li>
+                        }
+                    </ul>
+                    @{
+                        var hoTen = Context.Session.GetString(SessionKeys.HoTen);
+                        var vaiTro = Context.Session.GetString(SessionKeys.VaiTro);
+                    }
+                    <ul class="navbar-nav">
+                        @if (!string.IsNullOrEmpty(hoTen))
+                        {
+                            <li class="nav-item">
+                                <span class="nav-link text-dark">Xin chào, <strong>@hoTen</strong> (@vaiTro)</span>
+                            </li>
+                            <li class="nav-item">
+                                <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="my-1">
+                                    @Html.AntiForgeryToken()
+                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Đăng xuất</button>
+                                </form>
+                            </li>
+                        }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
                             </li>
                         }
                     </ul>

@@ -1,3 +1,9 @@
+// Họ và tên: Khuất Anh Chiến
+// Mã sinh viên: 23103100234
+// Nội dung thực hiện: Cấu hình Session, đăng ký xác thực Cookie và pipeline Middleware (Module 1)
+// (Nếu thành viên khác cũng sửa file này, ghi rõ nội dung của từng người bên dưới)
+
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Data;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Services;
@@ -22,6 +28,17 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
                 options.Cookie.HttpOnly = true;
                 options.Cookie.IsEssential = true;
             });
+
+            // 3. Đăng ký hệ thống xác thực Cookie - scheme mặc định cho [Authorize] và Forbid()
+            //    (Sửa lỗi "No authenticationScheme was specified" ở Module 4)
+            builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+                .AddCookie(options =>
+                {
+                    options.LoginPath = "/TaiKhoan/DangNhap";
+                    options.AccessDeniedPath = "/TaiKhoan/TruyCapBiChan";
+                    options.ExpireTimeSpan = TimeSpan.FromMinutes(30);
+                    options.SlidingExpiration = true;
+                });
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
@@ -57,8 +74,9 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
             app.UseHttpsRedirection();
             app.UseRouting();
 
-            // Kích hoạt Session trước Authorization
+            // Kích hoạt Session -> Xác thực -> Authorization
             app.UseSession();
+            app.UseAuthentication();
             app.UseAuthorization();
 
             app.MapStaticAssets();

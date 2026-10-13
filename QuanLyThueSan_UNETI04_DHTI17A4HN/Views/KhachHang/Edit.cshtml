@@ -1,0 +1,66 @@
+@* 
+    Họ và tên: Đào Đức Kiên
+    Mã sinh viên: 23103100220
+    Nội dung thực hiện: Module 3 - Giao diện cập nhật thông tin khách hàng
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.KhachHangFormViewModel
+
+@{
+    ViewData["Title"] = "Cập nhật Khách hàng";
+}
+
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-primary text-white py-3">
+                <h5 class="card-title mb-0">Cập nhật thông tin Khách hàng #@Model.MaKhachHang</h5>
+            </div>
+            <div class="card-body p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+                    <input type="hidden" asp-for="MaKhachHang" />
+                    <input type="hidden" asp-for="MaTaiKhoan" />
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                    <div class="mb-3">
+                        <label asp-for="HoTen" class="form-label fw-semibold"></label>
+                        <input asp-for="HoTen" class="form-control" />
+                        <span asp-validation-for="HoTen" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="SoDienThoai" class="form-label fw-semibold"></label>
+                        <input asp-for="SoDienThoai" class="form-control" />
+                        <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" type="email" class="form-control" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
+
+                    <div class="mb-3">
+                        <label asp-for="DiaChi" class="form-label fw-semibold"></label>
+                        <textarea asp-for="DiaChi" class="form-control" rows="2"></textarea>
+                        <span asp-validation-for="DiaChi" class="text-danger small"></span>
+                    </div>
+
+                    <div class="form-check form-switch mb-4">
+                        <input class="form-check-input" type="checkbox" asp-for="TrangThai" id="flexSwitchTrangThai">
+                        <label class="form-check-label fw-semibold" for="flexSwitchTrangThai">Đang hoạt động</label>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <a asp-action="Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+                        <button type="submit" class="btn btn-primary px-4">Cập nhật</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
