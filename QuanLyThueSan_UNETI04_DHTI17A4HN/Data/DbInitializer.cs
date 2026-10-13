@@ -1,7 +1,7 @@
-// Họ và tên: Đào Đức Kiên
-// Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 3 - Khởi tạo dữ liệu mẫu 25 khách hàng phục vụ kiểm thử phân trang (Mục 16 file Word)
-// Bổ sung: Khuất Anh Chiến - 23103100234 - Module 1 - Seed tài khoản Admin/Nhân viên và liên kết MaTaiKhoan cho khách hàng
+// Họ và tên: Đào Duy Khánh - MSSV: 23103100220 (Module 2 - Sân & Bảng giá)
+// Đào Đức Kiên - MSSV: 23103100222 (Module 3 - 25 Khách hàng)
+// Khuất Anh Chiến - MSSV: 23103100234 (Module 1 - Tài khoản Admin/Nhân viên)
+// Nội dung thực hiện: Lớp điều phối khởi tạo CSDL dùng chung cho cả nhóm (Mục 16 file Word)
 
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Models;
@@ -12,6 +12,14 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
     {
         public static void Initialize(ApplicationDbContext context)
         {
+            // Đảm bảo CSDL đã được tạo
+            context.Database.EnsureCreated();
+
+            // 1. MODULE 2 (Đào Duy Khánh - 23103100220):
+            // Nạp dữ liệu mẫu: 4 Loại sân, 4 Khu vực, 18 Sân thể thao và Bảng giá theo khung giờ
+            SeedData_23103100220_DaoDuyKhanh.Seed(context);
+
+            // 2. MODULE 3 (Đào Đức Kiên - 23103100222):
             // Tự động kiểm tra và khởi tạo dữ liệu mẫu cho bảng Khách hàng
             if (!context.KhachHangs.Any())
             {

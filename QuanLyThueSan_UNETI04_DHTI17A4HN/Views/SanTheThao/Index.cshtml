@@ -1,0 +1,237 @@
+@* 
+    Họ và tên: Đào Duy Khánh
+    Mã sinh viên: 23103100220
+    Nội dung thực hiện: Module 2 - Giao diện danh sách sân thể thao, tìm kiếm, bộ lọc đa tiêu chí và phân trang (Minimalism style)
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.SanTheThaoIndexViewModel
+
+@{
+    ViewData["Title"] = "Quản lý sân thể thao";
+}
+
+<div class="container-fluid pt-0 pb-4">
+    <!-- KHỐI BỘ LỌC VÀ TÌM KIẾM -->
+    <div class="border rounded-2 bg-white mb-3">
+        <div class="border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-uppercase small text-muted tracking-wide">Bộ lọc và Tìm kiếm</span>
+            <a asp-action="Create" class="btn btn-dark btn-sm px-3 rounded-1">
+                Thêm sân mới
+            </a>
+        </div>
+        <div class="p-3 bg-light bg-opacity-25">
+            <form method="get" asp-action="Index" class="row g-2 align-items-end">
+                <!-- Từ khóa tìm kiếm -->
+                <div class="col-lg-3 col-md-6">
+                    <label class="form-label small text-muted mb-1">Từ khóa</label>
+                    <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control form-control-sm rounded-1" 
+                           placeholder="Tên sân, môn thể thao, khu vực..." />
+                </div>
+
+                <!-- Lọc Loại sân -->
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label small text-muted mb-1">Loại sân</label>
+                    <select name="maLoaiSan" asp-items="Model.DanhSachLoaiSan" class="form-select form-select-sm rounded-1">
+                        <option value="">Tất cả loại sân</option>
+                    </select>
+                </div>
+
+                <!-- Lọc Khu vực -->
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label small text-muted mb-1">Khu vực</label>
+                    <select name="maKhuVuc" asp-items="Model.DanhSachKhuVuc" class="form-select form-select-sm rounded-1">
+                        <option value="">Tất cả khu vực</option>
+                    </select>
+                </div>
+
+                <!-- Lọc Tình trạng -->
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label small text-muted mb-1">Tình trạng</label>
+                    <select name="tinhTrang" asp-items="Model.DanhSachTinhTrang" class="form-select form-select-sm rounded-1">
+                        <option value="">Tất cả tình trạng</option>
+                    </select>
+                </div>
+
+                <!-- Sắp xếp -->
+                <div class="col-lg-2 col-md-3">
+                    <label class="form-label small text-muted mb-1">Sắp xếp</label>
+                    <select name="sortOrder" class="form-select form-select-sm rounded-1">
+                        <option value="" selected="@(string.IsNullOrEmpty(Model.SortOrder))">Tên sân (A - Z)</option>
+                        <option value="ten_desc" selected="@(Model.SortOrder == "ten_desc")">Tên sân (Z - A)</option>
+                        <option value="succhua_asc" selected="@(Model.SortOrder == "succhua_asc")">Sức chứa tăng dần</option>
+                        <option value="succhua_desc" selected="@(Model.SortOrder == "succhua_desc")">Sức chứa giảm dần</option>
+                        <option value="loai_asc" selected="@(Model.SortOrder == "loai_asc")">Theo loại sân</option>
+                        <option value="khuvuc_asc" selected="@(Model.SortOrder == "khuvuc_asc")">Theo khu vực</option>
+                    </select>
+                </div>
+
+                <!-- Nút thao tác -->
+                <div class="col-lg-1 col-md-6 d-flex gap-1">
+                    <button type="submit" class="btn btn-outline-dark btn-sm w-100 rounded-1">Lọc</button>
+                    <a asp-action="Index" class="btn btn-light btn-sm border text-muted rounded-1" title="Xóa bộ lọc">Xóa</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BẢNG DANH SÁCH SÂN THỂ THAO -->
+    <div class="border rounded-2 bg-white">
+        <div class="border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+            <span class="small text-muted">
+                Tổng cộng: <strong class="text-dark">@Model.TongSoSan</strong> sân
+            </span>
+            <span class="small text-muted">
+                Trang @Model.TrangHienTai / @(Model.TongSoTrang == 0 ? 1 : Model.TongSoTrang)
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small text-uppercase">
+                    <tr>
+                        <th style="width: 28%;" class="border-0 ps-3">Tên sân thể thao</th>
+                        <th style="width: 17%;" class="border-0">Loại sân</th>
+                        <th style="width: 19%;" class="border-0">Khu vực</th>
+                        <th style="width: 11%;" class="border-0 text-center">Sức chứa</th>
+                        <th style="width: 11%;" class="border-0 text-center">Tình trạng</th>
+                        <th style="width: 14%;" class="border-0 text-center pe-3">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top">
+                    @if (Model.DanhSachSan != null && Model.DanhSachSan.Any())
+                    {
+                        foreach (var item in Model.DanhSachSan)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="fw-semibold text-dark">@item.TenSan</div>
+                                    @if (!string.IsNullOrEmpty(item.MoTa))
+                                    {
+                                        <div class="text-muted small text-truncate" style="max-width: 260px;">
+                                            @item.MoTa
+                                        </div>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-dark small">@(item.LoaiSan?.TenLoaiSan ?? "-")</span>
+                                </td>
+                                <td>
+                                    <span class="text-dark small">@(item.KhuVuc?.TenKhuVuc ?? "-")</span>
+                                </td>
+                                <td class="text-center text-nowrap">
+                                    <span class="text-dark small">@item.SucChua người</span>
+                                </td>
+                                <td class="text-center text-nowrap">
+                                    @switch (item.TinhTrang)
+                                    {
+                                        case "Đang hoạt động":
+                                            <span class="badge border border-dark text-dark bg-white px-2 py-1 small fw-normal">
+                                                Đang hoạt động
+                                            </span>
+                                            break;
+                                        case "Tạm ngừng":
+                                            <span class="badge border border-secondary text-secondary bg-white px-2 py-1 small fw-normal">
+                                                Tạm ngừng
+                                            </span>
+                                            break;
+                                        case "Đang bảo trì":
+                                            <span class="badge border border-secondary text-muted bg-light px-2 py-1 small fw-normal">
+                                                Đang bảo trì
+                                            </span>
+                                            break;
+                                        default:
+                                            <span class="badge border border-danger text-danger bg-white px-2 py-1 small fw-normal">
+                                                Ngừng sử dụng
+                                            </span>
+                                            break;
+                                    }
+                                </td>
+                                <td class="text-center text-nowrap pe-3">
+                                    <div class="d-inline-flex gap-1">
+                                        <a asp-action="Details" asp-route-id="@item.MaSan" 
+                                           class="btn btn-sm btn-outline-dark rounded-1 px-2 py-0 small">
+                                            Chi tiết
+                                        </a>
+                                        <a asp-action="Edit" asp-route-id="@item.MaSan" 
+                                           class="btn btn-sm btn-outline-secondary rounded-1 px-2 py-0 small">
+                                            Sửa
+                                        </a>
+                                        <a asp-controller="BangGia" asp-action="Index" asp-route-maSan="@item.MaSan" 
+                                           class="btn btn-sm btn-outline-secondary rounded-1 px-2 py-0 small">
+                                            Giá
+                                        </a>
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted small">
+                                Không tìm thấy sân thể thao nào phù hợp với điều kiện tìm kiếm.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PHÂN TRANG -->
+        @if (Model.TongSoTrang > 1)
+        {
+            <div class="border-top py-2 px-3 d-flex justify-content-between align-items-center">
+                <span class="text-muted small">
+                    Trang @Model.TrangHienTai / @Model.TongSoTrang
+                </span>
+                <nav aria-label="Phân trang danh sách sân">
+                    <ul class="pagination pagination-sm mb-0">
+                        <!-- Nút Trước -->
+                        <li class="page-item @(!Model.CoTrangTruoc ? "disabled" : "")">
+                            <a class="page-link text-dark rounded-1 me-1 border" asp-action="Index"
+                               asp-route-pageIndex="@(Model.TrangHienTai - 1)"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-maLoaiSan="@Model.MaLoaiSan"
+                               asp-route-maKhuVuc="@Model.MaKhuVuc"
+                               asp-route-tinhTrang="@Model.TinhTrang"
+                               asp-route-sucChuaToiThieu="@Model.SucChuaToiThieu"
+                               asp-route-sortOrder="@Model.SortOrder">
+                                Trước
+                            </a>
+                        </li>
+
+                        <!-- Các số trang -->
+                        @for (int p = 1; p <= Model.TongSoTrang; p++)
+                        {
+                            <li class="page-item @(p == Model.TrangHienTai ? "active" : "")">
+                                <a class="page-link rounded-1 me-1 border @(p == Model.TrangHienTai ? "bg-dark border-dark text-white" : "text-dark")" 
+                                   asp-action="Index"
+                                   asp-route-pageIndex="@p"
+                                   asp-route-tuKhoa="@Model.TuKhoa"
+                                   asp-route-maLoaiSan="@Model.MaLoaiSan"
+                                   asp-route-maKhuVuc="@Model.MaKhuVuc"
+                                   asp-route-tinhTrang="@Model.TinhTrang"
+                                   asp-route-sucChuaToiThieu="@Model.SucChuaToiThieu"
+                                   asp-route-sortOrder="@Model.SortOrder">
+                                    @p
+                                </a>
+                            </li>
+                        }
+
+                        <!-- Nút Sau -->
+                        <li class="page-item @(!Model.CoTrangSau ? "disabled" : "")">
+                            <a class="page-link text-dark rounded-1 border" asp-action="Index"
+                               asp-route-pageIndex="@(Model.TrangHienTai + 1)"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-maLoaiSan="@Model.MaLoaiSan"
+                               asp-route-maKhuVuc="@Model.MaKhuVuc"
+                               asp-route-tinhTrang="@Model.TinhTrang"
+                               asp-route-sucChuaToiThieu="@Model.SucChuaToiThieu"
+                               asp-route-sortOrder="@Model.SortOrder">
+                                Sau
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+</div>
