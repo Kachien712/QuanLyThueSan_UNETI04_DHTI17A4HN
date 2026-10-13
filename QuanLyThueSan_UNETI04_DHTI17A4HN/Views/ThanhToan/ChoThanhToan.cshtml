@@ -1,0 +1,118 @@
+@*
+    Họ và tên: Trần Văn Lợi
+    Mã sinh viên: 23103100237
+    Nội dung thực hiện: Module 5 - Giao diện danh sách đơn đặt sân đang chờ thanh toán
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.ChoThanhToanIndexViewModel
+
+@{
+    ViewData["Title"] = "Đơn chờ thanh toán";
+}
+
+<div class="container-fluid px-0">
+    <div class="mb-3">
+        <h2 class="text-primary mb-1">Đơn chờ thanh toán</h2>
+        <p class="text-muted mb-0">Các đơn đặt sân đã trả sân và đang chờ thu tiền</p>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Tìm kiếm -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="ChoThanhToan" class="row g-2 align-items-center">
+                <div class="col-md-9">
+                    <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control"
+                           placeholder="Tìm theo mã đơn, tên khách, số điện thoại, tên sân..." />
+                </div>
+                <div class="col-md-3 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary w-100">Tìm kiếm</button>
+                    <a asp-action="ChoThanhToan" class="btn btn-outline-secondary">Đặt lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3" style="width: 90px;">Mã đơn</th>
+                            <th>Khách hàng</th>
+                            <th>Số điện thoại</th>
+                            <th>Sân</th>
+                            <th>Ngày sử dụng</th>
+                            <th>Giờ</th>
+                            <th class="text-center pe-3" style="width: 140px;">Hành động</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.DanhSachDon != null && Model.DanhSachDon.Any())
+                        {
+                            foreach (var don in Model.DanhSachDon)
+                            {
+                                <tr>
+                                    <td class="ps-3 fw-bold text-secondary">#@don.MaDatSan</td>
+                                    <td class="fw-semibold">@don.TenKhachHang</td>
+                                    <td>@don.SoDienThoai</td>
+                                    <td>@don.TenSan</td>
+                                    <td>@don.NgaySuDung.ToString("dd/MM/yyyy")</td>
+                                    <td>@don.GioBatDau.ToString(@"hh\:mm") - @don.GioKetThuc.ToString(@"hh\:mm")</td>
+                                    <td class="text-center pe-3">
+                                        <a asp-action="Create" asp-route-maDatSan="@don.MaDatSan" class="btn btn-sm btn-success">
+                                            Thanh toán
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center text-muted py-4">Không có đơn nào đang chờ thanh toán.</td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        @if (Model.DanhSachDon != null && Model.DanhSachDon.TongSoTrang > 1)
+        {
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center">
+                <small class="text-muted">
+                    Trang @Model.DanhSachDon.TrangHienTai / @Model.DanhSachDon.TongSoTrang
+                    (@Model.DanhSachDon.TongSoBanGhi đơn)
+                </small>
+                <div class="btn-group btn-group-sm">
+                    @if (Model.DanhSachDon.CoTrangTruoc)
+                    {
+                        <a asp-action="ChoThanhToan" asp-route-tuKhoa="@Model.TuKhoa"
+                           asp-route-pageIndex="@(Model.DanhSachDon.TrangHienTai - 1)" class="btn btn-outline-primary">Trang trước</a>
+                    }
+                    @if (Model.DanhSachDon.CoTrangSau)
+                    {
+                        <a asp-action="ChoThanhToan" asp-route-tuKhoa="@Model.TuKhoa"
+                           asp-route-pageIndex="@(Model.DanhSachDon.TrangHienTai + 1)" class="btn btn-outline-primary">Trang sau</a>
+                    }
+                </div>
+            </div>
+        }
+    </div>
+</div>
