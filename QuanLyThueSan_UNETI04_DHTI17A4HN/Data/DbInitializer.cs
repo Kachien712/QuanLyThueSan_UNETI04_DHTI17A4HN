@@ -56,8 +56,9 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
                 context.SaveChanges();
             }
 
-            // 3. MODULE 1 (Khuất Anh Chiến - 23103100234):
-            // Tài khoản quản trị mặc định để kiểm thử phân quyền
+            // ===== PHẦN BỔ SUNG - MODULE 1 (Khuất Anh Chiến - 23103100234) =====
+
+            // 1. Tài khoản quản trị mặc định để kiểm thử phân quyền (Mục 16 file Word)
             if (!context.TaiKhoans.Any(t => t.VaiTro == "Admin"))
             {
                 context.TaiKhoans.AddRange(
@@ -82,13 +83,14 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
                 context.SaveChanges();
             }
 
-            // Khách hàng chưa liên kết tài khoản (MaTaiKhoan null) -> tạo tài khoản và ghép mã
+            // 2. Khách hàng chưa liên kết tài khoản (MaTaiKhoan null) -> tạo tài khoản và ghép mã
             var khachChuaCoTaiKhoan = context.KhachHangs
                 .Where(k => k.MaTaiKhoan == null)
                 .ToList();
 
             foreach (var khach in khachChuaCoTaiKhoan)
             {
+                // Ưu tiên dùng email làm tên đăng nhập; email null hoặc đã bị chiếm thì dùng mã khách hàng
                 string tenDangNhap;
                 if (!string.IsNullOrWhiteSpace(khach.Email)
                     && !context.TaiKhoans.Any(t => t.TenDangNhap == khach.Email))
@@ -115,7 +117,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
                     TrangThai = khach.TrangThai
                 };
                 context.TaiKhoans.Add(taiKhoan);
-                context.SaveChanges();
+                context.SaveChanges(); // Lưu ngay để lấy MaTaiKhoan
 
                 khach.MaTaiKhoan = taiKhoan.MaTaiKhoan;
             }
