@@ -1,6 +1,6 @@
 // Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới)
+// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới, Chi tiết)
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -210,6 +210,32 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 
             TempData["ThanhCong"] = $"Đã thêm sân \"{sanMoi.TenSan}\" thành công!";
             return RedirectToAction(nameof(Index));
+        }
+
+        // =========================================================================================
+        // GET: /SanTheThao/Details/{id}
+        // Nghiệp vụ: Xem chi tiết thông tin sân thể thao và danh sách bảng giá áp dụng (Mục 6.3 file Word)
+        // =========================================================================================
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var sanTheThao = await _context.SanTheThaos
+                .Include(s => s.LoaiSan)
+                .Include(s => s.KhuVuc)
+                .Include(s => s.BangGias.OrderBy(b => b.GioBatDau))
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.MaSan == id);
+
+            if (sanTheThao == null)
+            {
+                return NotFound();
+            }
+
+            return View(sanTheThao);
         }
     }
 }
