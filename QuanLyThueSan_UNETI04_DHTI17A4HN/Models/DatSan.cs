@@ -1,6 +1,9 @@
 // Họ và tên: [Họ tên SV3]
 // Mã sinh viên: [MSSV SV3]
 // Nội dung thực hiện: Module 3 - Entity Đơn đặt sân
+// Họ và tên: Lê Ngọc Hải Nam
+// Mã sinh viên: 23103100219
+// Nội dung thực hiện: Module 4 - Thêm trường ThoiDiemNhanSanThucTe để lưu thời điểm nhận sân thực tế
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
@@ -40,7 +43,6 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Models
         [StringLength(500)]
         public string? GhiChu { get; set; }
 
-        // Lê Ngọc Hải Nam - 23103100219 - Module 4 tuần 2: thời điểm nhận sân thực tế.
         public DateTime? ThoiDiemNhanSanThucTe { get; set; }
 
         [ForeignKey("MaKhachHang")]
