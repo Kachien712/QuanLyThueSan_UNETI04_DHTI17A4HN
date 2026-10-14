@@ -1,5 +1,5 @@
-﻿// Họ và tên: [Họ tên SV1]
-// Mã sinh viên: [MSSV SV1]
+﻿// Họ và tên: Khuất Anh Chiến
+// Mã sinh viên: 23103100234
 // Nội dung thực hiện: Module 1 - Entity Tài khoản người dùng
 
 using System.ComponentModel.DataAnnotations;

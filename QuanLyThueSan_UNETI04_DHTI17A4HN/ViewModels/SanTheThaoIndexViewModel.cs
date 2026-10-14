@@ -1,4 +1,4 @@
-﻿// Họ và tên: [Đào Duy Khánh]
+// Họ và tên: [Đào Duy Khánh]
 // Mã sinh viên: [23103100220]
 // Nội dung thực hiện: Module 2 - ViewModel phục vụ tìm kiếm, lọc, sắp xếp và phân trang danh sách sân
 
@@ -28,7 +28,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels
         public int TrangHienTai { get; set; } = 1;
         public int TongSoTrang { get; set; } = 1;
         public int TongSoSan { get; set; } = 0;
-        public int KichThuocTrang { get; set; } = 6; // Mỗi trang hiển thị 6 sân
+        public int KichThuocTrang { get; set; } = 10; // Mỗi trang hiển thị 10 sân
         // Hai thuộc tính kiểm tra xem có trang trước / trang sau không
         public bool CoTrangTruoc => TrangHienTai > 1;
         public bool CoTrangSau => TrangHienTai < TongSoTrang;

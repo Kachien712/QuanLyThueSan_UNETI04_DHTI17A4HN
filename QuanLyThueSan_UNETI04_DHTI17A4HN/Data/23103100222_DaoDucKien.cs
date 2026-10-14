@@ -6,13 +6,8 @@ using QuanLyThueSan_UNETI04_DHTI17A4HN.Models;
 
 namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
 {
-    public static class _23103100222_DaoDucKien
+    public static class SeedData_23103100222_DaoDucKien
     {
-        public static void Initialize(ApplicationDbContext context)
-        {
-            Seed(context);
-        }
-
         public static void Seed(ApplicationDbContext context)
         {
             // Tự động kiểm tra và khởi tạo dữ liệu mẫu cho bảng Khách hàng
