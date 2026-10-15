@@ -10,6 +10,14 @@
 }
 
 <div class="container-fluid pt-0 pb-4">
+    @if (TempData["ThanhCong"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-2 py-2 px-3 small border mb-3" role="alert">
+            <strong>Thông báo:</strong> @TempData["ThanhCong"]
+            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
     <!-- KHỐI BỘ LỌC VÀ TÌM KIẾM -->
     <div class="border rounded-2 bg-white mb-3">
         <div class="border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
