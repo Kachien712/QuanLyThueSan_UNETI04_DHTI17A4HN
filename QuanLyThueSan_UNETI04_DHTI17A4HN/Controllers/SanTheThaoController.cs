@@ -1,6 +1,6 @@
 // Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới, Chi tiết)
+// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới, Chi tiết, Chỉnh sửa)
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -236,6 +236,108 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             }
 
             return View(sanTheThao);
+        }
+
+        // =========================================================================================
+        // GET: /SanTheThao/Edit/{id}
+        // Nghiệp vụ: Hiển thị form chỉnh sửa thông tin sân thể thao (Mục 6.3 file Word)
+        // =========================================================================================
+        public async Task<IActionResult> Edit(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var san = await _context.SanTheThaos.FindAsync(id);
+            if (san == null)
+            {
+                return NotFound();
+            }
+
+            var vm = new SanTheThaoFormViewModel
+            {
+                MaSan = san.MaSan,
+                TenSan = san.TenSan,
+                MaLoaiSan = san.MaLoaiSan,
+                MaKhuVuc = san.MaKhuVuc,
+                SucChua = san.SucChua,
+                MoTa = san.MoTa,
+                TinhTrang = san.TinhTrang,
+
+                DanhSachLoaiSan = new SelectList(
+                    await _context.LoaiSans
+                        .Where(l => l.TrangThai || l.MaLoaiSan == san.MaLoaiSan)
+                        .OrderBy(l => l.TenLoaiSan)
+                        .AsNoTracking()
+                        .ToListAsync(),
+                    "MaLoaiSan", "TenLoaiSan", san.MaLoaiSan),
+
+                DanhSachKhuVuc = new SelectList(
+                    await _context.KhuVucs
+                        .Where(k => k.TrangThai || k.MaKhuVuc == san.MaKhuVuc)
+                        .OrderBy(k => k.TenKhuVuc)
+                        .AsNoTracking()
+                        .ToListAsync(),
+                    "MaKhuVuc", "TenKhuVuc", san.MaKhuVuc)
+            };
+
+            return View(vm);
+        }
+
+        // =========================================================================================
+        // POST: /SanTheThao/Edit/{id}
+        // Nghiệp vụ: Xác thực dữ liệu, kiểm tra tên trùng (trừ chính nó) và cập nhật thông tin sân (Mục 6.3, 13)
+        // =========================================================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> Edit(int id, SanTheThaoFormViewModel vm)
+        {
+            if (id != vm.MaSan)
+            {
+                return NotFound();
+            }
+
+            // Kiểm tra tên sân không được trùng với sân khác (Mục 13 file Word)
+            bool tenBiTrung = await _context.SanTheThaos
+                .AnyAsync(s => s.TenSan.ToLower() == vm.TenSan.Trim().ToLower() && s.MaSan != id);
+
+            if (tenBiTrung)
+            {
+                ModelState.AddModelError(nameof(vm.TenSan), "Tên sân này đã được sử dụng bởi một sân khác. Vui lòng nhập tên khác.");
+            }
+
+            if (!ModelState.IsValid)
+            {
+                vm.DanhSachLoaiSan = new SelectList(
+                    await _context.LoaiSans.Where(l => l.TrangThai || l.MaLoaiSan == vm.MaLoaiSan).OrderBy(l => l.TenLoaiSan).AsNoTracking().ToListAsync(),
+                    "MaLoaiSan", "TenLoaiSan", vm.MaLoaiSan);
+
+                vm.DanhSachKhuVuc = new SelectList(
+                    await _context.KhuVucs.Where(k => k.TrangThai || k.MaKhuVuc == vm.MaKhuVuc).OrderBy(k => k.TenKhuVuc).AsNoTracking().ToListAsync(),
+                    "MaKhuVuc", "TenKhuVuc", vm.MaKhuVuc);
+
+                return View(vm);
+            }
+
+            var sanCanSua = await _context.SanTheThaos.FindAsync(id);
+            if (sanCanSua == null)
+            {
+                return NotFound();
+            }
+
+            // Cập nhật các trường thông tin
+            sanCanSua.TenSan = vm.TenSan.Trim();
+            sanCanSua.MaLoaiSan = vm.MaLoaiSan;
+            sanCanSua.MaKhuVuc = vm.MaKhuVuc;
+            sanCanSua.SucChua = vm.SucChua;
+            sanCanSua.MoTa = vm.MoTa?.Trim();
+            sanCanSua.TinhTrang = vm.TinhTrang;
+
+            await _context.SaveChangesAsync();
+
+            TempData["ThanhCong"] = $"Đã cập nhật thông tin sân \"{sanCanSua.TenSan}\" thành công!";
+            return RedirectToAction(nameof(Index));
         }
     }
 }
