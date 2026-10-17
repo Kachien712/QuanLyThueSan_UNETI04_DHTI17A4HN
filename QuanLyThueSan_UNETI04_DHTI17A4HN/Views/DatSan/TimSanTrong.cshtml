@@ -1,0 +1,174 @@
+@* 
+    Họ và tên: Đào Đức Kiên
+    Mã sinh viên: 23103100222
+    Nội dung thực hiện: Module 3 - Giao diện tra cứu và tìm kiếm sân trống theo thời gian
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.TimSanTrongViewModel
+
+@{
+    ViewData["Title"] = "Tìm sân trống & Đặt lịch";
+}
+
+<div class="container-fluid px-0">
+    <div class="mb-4">
+        <h2 class="text-primary fw-bold mb-1">
+            <i class="bi bi-search"></i> Tra cứu & Tìm sân trống
+        </h2>
+        <p class="text-muted mb-0">
+            Hệ thống tự động kiểm tra lịch thi đấu và đề xuất các sân khả dụng theo thời gian bạn yêu cầu.
+        </p>
+    </div>
+
+    <!-- KHUNG TÌM KIẾM THEO THỜI GIAN -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-primary text-white py-3">
+            <h5 class="card-title mb-0">
+                <i class="bi bi-sliders"></i> Bộ lọc thời gian và tiêu chí sân
+            </h5>
+        </div>
+        <div class="card-body p-4">
+            <form method="get" asp-action="TimSanTrong">
+                <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                <div class="row g-3">
+                    <!-- 1. Ngày sử dụng -->
+                    <div class="col-md-4">
+                        <label asp-for="NgaySuDung" class="form-label fw-semibold"></label>
+                        <input asp-for="NgaySuDung" type="date" class="form-control" 
+                               min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                        <span asp-validation-for="NgaySuDung" class="text-danger small"></span>
+                    </div>
+
+                    <!-- 2. Giờ bắt đầu -->
+                    <div class="col-md-4">
+                        <label asp-for="GioBatDau" class="form-label fw-semibold"></label>
+                        <input asp-for="GioBatDau" type="time" class="form-control" />
+                        <span asp-validation-for="GioBatDau" class="text-danger small"></span>
+                    </div>
+
+                    <!-- 3. Giờ kết thúc -->
+                    <div class="col-md-4">
+                        <label asp-for="GioKetThuc" class="form-label fw-semibold"></label>
+                        <input asp-for="GioKetThuc" type="time" class="form-control" />
+                        <span asp-validation-for="GioKetThuc" class="text-danger small"></span>
+                    </div>
+
+                    <!-- 4. Loại sân -->
+                    <div class="col-md-4">
+                        <label asp-for="MaLoaiSan" class="form-label fw-semibold"></label>
+                        <select asp-for="MaLoaiSan" asp-items="Model.DanhSachLoaiSan" class="form-select">
+                            <option value="">-- Tất cả loại sân --</option>
+                        </select>
+                    </div>
+
+                    <!-- 5. Khu vực -->
+                    <div class="col-md-4">
+                        <label asp-for="MaKhuVuc" class="form-label fw-semibold"></label>
+                        <select asp-for="MaKhuVuc" asp-items="Model.DanhSachKhuVuc" class="form-select">
+                            <option value="">-- Tất cả khu vực --</option>
+                        </select>
+                    </div>
+
+                    <!-- 6. Số người tham gia -->
+                    <div class="col-md-4">
+                        <label asp-for="SoNguoiYeuCau" class="form-label fw-semibold"></label>
+                        <input asp-for="SoNguoiYeuCau" type="number" min="1" max="100" class="form-control" 
+                               placeholder="VD: 10 người..." />
+                    </div>
+                </div>
+
+                <div class="mt-4 d-flex justify-content-end gap-2">
+                    <a asp-action="TimSanTrong" class="btn btn-outline-secondary px-3">
+                        <i class="bi bi-arrow-counterclockwise"></i> Đặt lại
+                    </a>
+                    <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                        <i class="bi bi-search"></i> Tìm kiếm sân trống
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH KẾT QUẢ SÂN TRỐNG TRẢ VỀ DẠNG CARD -->
+    @if (Model.DaTimKiem)
+    {
+        <div class="mb-3 d-flex justify-content-between align-items-center">
+            <h4 class="mb-0 fw-bold">
+                Kết quả tìm kiếm: 
+                <span class="badge bg-success fs-6">@Model.TongSoSanTrong sân trống khả dụng</span>
+            </h4>
+            <span class="text-muted small">
+                Khung giờ: <strong>@Model.GioBatDau.ToString(@"hh\:mm") - @Model.GioKetThuc.ToString(@"hh\:mm")</strong> ngày <strong>@Model.NgaySuDung.ToString("dd/MM/yyyy")</strong>
+            </span>
+        </div>
+
+        @if (Model.DanhSachSanTrong != null && Model.DanhSachSanTrong.Any())
+        {
+            <div class="row row-cols-1 row-cols-md-2 row-cols-lg-3 g-4 mb-5">
+                @foreach (var san in Model.DanhSachSanTrong)
+                {
+                    <div class="col">
+                        <div class="card h-100 shadow-sm border-0 border-top border-4 border-success">
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <span class="badge bg-info text-dark">@san.TenLoaiSan</span>
+                                    <span class="badge bg-secondary">@san.TenKhuVuc</span>
+                                </div>
+
+                                <h5 class="card-title fw-bold text-dark mb-2">@san.TenSan</h5>
+
+                                <p class="text-muted small mb-3 flex-grow-1">
+                                    @(string.IsNullOrWhiteSpace(san.GhiChu) ? "Sân chất lượng cao, đầy đủ hệ thống chiếu sáng và tiện ích tiêu chuẩn." : san.GhiChu)
+                                </p>
+
+                                <div class="border-top pt-3 mb-3">
+                                    <div class="d-flex justify-content-between align-items-center mb-1">
+                                        <small class="text-muted"><i class="bi bi-people"></i> Sức chứa tối đa:</small>
+                                        <span class="fw-semibold">@san.SoNguoiToiDa người</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                        <small class="text-muted"><i class="bi bi-tag"></i> Giá dự kiến:</small>
+                                        @if (san.GiaThamKhao.HasValue)
+                                        {
+                                            <span class="text-danger fw-bold fs-5">
+                                                @san.GiaThamKhao.Value.ToString("N0") <small class="fs-6">VNĐ/h</small>
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted fst-italic">Liên hệ trực tiếp</span>
+                                        }
+                                    </div>
+                                </div>
+
+                                <a asp-action="Create" 
+                                   asp-route-maSan="@san.MaSan"
+                                   asp-route-ngay="@Model.NgaySuDung.ToString("yyyy-MM-dd")"
+                                   asp-route-gioBatDau="@Model.GioBatDau"
+                                   asp-route-gioKetThuc="@Model.GioKetThuc"
+                                   class="btn btn-success w-100 fw-semibold">
+                                    <i class="bi bi-calendar-plus"></i> Chọn đặt sân này
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="alert alert-warning p-4 shadow-sm border-0 text-center" role="alert">
+                <h5 class="alert-heading fw-bold mb-2">Không tìm thấy sân trống phù hợp!</h5>
+                <p class="mb-0">
+                    Tất cả các sân trong tiêu chí lọc đều đã có lịch đặt hoặc đang bảo trì trong khoảng thời gian từ 
+                    <strong>@Model.GioBatDau.ToString(@"hh\:mm")</strong> đến <strong>@Model.GioKetThuc.ToString(@"hh\:mm")</strong>.
+                    Vui lòng chọn khung giờ khác hoặc ngày khác.
+                </p>
+            </div>
+        }
+    }
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
