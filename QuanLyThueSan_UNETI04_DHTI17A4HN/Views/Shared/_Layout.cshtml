@@ -4,7 +4,12 @@
     Họ và tên: Khuất Anh Chiến
     Mã sinh viên: 23103100234
     Nội dung thực hiện: Bổ sung vùng trạng thái đăng nhập/đăng xuất trên thanh điều hướng (Module 1)
-    (Nếu thành viên khác cũng sửa file này, ghi rõ nội dung của từng người)
+    Họ và tên: Lê Ngọc Hải Nam
+    Mã sinh viên: 23103100219
+    Nội dung thực hiện: Module 4 - Bổ sung liên kết nhận sân và quản lý dịch vụ.
+    Họ và tên: Khuất Anh Chiến
+    Mã sinh viên: 23103100234
+    Nội dung thực hiện: Module 4 - Bổ sung liên kết xác nhận đặt sân.
 *@
 <!DOCTYPE html>
 <html lang="en">
@@ -67,6 +72,18 @@
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách</a>
                         </li>
+                        @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="XacNhanDatSan" asp-action="Index">Xác nhận đặt sân</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="NhanSan" asp-action="Index">Nhận sân</a>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="DichVu" asp-action="Index">Dịch vụ</a>
+                            </li>
+                        }
                     </ul>
                     @{
                         var hoTen = Context.Session.GetString(SessionKeys.HoTen);

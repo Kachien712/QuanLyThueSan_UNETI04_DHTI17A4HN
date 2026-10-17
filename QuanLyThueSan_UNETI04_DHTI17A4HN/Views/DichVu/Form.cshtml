@@ -1,0 +1,42 @@
+@*
+    Họ và tên: Lê Ngọc Hải Nam
+    Mã sinh viên: 23103100219
+    Nội dung thực hiện: Module 4 tuần 3 - biểu mẫu thêm/sửa dịch vụ.
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.DichVuFormViewModel
+@{
+    var isEdit = Model.MaDichVu > 0;
+    ViewData["Title"] = isEdit ? "Sửa dịch vụ" : "Thêm dịch vụ";
+}
+<h1>@ViewData["Title"]</h1>
+<form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@(isEdit ? Model.MaDichVu : null)" method="post" class="col-md-6">
+    <input asp-for="MaDichVu" type="hidden" />
+    <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+    <div class="mb-3">
+        <label asp-for="TenDichVu" class="form-label"></label>
+        <input asp-for="TenDichVu" class="form-control" />
+        <span asp-validation-for="TenDichVu" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DonViTinh" class="form-label"></label>
+        <input asp-for="DonViTinh" class="form-control" />
+        <span asp-validation-for="DonViTinh" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="DonGia" class="form-label"></label>
+        <input asp-for="DonGia" class="form-control" min="0" step="0.01" />
+        <span asp-validation-for="DonGia" class="text-danger"></span>
+    </div>
+    <div class="mb-3">
+        <label asp-for="SoLuongTon" class="form-label"></label>
+        <input asp-for="SoLuongTon" class="form-control" min="0" />
+        <span asp-validation-for="SoLuongTon" class="text-danger"></span>
+    </div>
+    <div class="form-check mb-3">
+        <input asp-for="TrangThai" class="form-check-input" />
+        <label asp-for="TrangThai" class="form-check-label"></label>
+    </div>
+    <button class="btn btn-primary" type="submit">Lưu</button>
+    <a class="btn btn-outline-secondary" asp-action="Index">Quay lại</a>
+</form>
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

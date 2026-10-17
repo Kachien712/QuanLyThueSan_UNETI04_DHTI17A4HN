@@ -6,6 +6,7 @@
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Data;
+using QuanLyThueSan_UNETI04_DHTI17A4HN.Services;
 
 namespace QuanLyThueSan_UNETI04_DHTI17A4HN
 {
@@ -41,6 +42,8 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
 
             // Add services to the container.
             builder.Services.AddControllersWithViews();
+            builder.Services.AddScoped<XacNhanDatSanService>();
+            builder.Services.AddScoped<NhanSanService>();
 
             var app = builder.Build();
 
@@ -53,6 +56,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
                     var context = services.GetRequiredService<ApplicationDbContext>();
                     // Tự động kiểm tra và tạo CSDL + chạy Migration nếu chưa có
                     context.Database.Migrate();
+                    // Khởi tạo dữ liệu mẫu (Mục 16 file Word) - khôi phục sau gộp nhánh Module 4
                     DbInitializer.Initialize(context);
                 }
                 catch (Exception ex)
