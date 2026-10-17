@@ -5,6 +5,9 @@
     Họ và tên: Lê Ngọc Hải Nam
     Mã sinh viên: 23103100219
     Nội dung thực hiện: Module 4 - Bổ sung liên kết nhận sân và quản lý dịch vụ.
+    Họ và tên: Khuất Anh Chiến
+    Mã sinh viên: 23103100234
+    Nội dung thực hiện: Module 4 - Bổ sung liên kết xác nhận đặt sân.
 *@
 <!DOCTYPE html>
 <html lang="en">
@@ -39,6 +42,9 @@
                         </li>
                         @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
                         {
+                            <li class="nav-item">
+                                <a class="nav-link text-dark" asp-controller="XacNhanDatSan" asp-action="Index">Xác nhận đặt sân</a>
+                            </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="NhanSan" asp-action="Index">Nhận sân</a>
                             </li>
