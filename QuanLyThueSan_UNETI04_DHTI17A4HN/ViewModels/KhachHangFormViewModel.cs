@@ -1,5 +1,5 @@
 // Họ và tên: Đào Đức Kiên
-// Mã sinh viên: 23103100220
+// Mã sinh viên: 23103100222
 // Nội dung thực hiện: Module 3 - ViewModel thêm mới và chỉnh sửa thông tin khách hàng (chống Overposting)
 
 using System.ComponentModel.DataAnnotations;
