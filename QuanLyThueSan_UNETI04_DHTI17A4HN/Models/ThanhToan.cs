@@ -1,5 +1,5 @@
-// Họ và tên: [Họ tên SV5]
-// Mã sinh viên: [MSSV SV5]
+// Họ và tên: Trần Văn Lợi
+// Mã sinh viên: 23103100237
 // Nội dung thực hiện: Module 5 - Entity Hóa đơn thanh toán
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
