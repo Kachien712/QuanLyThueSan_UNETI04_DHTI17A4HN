@@ -1,11 +1,13 @@
 // Họ và tên: Đào Đức Kiên
 // Mã sinh viên: 23103100222
-// Nội dung thực hiện: Module 3 - Controller Đặt sân & Tìm sân trống (Kiểm tra trùng lịch bằng LINQ)
+// Nội dung thực hiện: Module 3 - Controller Đặt sân & Tìm sân trống (Kiểm tra trùng lịch bằng LINQ, Validation thời gian và Action Create)
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Data;
+using QuanLyThueSan_UNETI04_DHTI17A4HN.Filters;
+using QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Models;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels;
 
@@ -65,10 +67,38 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 model.GioKetThuc = new TimeSpan(9, 30, 0); // 09:30
             }
 
-            // Kiểm tra tính hợp lệ cơ bản của khung giờ
+            // ===== COMMIT 4: VALIDATION NGHIỆP VỤ THỜI GIAN TRA CỨU SÂN =====
+            bool coLoiValidation = false;
+
+            // 1. Ngày sử dụng không được trong quá khứ
+            if (model.NgaySuDung.Date < DateTime.Today)
+            {
+                ModelState.AddModelError(string.Empty, "Ngày sử dụng không được chọn trong quá khứ.");
+                coLoiValidation = true;
+            }
+
+            // 2. Giờ kết thúc phải lớn hơn giờ bắt đầu
             if (model.GioKetThuc <= model.GioBatDau)
             {
                 ModelState.AddModelError(string.Empty, "Giờ kết thúc phải lớn hơn giờ bắt đầu.");
+                coLoiValidation = true;
+            }
+            else if ((model.GioKetThuc - model.GioBatDau).TotalMinutes < 30)
+            {
+                ModelState.AddModelError(string.Empty, "Thời lượng sử dụng sân tối thiểu là 30 phút.");
+                coLoiValidation = true;
+            }
+
+            // 3. Khung giờ hoạt động cụm sân (05:00 - 23:00)
+            if (model.GioBatDau < new TimeSpan(5, 0, 0) || model.GioKetThuc > new TimeSpan(23, 0, 0))
+            {
+                ModelState.AddModelError(string.Empty, "Thời gian đặt sân phải nằm trong khung giờ hoạt động của cụm sân (05:00 - 23:00).");
+                coLoiValidation = true;
+            }
+
+            if (coLoiValidation)
+            {
+                model.DaTimKiem = false;
                 return View(model);
             }
 
@@ -135,7 +165,91 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             return View(model);
         }
 
-        // Hàm nạp danh sách chọn vào dropdown
+        // =========================================================================
+        // 3. TẠO ĐƠN ĐẶT SÂN (GET - Nhận thông tin sân đã chọn từ TimSanTrong)
+        // Yêu cầu đăng nhập thông qua [PhanQuyen] (Mục 5.3 & 17.1 file Word)
+        // =========================================================================
+        [HttpGet]
+        [PhanQuyen]
+        public async Task<IActionResult> Create(int? maSan, string? ngay, string? gioBatDau, string? gioKetThuc)
+        {
+            var viewModel = new DatSanCreateViewModel();
+
+            // Tự động nhận diện tài khoản đang đăng nhập trong Session
+            var maTaiKhoan = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);
+            var vaiTro = HttpContext.Session.GetString(SessionKeys.VaiTro);
+
+            if (maTaiKhoan.HasValue)
+            {
+                var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(k => k.MaTaiKhoan == maTaiKhoan.Value);
+                if (khachHang != null)
+                {
+                    viewModel.MaKhachHang = khachHang.MaKhachHang;
+                    ViewBag.TenKhachHangHienTai = khachHang.HoTen;
+                    ViewBag.SoDienThoaiKhachHang = khachHang.SoDienThoai;
+                }
+            }
+
+            ViewBag.LaKhachHang = (vaiTro == "KhachHang");
+
+            // 1. Điền sẵn ngày sử dụng
+            if (!string.IsNullOrWhiteSpace(ngay) && DateTime.TryParse(ngay, out DateTime parsedNgay))
+            {
+                viewModel.NgaySuDung = parsedNgay;
+            }
+            else
+            {
+                viewModel.NgaySuDung = DateTime.Today;
+            }
+
+            // 2. Điền sẵn giờ bắt đầu
+            if (!string.IsNullOrWhiteSpace(gioBatDau) && TimeSpan.TryParse(gioBatDau, out TimeSpan parsedBatDau))
+            {
+                viewModel.GioBatDau = parsedBatDau;
+            }
+            else
+            {
+                viewModel.GioBatDau = new TimeSpan(8, 0, 0);
+            }
+
+            // 3. Điền sẵn giờ kết thúc
+            if (!string.IsNullOrWhiteSpace(gioKetThuc) && TimeSpan.TryParse(gioKetThuc, out TimeSpan parsedKetThuc))
+            {
+                viewModel.GioKetThuc = parsedKetThuc;
+            }
+            else
+            {
+                viewModel.GioKetThuc = new TimeSpan(9, 30, 0);
+            }
+
+            // 4. Điền sẵn thông tin sân thể thao đã chọn
+            if (maSan.HasValue)
+            {
+                var san = await _context.SanTheThaos
+                    .Include(s => s.LoaiSan)
+                    .Include(s => s.KhuVuc)
+                    .FirstOrDefaultAsync(s => s.MaSan == maSan.Value && s.TinhTrang == "Đang hoạt động");
+
+                if (san != null)
+                {
+                    viewModel.MaSan = san.MaSan;
+                    viewModel.TenSanDuocChon = san.TenSan;
+                    viewModel.TenLoaiSan = san.LoaiSan?.TenLoaiSan ?? "Tiêu chuẩn";
+                    viewModel.TenKhuVuc = san.KhuVuc?.TenKhuVuc ?? "Chưa phân khu";
+                    viewModel.SoNguoiToiDa = san.SucChua;
+                    viewModel.SoNguoi = Math.Min(10, san.SucChua);
+                }
+            }
+
+            // Nạp DropDown Khách hàng và Sân thể thao
+            await NapDropdownDatSanAsync(viewModel);
+
+            return View(viewModel);
+        }
+
+        // =========================================================================
+        // HÀM HỖ TRỢ NẠP DROPDOWN
+        // =========================================================================
         private async Task NapDropdownLocSanAsync(TimSanTrongViewModel model)
         {
             var loaiSans = await _context.LoaiSans
@@ -150,6 +264,22 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 
             model.DanhSachLoaiSan = new SelectList(loaiSans, "MaLoaiSan", "TenLoaiSan", model.MaLoaiSan);
             model.DanhSachKhuVuc = new SelectList(khuVucs, "MaKhuVuc", "TenKhuVuc", model.MaKhuVuc);
+        }
+
+        private async Task NapDropdownDatSanAsync(DatSanCreateViewModel viewModel)
+        {
+            var khachHangs = await _context.KhachHangs
+                .Where(k => k.TrangThai)
+                .OrderBy(k => k.HoTen)
+                .ToListAsync();
+
+            var sans = await _context.SanTheThaos
+                .Where(s => s.TinhTrang == "Đang hoạt động")
+                .OrderBy(s => s.TenSan)
+                .ToListAsync();
+
+            viewModel.DanhSachKhachHang = new SelectList(khachHangs, "MaKhachHang", "HoTen", viewModel.MaKhachHang);
+            viewModel.DanhSachSan = new SelectList(sans, "MaSan", "TenSan", viewModel.MaSan);
         }
     }
 }

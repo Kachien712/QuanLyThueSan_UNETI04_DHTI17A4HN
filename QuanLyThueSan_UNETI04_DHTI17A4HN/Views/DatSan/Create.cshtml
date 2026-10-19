@@ -1,0 +1,142 @@
+@* 
+    Họ và tên: Đào Đức Kiên
+    Mã sinh viên: 23103100222
+    Nội dung thực hiện: Module 3 - Giao diện form tạo mới đơn đặt sân
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.DatSanCreateViewModel
+
+@{
+    ViewData["Title"] = "Tạo đơn đặt sân mới";
+}
+
+<div class="container-fluid px-0">
+    <!-- Breadcrumb điều hướng -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item"><a asp-action="TimSanTrong">Tìm sân trống</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Đặt sân mới</li>
+        </ol>
+    </nav>
+
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <!-- THẺ TÓM TẮT THÔNG TIN SÂN NẾU ĐƯỢC CHỌN TỪ TRANG TÌM SÂN -->
+            @if (!string.IsNullOrEmpty(Model.TenSanDuocChon))
+            {
+                <div class="card shadow-sm border-0 border-start border-4 border-success mb-4 bg-light">
+                    <div class="card-body p-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <h5 class="fw-bold text-success mb-0">
+                                <i class="bi bi-check-circle-fill"></i> @Model.TenSanDuocChon
+                            </h5>
+                            <div>
+                                <span class="badge bg-info text-dark">@Model.TenLoaiSan</span>
+                                <span class="badge bg-secondary">@Model.TenKhuVuc</span>
+                            </div>
+                        </div>
+                        <p class="text-muted small mb-0">
+                            Sức chứa tiêu chuẩn: <strong>@Model.SoNguoiToiDa người</strong>. 
+                            Khung giờ bạn đang chọn: <strong>@Model.GioBatDau.ToString(@"hh\:mm") - @Model.GioKetThuc.ToString(@"hh\:mm")</strong> ngày <strong>@Model.NgaySuDung.ToString("dd/MM/yyyy")</strong>.
+                        </p>
+                    </div>
+                </div>
+            }
+
+            <!-- FORM TẠO ĐƠN ĐẶT SÂN -->
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-success text-white py-3">
+                    <h5 class="card-title mb-0">
+                        <i class="bi bi-calendar-plus"></i> Thông tin phiếu đặt sân
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="row g-3">
+                            <!-- 1. Chọn khách hàng -->
+                            <div class="col-md-6">
+                                <label asp-for="MaKhachHang" class="form-label fw-semibold"></label>
+                                @if (ViewBag.LaKhachHang == true && !string.IsNullOrEmpty(ViewBag.TenKhachHangHienTai as string))
+                                {
+                                    <input type="hidden" asp-for="MaKhachHang" />
+                                    <input type="text" class="form-control bg-light fw-bold text-success" value="@ViewBag.TenKhachHangHienTai" readonly />
+                                    <small class="text-success"><i class="bi bi-person-check-fill"></i> Đang đặt sân bằng tài khoản của bạn</small>
+                                }
+                                else
+                                {
+                                    <select asp-for="MaKhachHang" asp-items="Model.DanhSachKhachHang" class="form-select">
+                                        <option value="">-- Chọn khách hàng đặt sân --</option>
+                                    </select>
+                                    <span asp-validation-for="MaKhachHang" class="text-danger small"></span>
+                                }
+                            </div>
+
+                            <!-- 2. Chọn sân thể thao -->
+                            <div class="col-md-6">
+                                <label asp-for="MaSan" class="form-label fw-semibold"></label>
+                                <select asp-for="MaSan" asp-items="Model.DanhSachSan" class="form-select">
+                                    <option value="">-- Chọn sân thể thao --</option>
+                                </select>
+                                <span asp-validation-for="MaSan" class="text-danger small"></span>
+                            </div>
+
+                            <!-- 3. Ngày sử dụng -->
+                            <div class="col-md-4">
+                                <label asp-for="NgaySuDung" class="form-label fw-semibold"></label>
+                                <input asp-for="NgaySuDung" type="date" class="form-control" 
+                                       min="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                                <span asp-validation-for="NgaySuDung" class="text-danger small"></span>
+                            </div>
+
+                            <!-- 4. Giờ bắt đầu -->
+                            <div class="col-md-4">
+                                <label asp-for="GioBatDau" class="form-label fw-semibold"></label>
+                                <input asp-for="GioBatDau" type="time" class="form-control" />
+                                <span asp-validation-for="GioBatDau" class="text-danger small"></span>
+                            </div>
+
+                            <!-- 5. Giờ kết thúc -->
+                            <div class="col-md-4">
+                                <label asp-for="GioKetThuc" class="form-label fw-semibold"></label>
+                                <input asp-for="GioKetThuc" type="time" class="form-control" />
+                                <span asp-validation-for="GioKetThuc" class="text-danger small"></span>
+                            </div>
+
+                            <!-- 6. Số người tham gia -->
+                            <div class="col-md-12">
+                                <label asp-for="SoNguoi" class="form-label fw-semibold"></label>
+                                <input asp-for="SoNguoi" type="number" min="1" max="200" class="form-control" 
+                                       placeholder="Nhập số người dự kiến tham gia..." />
+                                <span asp-validation-for="SoNguoi" class="text-danger small"></span>
+                            </div>
+
+                            <!-- 7. Ghi chú -->
+                            <div class="col-md-12">
+                                <label asp-for="GhiChu" class="form-label fw-semibold"></label>
+                                <textarea asp-for="GhiChu" class="form-control" rows="3" 
+                                          placeholder="Yêu cầu thêm (VD: Chuẩn bị bóng thi đấu, áo bib tập luyện...)..."></textarea>
+                                <span asp-validation-for="GhiChu" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
+                            <a asp-action="TimSanTrong" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Quay lại tìm sân trống
+                            </a>
+                            <button type="submit" class="btn btn-success px-4 fw-semibold">
+                                <i class="bi bi-check-circle"></i> Xác nhận tạo đơn đặt sân
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
