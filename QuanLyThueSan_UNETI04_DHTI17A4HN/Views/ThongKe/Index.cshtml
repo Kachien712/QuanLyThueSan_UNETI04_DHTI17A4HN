@@ -1,0 +1,46 @@
+@* Họ và tên: Trần Văn Lợi
+   Mã sinh viên: 23103100237
+   Nội dung thực hiện: Module 5 - Thống kê đặt sân, sử dụng, doanh thu và tỷ lệ hủy *@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.ThongKeViewModel
+@{
+    ViewData["Title"] = "Thống kê";
+    var nhieuNhat = Model.LuotTheoSan.FirstOrDefault()?.SoLuot ?? 0;
+    var dungNhieuNhat = Model.GioTheoSan.Select(x => x.SoLuot).DefaultIfEmpty(0).Max();
+}
+<h2>Thống kê</h2>
+<p class="text-muted">Toàn bộ thời gian. Lượt đặt gồm tất cả trạng thái; doanh thu chỉ tính hóa đơn đã thanh toán. Tổng giờ dùng tính theo khung giờ đặt của đơn Đang sử dụng, Chờ thanh toán, Hoàn thành.</p>
+<div class="row g-3 mb-4">
+    <div class="col-md-4"><div class="card h-100"><div class="card-body"><h5>Tổng lượt đặt</h5><strong class="fs-3">@Model.TongDon</strong></div></div></div>
+    <div class="col-md-4"><div class="card h-100"><div class="card-body"><h5>Tỷ lệ hủy</h5><strong class="fs-3">@Model.TyLeHuy.ToString("N2")%</strong> (@Model.DonHuy đơn)</div></div></div>
+    <div class="col-md-4"><div class="card h-100"><div class="card-body"><h5>Sân được đặt nhiều nhất</h5><strong>@(nhieuNhat == 0 ? "Chưa có dữ liệu" : string.Join(", ", Model.LuotTheoSan.Where(x => x.SoLuot == nhieuNhat).Select(x => $"{x.Ten} (#{x.Ma})")))</strong><p>@nhieuNhat lượt/sân</p></div></div></div>
+</div>
+<div class="card mb-4"><div class="card-body">
+    <h5>Sân dùng nhiều nhất</h5>
+    <strong>@(dungNhieuNhat == 0 ? "Chưa có dữ liệu" : string.Join(", ", Model.GioTheoSan.Where(x => x.SoLuot == dungNhieuNhat).Select(x => $"{x.Ten} (#{x.Ma})")))</strong>
+    <span> · @dungNhieuNhat lượt/sân (đơn Đang sử dụng, Chờ thanh toán, Hoàn thành)</span>
+</div></div>
+<div class="row g-4">
+@foreach (var muc in new[] {
+    (Ten: "Lượt đặt theo sân", DuLieu: Model.LuotTheoSan),
+    (Ten: "Lượt đặt theo loại sân", DuLieu: Model.LuotTheoLoai),
+    (Ten: "Lượt đặt theo khu vực", DuLieu: Model.LuotTheoKhuVuc),
+    (Ten: "Khung giờ đặt nhiều nhất", DuLieu: Model.KhungGio),
+    (Ten: "Khách đặt nhiều nhất", DuLieu: Model.KhachHang) })
+{
+    <div class="col-lg-6"><h4>@muc.Ten</h4><div class="table-responsive"><table class="table table-striped"><thead><tr><th>Tên</th><th>Số lượt</th></tr></thead><tbody>
+    @foreach (var x in muc.DuLieu) { <tr><td>@x.Ten @(x.Ma > 0 ? $"(#{x.Ma})" : "")</td><td>@x.SoLuot</td></tr> }
+    @if (muc.DuLieu.Count == 0) { <tr><td colspan="2">Chưa có dữ liệu.</td></tr> }
+    </tbody></table></div></div>
+}
+<div class="col-lg-6"><h4>Tổng giờ dùng theo sân</h4><table class="table table-striped"><thead><tr><th>Sân</th><th>Lượt dùng</th><th>Số giờ</th></tr></thead><tbody>
+@foreach (var x in Model.GioTheoSan) { <tr><td>@x.Ten (#@x.Ma)</td><td>@x.SoLuot</td><td>@x.GiaTri.ToString("N2")</td></tr> }
+@if (!Model.GioTheoSan.Any()) { <tr><td colspan="3">Chưa có dữ liệu.</td></tr> }
+</tbody></table></div>
+@foreach (var muc in new[] { (Ten: "Doanh thu theo sân", DuLieu: Model.ThuTheoSan), (Ten: "Doanh thu theo loại sân", DuLieu: Model.ThuTheoLoai), (Ten: "Doanh thu theo tháng thanh toán", DuLieu: Model.ThuTheoThang), (Ten: "Doanh thu theo danh mục dịch vụ", DuLieu: Model.DichVu) })
+{
+    <div class="col-lg-6"><h4>@muc.Ten</h4><div class="table-responsive"><table class="table table-striped"><thead><tr><th>Tên / tháng</th><th>Doanh thu</th></tr></thead><tbody>
+    @foreach (var x in muc.DuLieu) { <tr><td>@x.Ten @(x.Ma > 0 ? $"(#{x.Ma})" : "")</td><td>@x.GiaTri.ToString("N0") đ</td></tr> }
+    @if (!muc.DuLieu.Any()) { <tr><td colspan="2">Chưa có dữ liệu.</td></tr> }
+    </tbody></table></div></div>
+}
+</div>

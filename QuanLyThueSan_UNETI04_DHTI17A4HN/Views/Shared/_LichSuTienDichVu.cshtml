@@ -1,0 +1,16 @@
+@* Họ và tên: Trần Văn Lợi
+   Mã sinh viên: 23103100237
+   Nội dung thực hiện: Module 5 - Cột dịch vụ và số tiền hóa đơn trong lịch sử *@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.Models.DatSan
+<td>
+    @if (Model.SuDungDichVus.Any())
+    {
+        @string.Join(", ", Model.SuDungDichVus.OrderBy(s => s.MaSuDung).Select(s => $"{s.DichVu?.TenDichVu ?? "Dịch vụ"} × {s.SoLuong}"))
+    }
+    else { <span>Không có</span> }
+</td>
+@if (Model.ThanhToan?.TrangThaiThanhToan == "Đã thanh toán")
+{
+    <td>@Model.ThanhToan.TienSan.ToString("N0") đ</td><td>@Model.ThanhToan.TienDichVu.ToString("N0") đ</td><td>@Model.ThanhToan.TongTien.ToString("N0") đ</td>
+}
+else { <td>—</td><td>—</td><td>—</td> }

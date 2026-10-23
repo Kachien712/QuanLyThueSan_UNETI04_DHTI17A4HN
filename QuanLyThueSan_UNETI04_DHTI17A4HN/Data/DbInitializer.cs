@@ -1,3 +1,6 @@
+// Họ và tên: Trần Văn Lợi
+// Mã sinh viên: 23103100237
+// Nội dung thực hiện: Module 5 - Gọi seed demo riêng sau dữ liệu các module
 // Họ và tên: Đào Duy Khánh - MSSV: 23103100220 (Module 2 - Sân & Bảng giá)
 // Đào Đức Kiên - MSSV: 23103100222 (Module 3 - 25 Khách hàng)
 // Khuất Anh Chiến - MSSV: 23103100234 (Module 1 - Tài khoản Admin/Nhân viên)
@@ -91,6 +94,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
             {
                 context.SaveChanges();
             }
+            SeedDataModule5.Seed(context);
         }
     }
 }

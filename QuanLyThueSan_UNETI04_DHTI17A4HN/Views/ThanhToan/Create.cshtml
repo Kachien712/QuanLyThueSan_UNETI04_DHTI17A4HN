@@ -1,0 +1,33 @@
+@* Họ và tên: Trần Văn Lợi
+   Mã sinh viên: 23103100237
+   Nội dung thực hiện: Module 5 - Hóa đơn tạm và xác nhận thanh toán *@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.ThanhToanCreateViewModel
+@using QuanLyThueSan_UNETI04_DHTI17A4HN.Models
+@using QuanLyThueSan_UNETI04_DHTI17A4HN.Services
+@{
+    ViewData["Title"] = "Xác nhận thanh toán";
+    var don = (DatSan)ViewData["DonDatSan"]!;
+    var tien = (KetQuaTinhTien)ViewData["TinhTien"]!;
+}
+<h2>Xác nhận thanh toán đơn #@Model.MaDatSan</h2>
+<div class="card my-3"><div class="card-body">
+    <p>Khách hàng: <strong>@don.KhachHang?.HoTen</strong> · Sân: <strong>@don.SanTheThao?.TenSan</strong></p>
+    <p>@don.NgaySuDung.ToString("dd/MM/yyyy") · @don.GioBatDau.ToString(@"hh\:mm") – @don.GioKetThuc.ToString(@"hh\:mm")</p>
+    <dl class="row">
+        <dt class="col-sm-4">Tiền sân</dt><dd class="col-sm-8">@tien.TienSan.ToString("N0") đ</dd>
+        <dt class="col-sm-4">Tiền dịch vụ</dt><dd class="col-sm-8">@tien.TienDichVu.ToString("N0") đ</dd>
+        <dt class="col-sm-4">Tổng tiền</dt><dd class="col-sm-8 fw-bold">@tien.TongTien.ToString("N0") đ</dd>
+    </dl>
+    <form asp-action="Create" method="post">
+        <div asp-validation-summary="All" class="text-danger"></div>
+        <input asp-for="MaDatSan" type="hidden" />
+        <label asp-for="PhuongThucThanhToan" class="form-label">Phương thức thanh toán</label>
+        <select asp-for="PhuongThucThanhToan" class="form-select mb-3">
+            <option value="Tiền mặt">Tiền mặt</option><option value="Chuyển khoản">Chuyển khoản</option>
+        </select>
+        <label asp-for="GhiChu" class="form-label">Ghi chú</label>
+        <textarea asp-for="GhiChu" maxlength="500" class="form-control mb-3"></textarea>
+        <button class="btn btn-success" type="submit">Xác nhận thu tiền</button>
+        <a asp-action="ChoThanhToan" class="btn btn-outline-secondary">Quay lại</a>
+    </form>
+</div></div>
