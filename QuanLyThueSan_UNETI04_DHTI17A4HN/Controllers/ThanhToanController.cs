@@ -104,6 +104,36 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             catch (InvalidOperationException ex) { return BaoLoi(ex.Message); }
         }
 
+        public async Task<IActionResult> Index(string? tuKhoa, string? phuongThuc, string? sortOrder, int pageIndex = 1, int pageSize = 8)
+        {
+            if (pageSize < 1 || pageSize > 50) pageSize = 8;
+            var query = _context.ThanhToans.AsNoTracking()
+                .Where(t => t.TrangThaiThanhToan == "Đã thanh toán");
+            if (!string.IsNullOrWhiteSpace(tuKhoa))
+            {
+                var keyword = tuKhoa.Trim();
+                query = query.Where(t => t.DatSan != null && t.DatSan.KhachHang != null
+                    && t.DatSan.KhachHang.HoTen.Contains(keyword));
+            }
+            if (!string.IsNullOrWhiteSpace(phuongThuc))
+                query = query.Where(t => t.PhuongThucThanhToan == phuongThuc);
+            query = sortOrder switch
+            {
+                "ngay_asc" => query.OrderBy(t => t.NgayThanhToan).ThenBy(t => t.MaThanhToan),
+                "tien_asc" => query.OrderBy(t => t.TongTien).ThenBy(t => t.MaThanhToan),
+                "tien_desc" => query.OrderByDescending(t => t.TongTien).ThenByDescending(t => t.MaThanhToan),
+                "khach" => query.OrderBy(t => t.DatSan!.KhachHang!.HoTen).ThenBy(t => t.MaThanhToan),
+                _ => query.OrderByDescending(t => t.NgayThanhToan).ThenByDescending(t => t.MaThanhToan)
+            };
+            pageIndex = Math.Clamp(pageIndex, 1, Math.Max(1, (int)Math.Ceiling(await query.CountAsync() / (double)pageSize)));
+            return View(new ThanhToanIndexViewModel
+            {
+                DanhSach = await PaginatedList<ThanhToan>.CreateAsync(query.Include(t => t.DatSan)!
+                    .ThenInclude(d => d!.KhachHang).Include(t => t.DatSan)!.ThenInclude(d => d!.SanTheThao), pageIndex, pageSize),
+                TuKhoa = tuKhoa, PhuongThuc = phuongThuc, SortOrder = sortOrder, PageSize = pageSize
+            });
+        }
+
         // DANH SÁCH ĐƠN "CHỜ THANH TOÁN" (tìm kiếm + phân trang)
         public async Task<IActionResult> ChoThanhToan(string? tuKhoa, int pageIndex = 1, int pageSize = 8)
         {
