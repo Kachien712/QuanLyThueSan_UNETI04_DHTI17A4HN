@@ -231,7 +231,6 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 .Include(s => s.KhuVuc)
                 .Include(s => s.BangGias.OrderBy(b => b.GioBatDau))
                 .Include(s => s.DatSans).ThenInclude(d => d.KhachHang)
-                .Include(s => s.DatSans).ThenInclude(d => d.SanTheThao)
                 .Include(s => s.DatSans).ThenInclude(d => d.ThanhToan)
                 .Include(s => s.DatSans).ThenInclude(d => d.SuDungDichVus).ThenInclude(d => d.DichVu)
                 .AsSplitQuery()
