@@ -1,6 +1,6 @@
 // Họ và tên: Trần Văn Lợi
 // Mã sinh viên: 23103100237
-// Nội dung thực hiện: Module 5 - Controller thanh toán (hiện có: danh sách đơn "Chờ thanh toán")
+// Nội dung thực hiện: Module 5 - Thu tiền an toàn, danh sách chờ thanh toán và hóa đơn đã thanh toán
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Data;

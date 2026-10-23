@@ -2,7 +2,11 @@
    Mã sinh viên: 23103100237
    Nội dung thực hiện: Module 5 - Thống kê đặt sân, sử dụng, doanh thu và tỷ lệ hủy *@
 @model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.ThongKeViewModel
-@{ ViewData["Title"] = "Thống kê"; var nhieuNhat = Model.LuotTheoSan.FirstOrDefault()?.SoLuot ?? 0; }
+@{
+    ViewData["Title"] = "Thống kê";
+    var nhieuNhat = Model.LuotTheoSan.FirstOrDefault()?.SoLuot ?? 0;
+    var dungNhieuNhat = Model.GioTheoSan.Select(x => x.SoLuot).DefaultIfEmpty(0).Max();
+}
 <h2>Thống kê</h2>
 <p class="text-muted">Toàn bộ thời gian. Lượt đặt gồm tất cả trạng thái; doanh thu chỉ tính hóa đơn đã thanh toán. Tổng giờ dùng tính theo khung giờ đặt của đơn Đang sử dụng, Chờ thanh toán, Hoàn thành.</p>
 <div class="row g-3 mb-4">
@@ -10,6 +14,11 @@
     <div class="col-md-4"><div class="card h-100"><div class="card-body"><h5>Tỷ lệ hủy</h5><strong class="fs-3">@Model.TyLeHuy.ToString("N2")%</strong> (@Model.DonHuy đơn)</div></div></div>
     <div class="col-md-4"><div class="card h-100"><div class="card-body"><h5>Sân được đặt nhiều nhất</h5><strong>@(nhieuNhat == 0 ? "Chưa có dữ liệu" : string.Join(", ", Model.LuotTheoSan.Where(x => x.SoLuot == nhieuNhat).Select(x => $"{x.Ten} (#{x.Ma})")))</strong><p>@nhieuNhat lượt/sân</p></div></div></div>
 </div>
+<div class="card mb-4"><div class="card-body">
+    <h5>Sân dùng nhiều nhất</h5>
+    <strong>@(dungNhieuNhat == 0 ? "Chưa có dữ liệu" : string.Join(", ", Model.GioTheoSan.Where(x => x.SoLuot == dungNhieuNhat).Select(x => $"{x.Ten} (#{x.Ma})")))</strong>
+    <span> · @dungNhieuNhat lượt/sân (đơn Đang sử dụng, Chờ thanh toán, Hoàn thành)</span>
+</div></div>
 <div class="row g-4">
 @foreach (var muc in new[] {
     (Ten: "Lượt đặt theo sân", DuLieu: Model.LuotTheoSan),
