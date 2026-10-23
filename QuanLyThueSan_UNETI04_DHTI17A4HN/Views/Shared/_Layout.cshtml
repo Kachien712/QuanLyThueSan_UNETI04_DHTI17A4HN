@@ -1,3 +1,6 @@
+@* Họ và tên: Trần Văn Lợi
+   Mã sinh viên: 23103100237
+   Nội dung thực hiện: Module 5 - Điều hướng thanh toán, lịch sử, Dashboard và thống kê *@
 @*
     Họ và tên: Khuất Anh Chiến - MSSV: 23103100234 (Module 1 - Trạng thái đăng nhập/đăng xuất)
     Đào Duy Khánh - MSSV: 23103100220 (Module 2 - Điều hướng Sân thể thao & Giao diện tối giản)
@@ -86,6 +89,10 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="ThanhToan" asp-action="ChoThanhToan">Thanh toán</a>
                             </li>
+                        }
+                        @if (Context.Session.GetString(SessionKeys.VaiTro) == "KhachHang")
+                        {
+                            <li class="nav-item"><a class="nav-link" asp-controller="LichSu" asp-action="CuaToi">Lịch sử của tôi</a></li>
                         }
                     </ul>
                     @{

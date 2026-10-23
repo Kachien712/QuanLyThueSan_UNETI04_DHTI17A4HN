@@ -1,3 +1,6 @@
+// Họ và tên: Trần Văn Lợi
+// Mã sinh viên: 23103100237
+// Nội dung thực hiện: Module 5 - Nạp lịch sử sử dụng trong chi tiết sân
 // Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
 // Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới, Chi tiết, Chỉnh sửa)
@@ -227,6 +230,11 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 .Include(s => s.LoaiSan)
                 .Include(s => s.KhuVuc)
                 .Include(s => s.BangGias.OrderBy(b => b.GioBatDau))
+                .Include(s => s.DatSans).ThenInclude(d => d.KhachHang)
+                .Include(s => s.DatSans).ThenInclude(d => d.SanTheThao)
+                .Include(s => s.DatSans).ThenInclude(d => d.ThanhToan)
+                .Include(s => s.DatSans).ThenInclude(d => d.SuDungDichVus).ThenInclude(d => d.DichVu)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.MaSan == id);
 
