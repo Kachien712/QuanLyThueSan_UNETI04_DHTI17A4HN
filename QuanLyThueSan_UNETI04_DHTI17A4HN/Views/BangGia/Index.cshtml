@@ -1,0 +1,123 @@
+@* 
+    Họ và tên: Đào Duy Khánh
+    Mã sinh viên: 23103100220
+    Nội dung thực hiện: Module 2 - Giao diện Danh sách Bảng giá thuê sân theo khung giờ (Minimalism style)
+*@
+@model IEnumerable<QuanLyThueSan_UNETI04_DHTI17A4HN.Models.BangGia>
+
+@{
+    ViewData["Title"] = "Quản lý Bảng giá thuê sân";
+    var maSanHienThi = ViewBag.MaSanHienThi as int?;
+    var tenSanHienThi = ViewBag.TenSanHienThi as string ?? "Tất cả các sân";
+}
+
+<div class="container-fluid pt-0 pb-4">
+    @if (TempData["ThanhCong"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-2 py-2 px-3 small border mb-3" role="alert">
+            <strong>Thông báo:</strong> @TempData["ThanhCong"]
+            <button type="button" class="btn-close py-2" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- THANH ĐIỀU HƯỚNG VÀ BỘ LỌC THEO SÂN -->
+    <div class="border rounded-2 bg-white mb-3">
+        <div class="border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+            <span class="fw-bold text-uppercase small text-muted tracking-wide">
+                Bảng giá: <span class="text-dark">@tenSanHienThi</span>
+            </span>
+            <div class="d-flex gap-2">
+                @if (maSanHienThi.HasValue)
+                {
+                    <a asp-controller="SanTheThao" asp-action="Index" class="btn btn-outline-secondary btn-sm rounded-1 px-3">
+                        Quay lại danh sách sân
+                    </a>
+                }
+                <a asp-action="Create" asp-route-maSan="@maSanHienThi" class="btn btn-dark btn-sm px-3 rounded-1">
+                    Thêm bảng giá mới
+                </a>
+            </div>
+        </div>
+        <div class="p-3 bg-light bg-opacity-25">
+            <form method="get" asp-action="Index" class="row g-2 align-items-end">
+                <div class="col-md-4 col-sm-6">
+                    <label class="form-label small text-muted mb-1">Lọc bảng giá theo sân thể thao</label>
+                    <select name="maSan" asp-items="ViewBag.DanhSachSan" class="form-select form-select-sm rounded-1" onchange="this.form.submit()">
+                        <option value="">-- Tất cả các sân thể thao --</option>
+                    </select>
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <a asp-action="Index" class="btn btn-outline-secondary btn-sm w-100 rounded-1">Xem tất cả</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BẢNG DANH SÁCH KHUNG BẢNG GIÁ (KHÔNG CỘT ID) -->
+    <div class="border rounded-2 bg-white">
+        <div class="border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
+            <span class="small text-muted">
+                Tổng cộng: <strong class="text-dark">@(Model?.Count() ?? 0)</strong> khung bảng giá
+            </span>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="bg-light text-muted small text-uppercase">
+                    <tr>
+                        <th style="width: 24%;" class="border-0 ps-3">Tên bảng giá</th>
+                        <th style="width: 20%;" class="border-0">Sân áp dụng</th>
+                        <th style="width: 16%;" class="border-0 text-center">Khung giờ áp dụng</th>
+                        <th style="width: 15%;" class="border-0 text-end">Đơn giá / giờ</th>
+                        <th style="width: 15%;" class="border-0 text-center">Thời gian áp dụng</th>
+                        <th style="width: 10%;" class="border-0 text-center pe-3">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody class="border-top">
+                    @if (Model != null && Model.Any())
+                    {
+                        foreach (var item in Model)
+                        {
+                            <tr>
+                                <td class="ps-3">
+                                    <div class="fw-semibold text-dark">@item.TenBangGia</div>
+                                    @if (!item.TrangThai)
+                                    {
+                                        <span class="badge border border-secondary text-muted bg-light small fw-normal py-0">Ngừng áp dụng</span>
+                                    }
+                                </td>
+                                <td>
+                                    <span class="text-dark small">@(item.SanTheThao?.TenSan ?? "-")</span>
+                                </td>
+                                <td class="text-center text-nowrap">
+                                    <span class="badge border border-dark text-dark bg-white px-2 py-1 small fw-normal">
+                                        @item.GioBatDau.ToString(@"hh\:mm") - @item.GioKetThuc.ToString(@"hh\:mm")
+                                    </span>
+                                </td>
+                                <td class="text-end text-nowrap">
+                                    <span class="fw-bold text-dark">@item.DonGiaMoiGio.ToString("#,##0") đ</span>
+                                </td>
+                                <td class="text-center text-muted small text-nowrap">
+                                    @item.NgayApDungTu.ToString("dd/MM/yyyy") - @item.NgayApDungDen.ToString("dd/MM/yyyy")
+                                </td>
+                                <td class="text-center text-nowrap pe-3">
+                                    <a asp-action="Edit" asp-route-id="@item.MaBangGia" 
+                                       class="btn btn-sm btn-outline-dark rounded-1 px-2 py-0 small">
+                                        Sửa
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    }
+                    else
+                    {
+                        <tr>
+                            <td colspan="6" class="text-center py-5 text-muted small">
+                                Chưa có khung bảng giá nào được thiết lập cho sân này.
+                            </td>
+                        </tr>
+                    }
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>

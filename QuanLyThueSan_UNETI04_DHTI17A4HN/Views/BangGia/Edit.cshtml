@@ -1,0 +1,122 @@
+@* 
+    Họ và tên: Đào Duy Khánh
+    Mã sinh viên: 23103100220
+    Nội dung thực hiện: Module 2 - Giao diện Chỉnh sửa Bảng giá thuê sân theo khung giờ (Minimalism style)
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.BangGiaFormViewModel
+
+@{
+    ViewData["Title"] = "Chỉnh sửa bảng giá: " + Model.TenBangGia;
+}
+
+<div class="container pt-0 pb-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <!-- Nút quay lại & Tiêu đề -->
+            <div class="d-flex align-items-center justify-content-between mb-3">
+                <span class="fw-bold text-uppercase small text-muted tracking-wide">
+                    Chỉnh sửa bảng giá @(string.IsNullOrEmpty(Model.TenSanHienThi) ? "" : $"cho {Model.TenSanHienThi}")
+                </span>
+                <a asp-action="Index" asp-route-maSan="@Model.MaSan" class="btn btn-outline-secondary btn-sm rounded-1 px-3">
+                    Quay lại
+                </a>
+            </div>
+
+            <div class="border rounded-2 bg-white p-4">
+                <form asp-action="Edit" method="post">
+                    @Html.AntiForgeryToken()
+
+                    <input type="hidden" asp-for="MaBangGia" />
+
+                    <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small mb-3"></div>
+
+                    <!-- Chọn Sân thể thao -->
+                    <div class="mb-3">
+                        <label asp-for="MaSan" class="form-label small text-muted mb-1">
+                            Sân thể thao áp dụng <span class="text-danger">*</span>
+                        </label>
+                        <select asp-for="MaSan" asp-items="Model.DanhSachSan" class="form-select rounded-1">
+                            <option value="">-- Chọn sân thể thao --</option>
+                        </select>
+                        <span asp-validation-for="MaSan" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Tên bảng giá -->
+                    <div class="mb-3">
+                        <label asp-for="TenBangGia" class="form-label small text-muted mb-1">
+                            Tên bảng giá <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="TenBangGia" class="form-control rounded-1" />
+                        <span asp-validation-for="TenBangGia" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Khung giờ bắt đầu & kết thúc -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="GioBatDau" class="form-label small text-muted mb-1">
+                                Giờ bắt đầu <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="GioBatDau" type="time" class="form-control rounded-1" />
+                            <span asp-validation-for="GioBatDau" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="GioKetThuc" class="form-label small text-muted mb-1">
+                                Giờ kết thúc <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="GioKetThuc" type="time" class="form-control rounded-1" />
+                            <span asp-validation-for="GioKetThuc" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Đơn giá mỗi giờ -->
+                    <div class="mb-3">
+                        <label asp-for="DonGiaMoiGio" class="form-label small text-muted mb-1">
+                            Đơn giá mỗi giờ (VNĐ) <span class="text-danger">*</span>
+                        </label>
+                        <input asp-for="DonGiaMoiGio" type="number" step="1000" min="1000" class="form-control rounded-1" />
+                        <span asp-validation-for="DonGiaMoiGio" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Ngày áp dụng từ & đến -->
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="NgayApDungTu" class="form-label small text-muted mb-1">
+                                Ngày áp dụng từ <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="NgayApDungTu" type="date" class="form-control rounded-1" />
+                            <span asp-validation-for="NgayApDungTu" class="text-danger small"></span>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label asp-for="NgayApDungDen" class="form-label small text-muted mb-1">
+                                Ngày áp dụng đến <span class="text-danger">*</span>
+                            </label>
+                            <input asp-for="NgayApDungDen" type="date" class="form-control rounded-1" />
+                            <span asp-validation-for="NgayApDungDen" class="text-danger small"></span>
+                        </div>
+                    </div>
+
+                    <!-- Trạng thái áp dụng -->
+                    <div class="mb-4 form-check">
+                        <input asp-for="TrangThai" class="form-check-input" />
+                        <label asp-for="TrangThai" class="form-check-label small text-dark">
+                            Đang áp dụng khung giá này
+                        </label>
+                    </div>
+
+                    <!-- Nút hành động -->
+                    <div class="d-flex justify-content-end gap-2 pt-2 border-top">
+                        <a asp-action="Index" asp-route-maSan="@Model.MaSan" class="btn btn-outline-secondary rounded-1 px-4">Hủy</a>
+                        <button type="submit" class="btn btn-dark rounded-1 px-4"
+                                onclick="return confirm('Bạn có chắc chắn muốn cập nhật thay đổi cho bảng giá này không?');">
+                            Lưu thay đổi
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}
