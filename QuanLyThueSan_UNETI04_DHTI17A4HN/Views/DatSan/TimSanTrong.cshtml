@@ -1,4 +1,4 @@
-@* 
+﻿@* 
     Họ và tên: Đào Đức Kiên
     Mã sinh viên: 23103100222
     Nội dung thực hiện: Module 3 - Giao diện tra cứu và tìm kiếm sân trống theo thời gian
@@ -10,6 +10,18 @@
 }
 
 <div class="container-fluid px-0">
+    @if (TempData["ThanhCong"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-2 py-3 px-3 shadow-sm border-0 border-start border-4 border-success mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-4 text-success me-3"></i>
+                <div>
+                    <strong>Thành công!</strong> @TempData["ThanhCong"]
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
     <div class="mb-4">
         <h2 class="text-primary fw-bold mb-1">
             <i class="bi bi-search"></i> Tra cứu & Tìm sân trống

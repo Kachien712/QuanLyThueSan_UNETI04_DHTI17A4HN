@@ -1,4 +1,4 @@
-// Họ và tên: Đào Đức Kiên
+﻿// Họ và tên: Đào Đức Kiên
 // Mã sinh viên: 23103100222
 // Nội dung thực hiện: Module 3 - Controller Đặt sân & Tìm sân trống (Kiểm tra trùng lịch bằng LINQ, Validation thời gian và Action Create)
 
@@ -245,6 +245,142 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             await NapDropdownDatSanAsync(viewModel);
 
             return View(viewModel);
+        }
+
+        // =========================================================================
+        // 4. XỬ LÝ LƯU ĐƠN ĐẶT SÂN (POST - Commit STT 7 & 8)
+        // Kiểm tra 7 quy tắc nghiệp vụ EF Core & LINQ:
+        //  1) Khách hàng hợp lệ và đang hoạt động
+        //  2) Sân hợp lệ và đang ở tình trạng "Đang hoạt động"
+        //  3) Không được đặt lịch lùi về quá khứ
+        //  4) Khung giờ hoạt động từ 05:00 đến 23:00
+        //  5) Thời lượng tối thiểu 30 phút (Giờ kết thúc > Giờ bắt đầu)
+        //  6) Số người tham gia không vượt quá sức chứa tối đa của sân
+        //  7) Gọi thuật toán LINQ kiểm tra trùng lịch (KiemTraTrungLichAsync)
+        // =========================================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [PhanQuyen]
+        public async Task<IActionResult> Create(DatSanCreateViewModel model)
+        {
+            var maTaiKhoan = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);
+            var vaiTro = HttpContext.Session.GetString(SessionKeys.VaiTro);
+            ViewBag.LaKhachHang = (vaiTro == "KhachHang");
+
+            // Nếu người dùng là Khách hàng, luôn cưỡng chế MaKhachHang theo Session tài khoản
+            if (vaiTro == "KhachHang" && maTaiKhoan.HasValue)
+            {
+                var khachHangDangNhap = await _context.KhachHangs
+                    .FirstOrDefaultAsync(k => k.MaTaiKhoan == maTaiKhoan.Value);
+
+                if (khachHangDangNhap != null)
+                {
+                    model.MaKhachHang = khachHangDangNhap.MaKhachHang;
+                    ViewBag.TenKhachHangHienTai = khachHangDangNhap.HoTen;
+                    ViewBag.SoDienThoaiKhachHang = khachHangDangNhap.SoDienThoai;
+                }
+            }
+
+            // 1. Kiểm tra khách hàng có hợp lệ và đang hoạt động không
+            var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(k => k.MaKhachHang == model.MaKhachHang);
+            if (khachHang == null || !khachHang.TrangThai)
+            {
+                ModelState.AddModelError("MaKhachHang", "Khách hàng không tồn tại hoặc đã bị khóa tài khoản.");
+            }
+
+            // 2. Kiểm tra sân có hợp lệ và đang hoạt động không
+            var san = await _context.SanTheThaos
+                .Include(s => s.LoaiSan)
+                .Include(s => s.KhuVuc)
+                .FirstOrDefaultAsync(s => s.MaSan == model.MaSan);
+
+            if (san == null || san.TinhTrang != "Đang hoạt động")
+            {
+                ModelState.AddModelError("MaSan", "Sân thể thao được chọn hiện không khả dụng hoặc đang bảo trì.");
+            }
+            else
+            {
+                model.TenSanDuocChon = san.TenSan;
+                model.TenLoaiSan = san.LoaiSan?.TenLoaiSan ?? "Tiêu chuẩn";
+                model.TenKhuVuc = san.KhuVuc?.TenKhuVuc ?? "Chưa phân khu";
+                model.SoNguoiToiDa = san.SucChua;
+
+                // 3. Kiểm tra số người không vượt quá sức chứa tối đa của sân
+                if (model.SoNguoi > san.SucChua)
+                {
+                    ModelState.AddModelError("SoNguoi", $"Số người tham gia ({model.SoNguoi} người) vượt quá sức chứa tối đa của sân {san.TenSan} ({san.SucChua} người).");
+                }
+            }
+
+            // 4. Kiểm tra ngày sử dụng không được trong quá khứ
+            if (model.NgaySuDung.Date < DateTime.Today)
+            {
+                ModelState.AddModelError("NgaySuDung", "Ngày sử dụng không được ở trong quá khứ.");
+            }
+
+            // 5. Kiểm tra thời lượng và giờ mở cửa (05:00 - 23:00, tối thiểu 30 phút)
+            var gioMoCua = new TimeSpan(5, 0, 0);
+            var gioDongCua = new TimeSpan(23, 0, 0);
+
+            if (model.GioBatDau < gioMoCua || model.GioKetThuc > gioDongCua)
+            {
+                ModelState.AddModelError(string.Empty, "Sân chỉ hoạt động trong khung giờ từ 05:00 đến 23:00 hàng ngày.");
+            }
+
+            if (model.GioKetThuc <= model.GioBatDau)
+            {
+                ModelState.AddModelError("GioKetThuc", "Giờ kết thúc phải lớn hơn giờ bắt đầu.");
+            }
+            else if ((model.GioKetThuc - model.GioBatDau).TotalMinutes < 30)
+            {
+                ModelState.AddModelError("GioKetThuc", "Thời lượng thuê sân tối thiểu phải từ 30 phút trở lên.");
+            }
+
+            // Nếu ngày là hôm nay thì giờ bắt đầu phải sau giờ hiện tại
+            if (model.NgaySuDung.Date == DateTime.Today && model.GioBatDau <= DateTime.Now.TimeOfDay)
+            {
+                ModelState.AddModelError("GioBatDau", "Giờ bắt đầu phải lớn hơn thời điểm hiện tại.");
+            }
+
+            // 6. Kiểm tra trùng lịch bằng LINQ qua hàm KiemTraTrungLichAsync
+            if (ModelState.IsValid)
+            {
+                bool biTrungLich = await KiemTraTrungLichAsync(model.MaSan, model.NgaySuDung, model.GioBatDau, model.GioKetThuc);
+                if (biTrungLich)
+                {
+                    ModelState.AddModelError(string.Empty, $"Khung giờ từ {model.GioBatDau:hh\\:mm} đến {model.GioKetThuc:hh\\:mm} ngày {model.NgaySuDung:dd/MM/yyyy} tại sân {san?.TenSan} đã có người đặt trước. Vui lòng chọn khung giờ hoặc sân khác.");
+                }
+            }
+
+            // Nếu có bất kỳ lỗi nào, nạp lại dropdown và render lại view
+            if (!ModelState.IsValid)
+            {
+                await NapDropdownDatSanAsync(model);
+                return View(model);
+            }
+
+            // 7. Tạo đối tượng DatSan và lưu vào cơ sở dữ liệu
+            var donDatSan = new DatSan
+            {
+                MaKhachHang = model.MaKhachHang,
+                MaSan = model.MaSan,
+                NgaySuDung = model.NgaySuDung.Date,
+                GioBatDau = model.GioBatDau,
+                GioKetThuc = model.GioKetThuc,
+                NgayDat = DateTime.Now,
+                SoNguoi = model.SoNguoi,
+                TrangThai = "Chờ xác nhận", // Trạng thái mặc định theo quy trình duyệt đặt sân
+                GhiChu = model.GhiChu?.Trim()
+            };
+
+            _context.DatSans.Add(donDatSan);
+            await _context.SaveChangesAsync();
+
+            // Thông báo thành công qua TempData
+            TempData["ThanhCong"] = $"Tạo đơn đặt sân thành công (Mã đơn: #{donDatSan.MaDatSan})! Trạng thái: Chờ xác nhận.";
+
+            // Điều hướng sang Tìm sân trống kèm thông báo
+            return RedirectToAction(nameof(TimSanTrong));
         }
 
         // =========================================================================

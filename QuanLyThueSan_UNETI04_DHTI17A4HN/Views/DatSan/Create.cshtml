@@ -1,4 +1,4 @@
-@* 
+﻿@* 
     Họ và tên: Đào Đức Kiên
     Mã sinh viên: 23103100222
     Nội dung thực hiện: Module 3 - Giao diện form tạo mới đơn đặt sân
@@ -126,7 +126,7 @@
                             <a asp-action="TimSanTrong" class="btn btn-outline-secondary">
                                 <i class="bi bi-arrow-left"></i> Quay lại tìm sân trống
                             </a>
-                            <button type="submit" class="btn btn-success px-4 fw-semibold">
+                            <button type="submit" class="btn btn-success px-4 fw-semibold" onclick="return confirm('Bạn có chắc chắn muốn xác nhận tạo đơn đặt sân với các thông tin đã chọn không?');">
                                 <i class="bi bi-check-circle"></i> Xác nhận tạo đơn đặt sân
                             </button>
                         </div>
