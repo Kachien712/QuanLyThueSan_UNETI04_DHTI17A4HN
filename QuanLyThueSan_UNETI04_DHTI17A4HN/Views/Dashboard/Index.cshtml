@@ -1,0 +1,30 @@
+@* Họ và tên: Trần Văn Lợi
+   Mã sinh viên: 23103100237
+   Nội dung thực hiện: Module 5 - Trang tổng quan dành cho Admin và Nhân viên *@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.DashboardViewModel
+@{ ViewData["Title"] = "Dashboard"; }
+<div class="d-flex justify-content-between mb-3"><h2>Dashboard · @Model.Ngay.ToString("dd/MM/yyyy")</h2><a asp-controller="ThongKe" asp-action="Index" class="btn btn-outline-primary">Xem thống kê</a></div>
+<div class="row g-3 mb-4">
+    <div class="col-md-3"><div class="card h-100"><div class="card-body"><h6>Tổng số sân</h6><strong class="fs-3">@Model.TongSoSan</strong></div></div></div>
+    <div class="col-md-3"><div class="card h-100"><div class="card-body"><h6>Lượt dùng trong ngày</h6><strong class="fs-3">@Model.SoLuotDungTrongNgay</strong></div></div></div>
+    <div class="col-md-3"><div class="card h-100"><div class="card-body"><h6>Doanh thu hôm nay</h6><strong class="fs-3">@Model.DoanhThuNgay.ToString("N0") đ</strong></div></div></div>
+    <div class="col-md-3"><div class="card h-100"><div class="card-body"><h6>Doanh thu tháng này</h6><strong class="fs-3">@Model.DoanhThuThang.ToString("N0") đ</strong></div></div></div>
+</div>
+<div class="row g-3 mb-4">
+    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h4>Sân theo tình trạng</h4>
+    @foreach (var ten in new[] { "Đang hoạt động", "Tạm ngừng", "Đang bảo trì", "Ngừng sử dụng" }.Union(Model.SanTheoTinhTrang.Keys))
+    { <p class="d-flex justify-content-between border-bottom"><span>@ten</span><strong>@Model.SanTheoTinhTrang.GetValueOrDefault(ten)</strong></p> }
+    </div></div></div>
+    <div class="col-md-6"><div class="card h-100"><div class="card-body"><h4>Đơn theo trạng thái</h4>
+    @foreach (var ten in new[] { "Chờ xác nhận", "Đã xác nhận", "Đang sử dụng", "Chờ thanh toán" })
+    { <p class="d-flex justify-content-between border-bottom"><span>@ten</span><strong>@Model.DonTheoTrangThai.GetValueOrDefault(ten)</strong></p> }
+    <p class="d-flex justify-content-between"><span>Đã hủy (tất cả thời gian)</span><strong>@Model.SoDonDaHuy</strong></p>
+    </div></div></div>
+</div>
+<p class="text-muted">Lượt dùng trong ngày gồm đơn Đang sử dụng, Chờ thanh toán, Hoàn thành. Doanh thu tính theo ngày thanh toán của hóa đơn đã thanh toán.</p>
+<h4>Sân sắp có lịch trong ngày</h4>
+<div class="table-responsive"><table class="table table-striped"><thead><tr><th>Đơn</th><th>Sân</th><th>Khách hàng</th><th>Giờ</th></tr></thead><tbody>
+@foreach (var d in Model.LichSapToi)
+{ <tr><td>#@d.MaDatSan</td><td>@d.SanTheThao?.TenSan</td><td>@d.KhachHang?.HoTen</td><td>@d.GioBatDau.ToString(@"hh\:mm") – @d.GioKetThuc.ToString(@"hh\:mm")</td></tr> }
+@if (!Model.LichSapToi.Any()) { <tr><td colspan="4">Không có lịch đã xác nhận sắp tới trong ngày.</td></tr> }
+</tbody></table></div>

@@ -1,3 +1,6 @@
+// Họ và tên: Trần Văn Lợi
+// Mã sinh viên: 23103100237
+// Nội dung thực hiện: Module 5 - Nạp thêm hóa đơn và dịch vụ vào lịch sử đã có
 // Họ và tên: Đào Đức Kiên
 // Mã sinh viên: 23103100222
 // Nội dung thực hiện: Module 3 - Controller Quản lý Khách hàng (CRUD, Tìm kiếm, Lọc, Phân trang LINQ, Khóa/Mở khóa)
@@ -92,6 +95,9 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             var khachHang = await _context.KhachHangs
                 .Include(k => k.DatSans)
                     .ThenInclude(d => d.SanTheThao)
+                .Include(k => k.DatSans).ThenInclude(d => d.ThanhToan)
+                .Include(k => k.DatSans).ThenInclude(d => d.SuDungDichVus).ThenInclude(s => s.DichVu)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.MaKhachHang == id);
 

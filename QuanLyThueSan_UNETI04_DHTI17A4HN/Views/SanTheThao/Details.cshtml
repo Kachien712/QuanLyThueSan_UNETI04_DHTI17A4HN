@@ -1,3 +1,6 @@
+@* Họ và tên: Trần Văn Lợi
+   Mã sinh viên: 23103100237
+   Nội dung thực hiện: Module 5 - Hiển thị lịch sử các lượt sử dụng sân *@
 @* 
     Họ và tên: Đào Duy Khánh
     Mã sinh viên: 23103100220
@@ -8,6 +11,11 @@
 @{
     ViewData["Title"] = "Chi tiết sân: " + Model.TenSan;
 }
+
+<div class="card mb-3"><div class="card-body">
+    <h3>Lịch sử các lượt sử dụng sân</h3>
+    <partial name="_LichSuDatSan" model="Model.DatSans" />
+</div></div>
 
 <div class="container pt-0 pb-4">
     <!-- Nút điều hướng phía trên -->
