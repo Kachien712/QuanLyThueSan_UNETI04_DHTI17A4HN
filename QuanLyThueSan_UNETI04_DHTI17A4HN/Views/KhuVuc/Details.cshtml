@@ -1,0 +1,123 @@
+@* 
+    Họ và tên: Khuất Anh Chiến
+    Mã sinh viên: 23103100234
+    Nội dung thực hiện: Module 1 - Giao diện chi tiết Khu vực và danh sách các sân trực thuộc (Mục 5.5, 22.2 file Word)
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.Models.KhuVuc
+
+@{
+    ViewData["Title"] = "Chi tiết Khu vực - " + Model.TenKhuVuc;
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h3 class="text-primary mb-1"><i class="bi bi-geo-alt-fill"></i> Khu vực: @Model.TenKhuVuc</h3>
+            <span class="badge @(Model.TrangThai ? "bg-success" : "bg-secondary")">
+                @(Model.TrangThai ? "Đang hoạt động" : "Ngừng hoạt động")
+            </span>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="Edit" asp-route-id="@Model.MaKhuVuc" class="btn btn-primary">
+                <i class="bi bi-pencil"></i> Chỉnh sửa
+            </a>
+            <a asp-action="Index" class="btn btn-outline-secondary">Quay lại danh sách</a>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-4">
+        <!-- Thông tin cơ bản của Khu vực -->
+        <div class="col-md-4">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light fw-bold py-3">
+                    <i class="bi bi-info-circle-fill"></i> Thông tin khu vực
+                </div>
+                <div class="card-body">
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Mã khu vực:</span>
+                            <strong>#@Model.MaKhuVuc</strong>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Tên khu vực:</span>
+                            <strong class="text-primary">@Model.TenKhuVuc</strong>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Vị trí:</span>
+                            <span>@(string.IsNullOrWhiteSpace(Model.ViTri) ? "Chưa xác định" : Model.ViTri)</span>
+                        </li>
+                        <li class="list-group-item px-0 d-flex justify-content-between">
+                            <span class="text-muted">Số lượng sân:</span>
+                            <span class="badge bg-primary rounded-pill">@Model.SanTheThaos.Count sân</span>
+                        </li>
+                        <li class="list-group-item px-0">
+                            <span class="text-muted d-block mb-1">Mô tả chi tiết:</span>
+                            <p class="mb-0 text-secondary small bg-light p-2 rounded">
+                                @(string.IsNullOrWhiteSpace(Model.MoTa) ? "Chưa có mô tả chi tiết." : Model.MoTa)
+                            </p>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+
+        <!-- Danh sách các sân thuộc khu vực này -->
+        <div class="col-md-8">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-light fw-bold py-3 d-flex justify-content-between align-items-center">
+                    <span><i class="bi bi-grid-fill"></i> Danh sách sân nằm trong "@Model.TenKhuVuc"</span>
+                    <span class="badge bg-info text-dark">@Model.SanTheThaos.Count sân</span>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
+                                <tr>
+                                    <th class="ps-3">Mã sân</th>
+                                    <th>Tên sân</th>
+                                    <th>Loại sân</th>
+                                    <th class="text-center">Sức chứa</th>
+                                    <th class="text-center">Tình trạng</th>
+                                    <th class="text-end pe-3">Xem</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @if (Model.SanTheThaos.Any())
+                                {
+                                    foreach (var san in Model.SanTheThaos)
+                                    {
+                                        <tr>
+                                            <td class="ps-3 fw-bold text-muted">#@san.MaSan</td>
+                                            <td class="fw-semibold">@san.TenSan</td>
+                                            <td>@(san.LoaiSan?.TenLoaiSan ?? "—")</td>
+                                            <td class="text-center">@san.SucChua người</td>
+                                            <td class="text-center">
+                                                <span class="badge @(san.TinhTrang == "Đang hoạt động" ? "bg-success" : "bg-warning text-dark")">
+                                                    @san.TinhTrang
+                                                </span>
+                                            </td>
+                                            <td class="text-end pe-3">
+                                                <a asp-controller="SanTheThao" asp-action="Details" asp-route-id="@san.MaSan" 
+                                                   class="btn btn-sm btn-outline-info" title="Xem chi tiết sân">
+                                                    <i class="bi bi-arrow-right"></i>
+                                                </a>
+                                            </td>
+                                        </tr>
+                                    }
+                                }
+                                else
+                                {
+                                    <tr>
+                                        <td colspan="6" class="text-center py-4 text-muted">
+                                            Hiện chưa có sân nào được đặt tại khu vực này.
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
