@@ -1,3 +1,6 @@
+@* Họ và tên: Trần Văn Lợi
+   Mã sinh viên: 23103100237
+   Nội dung thực hiện: Module 5 - Bổ sung dịch vụ và tiền vào lịch sử sẵn có *@
 @* 
     Họ và tên: Đào Đức Kiên
     Mã sinh viên: 23103100222
@@ -25,7 +28,7 @@
 
     <div class="row g-4 mb-4">
         <!-- Thông tin cá nhân -->
-        <div class="col-md-4">
+        <div class="col-md-12">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-light fw-bold py-3">
                     <i class="bi bi-person-lines-fill"></i> Thông tin liên hệ
@@ -58,7 +61,7 @@
         </div>
 
         <!-- Lịch sử các đơn đặt sân của khách hàng -->
-        <div class="col-md-8">
+        <div class="col-md-12">
             <div class="card shadow-sm border-0 h-100">
                 <div class="card-header bg-light d-flex justify-content-between align-items-center py-3">
                     <span class="fw-bold"><i class="bi bi-calendar-check"></i> Lịch sử đặt sân (@(Model.DatSans?.Count ?? 0) đơn)</span>
@@ -73,6 +76,7 @@
                                     <th>Ngày sử dụng</th>
                                     <th>Khung giờ</th>
                                     <th class="text-center">Trạng thái</th>
+                                    <th>Dịch vụ</th><th>Tiền sân</th><th>Tiền dịch vụ</th><th>Tổng tiền</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -88,14 +92,15 @@
                                             <td class="text-center">
                                                 <span class="badge bg-secondary">@datSan.TrangThai</span>
                                             </td>
+                                            <partial name="_LichSuTienDichVu" model="datSan" />
                                         </tr>
                                     }
                                 }
                                 else
                                 {
                                     <tr>
-                                        <td colspan="5" class="text-center py-4 text-muted">
-                                            Khách hàng này chưa có đơn đặt sân nào.
+                                        <td colspan="9" class="text-center py-4 text-muted">
+                                            Chưa có lịch sử.
                                         </td>
                                     </tr>
                                 }
