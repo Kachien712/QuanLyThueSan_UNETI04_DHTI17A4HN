@@ -22,8 +22,8 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels
         [Display(Name = "Số điện thoại")]
         public string SoDienThoai { get; set; } = string.Empty;
 
-        [EmailAddress(ErrorMessage = "Địa chỉ email không đúng định dạng")]
         [StringLength(100, ErrorMessage = "Email không được vượt quá 100 ký tự")]
+        [RegularExpression(@"^[a-zA-Z0-9]+([._%+-][a-zA-Z0-9]+)*@([a-zA-Z0-9]+(-[a-zA-Z0-9]+)*\.)+[a-zA-Z]{2,}$", ErrorMessage = "Địa chỉ email không đúng định dạng (Ví dụ: example@gmail.com)")]
         [Display(Name = "Email")]
         public string? Email { get; set; }
 

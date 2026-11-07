@@ -1,0 +1,171 @@
+@* 
+    Họ và tên: Đào Đức Kiên
+    Mã sinh viên: 23103100222
+    Nội dung thực hiện: Module 3 - Giao diện xem và cập nhật hồ sơ cá nhân của Khách hàng (Commit 14)
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.KhachHangHoSoViewModel
+
+@{
+    ViewData["Title"] = "Hồ sơ cá nhân";
+}
+
+<div class="container-fluid px-0">
+    <!-- Breadcrumb điều hướng -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Hồ sơ cá nhân</li>
+        </ol>
+    </nav>
+
+    <!-- Tiêu đề trang -->
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-person-badge text-primary"></i> Hồ sơ cá nhân
+                </h3>
+                <p class="text-muted mb-0">Quản lý và cập nhật thông tin liên hệ của bạn trong hệ thống thuê sân</p>
+            </div>
+            <div>
+                <a asp-controller="DatSan" asp-action="LichSuDatSan" class="btn btn-outline-primary">
+                    <i class="bi bi-clock-history"></i> Lịch sử đặt sân của tôi
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông báo kết quả thao tác -->
+    @if (TempData["ThanhCong"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-2 py-3 px-3 shadow-sm border-0 border-start border-4 border-success mb-4" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-4 text-success me-3"></i>
+                <div>
+                    <strong>Thành công!</strong> @TempData["ThanhCong"]
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <div class="row g-4">
+        <!-- CỘT TRÁI: THẺ TỔNG QUAN TÀI KHOẢN -->
+        <div class="col-lg-4">
+            <div class="card shadow-sm border-0 h-100 text-center p-4">
+                <div class="card-body">
+                    <div class="mb-3">
+                        <div class="d-inline-flex align-items-center justify-content-center bg-primary text-white rounded-circle shadow-sm" style="width: 80px; height: 80px; font-size: 32px;">
+                            <i class="bi bi-person-fill"></i>
+                        </div>
+                    </div>
+                    <h5 class="fw-bold text-dark mb-1">@Model.HoTen</h5>
+                    <p class="text-muted mb-2">@@@Model.TenDangNhap</p>
+                    <span class="badge bg-primary px-3 py-1 rounded-pill mb-4">@(Model.VaiTro ?? "Khách hàng")</span>
+
+                    <hr />
+
+                    <div class="row text-start g-3 my-2">
+                        <div class="col-12">
+                            <small class="text-muted d-block"><i class="bi bi-telephone"></i> Số điện thoại:</small>
+                            <span class="fw-semibold text-dark">@Model.SoDienThoai</span>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block"><i class="bi bi-envelope"></i> Email:</small>
+                            <span class="fw-semibold text-dark">@(string.IsNullOrWhiteSpace(Model.Email) ? "Chưa cập nhật" : Model.Email)</span>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block"><i class="bi bi-geo-alt"></i> Địa chỉ:</small>
+                            <span class="fw-semibold text-dark">@(string.IsNullOrWhiteSpace(Model.DiaChi) ? "Chưa cập nhật" : Model.DiaChi)</span>
+                        </div>
+                        <div class="col-12">
+                            <small class="text-muted d-block"><i class="bi bi-calendar-check"></i> Đơn đặt sân đã tạo:</small>
+                            <span class="badge bg-success fs-6">@Model.TongSoDonDatSan đơn</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI: FORM CHỈNH SỬA THÔNG TIN -->
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-3">
+                    <h5 class="fw-bold text-dark mb-0">
+                        <i class="bi bi-pencil-square text-primary"></i> Chỉnh sửa thông tin cá nhân
+                    </h5>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="HoSoCaNhan" method="post" novalidate>
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" asp-for="MaKhachHang" />
+                        <input type="hidden" asp-for="MaTaiKhoan" />
+
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger py-2 small" role="alert"></div>
+
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Tên đăng nhập:</label>
+                                <input type="text" class="form-control bg-light" value="@Model.TenDangNhap" readonly disabled />
+                                <small class="text-muted">Tên tài khoản không thể thay đổi</small>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label fw-semibold">Vai trò:</label>
+                                <input type="text" class="form-control bg-light" value="@(Model.VaiTro ?? "Khách hàng")" readonly disabled />
+                            </div>
+
+                            <div class="col-md-12">
+                                <label asp-for="HoTen" class="form-label fw-semibold">Họ và tên <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-person"></i></span>
+                                    <input asp-for="HoTen" class="form-control" placeholder="Nhập họ và tên đầy đủ" />
+                                </div>
+                                <span asp-validation-for="HoTen" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="SoDienThoai" class="form-label fw-semibold">Số điện thoại <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-telephone"></i></span>
+                                    <input asp-for="SoDienThoai" class="form-control" placeholder="0912345678" />
+                                </div>
+                                <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-md-6">
+                                <label asp-for="Email" class="form-label fw-semibold">Địa chỉ Email <span class="text-danger">*</span></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-envelope"></i></span>
+                                    <input asp-for="Email" class="form-control" placeholder="example@gmail.com" />
+                                </div>
+                                <span asp-validation-for="Email" class="text-danger small"></span>
+                            </div>
+
+                            <div class="col-12">
+                                <label asp-for="DiaChi" class="form-label fw-semibold"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-white"><i class="bi bi-geo-alt"></i></span>
+                                    <input asp-for="DiaChi" class="form-control" placeholder="Nhập địa chỉ của bạn" />
+                                </div>
+                                <span asp-validation-for="DiaChi" class="text-danger small"></span>
+                            </div>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2 mt-4 pt-3 border-top">
+                            <a asp-controller="Home" asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left"></i> Về trang chủ
+                            </a>
+                            <button type="submit" class="btn btn-primary px-4 fw-semibold">
+                                <i class="bi bi-check2-circle"></i> Cập nhật hồ sơ
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}
