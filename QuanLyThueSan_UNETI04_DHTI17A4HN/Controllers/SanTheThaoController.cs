@@ -9,6 +9,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Data;
+using QuanLyThueSan_UNETI04_DHTI17A4HN.Filters;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Models;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels;
@@ -143,6 +144,8 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // GET: /SanTheThao/Create
         // Nghiệp vụ: Hiển thị form thêm mới sân thể thao (Mục 6.3 file Word)
         // =========================================================================================
+        [HttpGet]
+        [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Create()
         {
             var vm = new SanTheThaoFormViewModel
@@ -173,6 +176,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // =========================================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Create(SanTheThaoFormViewModel vm)
         {
             // Kiểm tra tên sân không được trùng (Mục 13 file Word)
@@ -182,6 +186,21 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             if (tenBiTrung)
             {
                 ModelState.AddModelError(nameof(vm.TenSan), "Tên sân này đã tồn tại. Vui lòng nhập tên khác.");
+            }
+
+            // Mục 5.4 & 5.5: Loại sân / khu vực đã ngừng hoạt động không được dùng để tạo sân mới
+            bool loaiSanHopLe = await _context.LoaiSans
+                .AnyAsync(l => l.MaLoaiSan == vm.MaLoaiSan && l.TrangThai);
+            if (!loaiSanHopLe)
+            {
+                ModelState.AddModelError(nameof(vm.MaLoaiSan), "Loại sân không tồn tại hoặc đã ngừng hoạt động.");
+            }
+
+            bool khuVucHopLe = await _context.KhuVucs
+                .AnyAsync(k => k.MaKhuVuc == vm.MaKhuVuc && k.TrangThai);
+            if (!khuVucHopLe)
+            {
+                ModelState.AddModelError(nameof(vm.MaKhuVuc), "Khu vực không tồn tại hoặc đã ngừng hoạt động.");
             }
 
             if (!ModelState.IsValid)
@@ -249,6 +268,8 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // GET: /SanTheThao/Edit/{id}
         // Nghiệp vụ: Hiển thị form chỉnh sửa thông tin sân thể thao (Mục 6.3 file Word)
         // =========================================================================================
+        [HttpGet]
+        [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -298,9 +319,16 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // =========================================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int id, SanTheThaoFormViewModel vm)
         {
             if (id != vm.MaSan)
+            {
+                return NotFound();
+            }
+
+            var sanCanSua = await _context.SanTheThaos.FindAsync(id);
+            if (sanCanSua == null)
             {
                 return NotFound();
             }
@@ -314,6 +342,22 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 ModelState.AddModelError(nameof(vm.TenSan), "Tên sân này đã được sử dụng bởi một sân khác. Vui lòng nhập tên khác.");
             }
 
+            // Mục 5.4 & 5.5: chỉ cho phép giữ nguyên loại sân/khu vực cũ nếu chúng đã ngừng hoạt động,
+            // không được đổi sang một loại sân/khu vực ngừng hoạt động khác
+            bool loaiSanHopLe = await _context.LoaiSans
+                .AnyAsync(l => l.MaLoaiSan == vm.MaLoaiSan && (l.TrangThai || l.MaLoaiSan == sanCanSua.MaLoaiSan));
+            if (!loaiSanHopLe)
+            {
+                ModelState.AddModelError(nameof(vm.MaLoaiSan), "Loại sân không tồn tại hoặc đã ngừng hoạt động.");
+            }
+
+            bool khuVucHopLe = await _context.KhuVucs
+                .AnyAsync(k => k.MaKhuVuc == vm.MaKhuVuc && (k.TrangThai || k.MaKhuVuc == sanCanSua.MaKhuVuc));
+            if (!khuVucHopLe)
+            {
+                ModelState.AddModelError(nameof(vm.MaKhuVuc), "Khu vực không tồn tại hoặc đã ngừng hoạt động.");
+            }
+
             if (!ModelState.IsValid)
             {
                 vm.DanhSachLoaiSan = new SelectList(
@@ -325,12 +369,6 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                     "MaKhuVuc", "TenKhuVuc", vm.MaKhuVuc);
 
                 return View(vm);
-            }
-
-            var sanCanSua = await _context.SanTheThaos.FindAsync(id);
-            if (sanCanSua == null)
-            {
-                return NotFound();
             }
 
             // Cập nhật các trường thông tin

@@ -29,3 +29,94 @@ body {
 .form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
   text-align: start;
 }
+
+/* ============================================================
+   Navbar dùng chung:
+   - Brand "QUẢN LÝ THUÊ SÂN" cố định bên trái
+   - Khối tài khoản / đăng nhập - đăng ký dồn về bên phải
+   - Các mục menu luôn nằm trên 1 dòng ở màn hình >= 1200px
+   ============================================================ */
+#mainNavbar .navbar-brand {
+  white-space: nowrap;
+  letter-spacing: .02em;
+}
+
+#mainNavbar .navbar-user-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: .35rem;
+  max-width: 340px;
+}
+
+#mainNavbar .navbar-user-toggle .navbar-user-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+@media (min-width: 1200px) {
+  #mainNavbar .navbar-collapse,
+  #mainNavbar .navbar-nav {
+    flex-wrap: nowrap;
+    align-items: center;
+  }
+
+  #mainNavbar .navbar-brand {
+    font-size: 1.15rem;
+    margin-right: .75rem;
+  }
+
+  #mainNavbar .navbar-nav .nav-link {
+    white-space: nowrap;
+    font-size: .95rem;
+    padding: .45rem .55rem;
+  }
+
+  #mainNavbar .navbar-nav .dropdown-toggle::after {
+    margin-left: .25rem;
+    vertical-align: .15em;
+  }
+}
+
+/* Màn hình vừa (1200px - 1599px): thu gọn để menu không bị xuống dòng */
+@media (min-width: 1200px) and (max-width: 1599.98px) {
+  #mainNavbar .navbar-brand {
+    font-size: 1rem;
+    margin-right: .5rem;
+  }
+
+  #mainNavbar .navbar-nav .nav-link {
+    font-size: .9rem;
+    padding: .45rem .4rem;
+  }
+
+  #mainNavbar .navbar-user-role {
+    display: none;
+  }
+}
+
+/* Màn hình hẹp (1200px - 1399px): khối tài khoản chỉ hiện icon */
+@media (min-width: 1200px) and (max-width: 1399.98px) {
+  #mainNavbar .navbar-user-name {
+    display: none;
+  }
+}
+
+/* Màn hình 1200px - 1279px: thu thêm một nhịp cho vừa 1 dòng */
+@media (min-width: 1200px) and (max-width: 1279.98px) {
+  #mainNavbar .navbar-brand {
+    font-size: .95rem;
+  }
+
+  #mainNavbar .navbar-nav .nav-link {
+    font-size: .85rem;
+    padding: .4rem .3rem;
+  }
+}
+
+@media (min-width: 1600px) {
+  #mainNavbar .navbar-nav .nav-link {
+    font-size: .95rem;
+    padding: .45rem .65rem;
+  }
+}
