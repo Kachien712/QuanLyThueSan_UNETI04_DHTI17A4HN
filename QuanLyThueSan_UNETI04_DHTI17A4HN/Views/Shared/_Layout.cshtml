@@ -22,29 +22,29 @@
 </head>
 <body>
     <header>
-        <nav class="navbar navbar-expand-lg navbar-light bg-white border-bottom shadow-sm mb-2">
-            <div class="container">
-                <a class="navbar-brand fw-bold text-dark fs-5 tracking-wide me-4" asp-area="" asp-controller="Home" asp-action="Index">
+        <nav id="mainNavbar" class="navbar navbar-expand-xl navbar-light bg-white border-bottom shadow-sm mb-2">
+            <div class="container-fluid px-3 px-xl-4">
+                <a class="navbar-brand fw-bold text-dark tracking-wide me-3" asp-area="" asp-controller="Home" asp-action="Index">
                     QUẢN LÝ THUÊ SÂN
                 </a>
-                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
+                <button class="navbar-toggler border-0 shadow-none" type="button" data-bs-toggle="collapse" data-bs-target="#mainNavbarNav" aria-controls="mainNavbarNav"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
                 </button>
-                <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
-                    <ul class="navbar-nav me-auto mb-2 mb-lg-0 gap-1">
+                <div id="mainNavbarNav" class="navbar-collapse collapse justify-content-between">
+                    <ul class="navbar-nav me-auto mb-2 mb-xl-0">
                         <li class="nav-item">
                             @if (Context.Session.GetString(SessionKeys.VaiTro) == "Admin")
                             {
-                                <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="Dashboard" asp-action="Index">Trang chủ</a>
+                                <a class="nav-link text-secondary fw-medium rounded" asp-area="" asp-controller="Dashboard" asp-action="Index">Trang chủ</a>
                             }
                             else
                             {
-                                <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
+                                <a class="nav-link text-secondary fw-medium rounded" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                             }
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link px-3 py-2 text-dark fw-semibold rounded" asp-area="" asp-controller="SanTheThao" asp-action="Index">Quản lý sân thể thao</a>
+                            <a class="nav-link text-dark fw-semibold rounded" asp-area="" asp-controller="SanTheThao" asp-action="Index">Quản lý sân thể thao</a>
                         </li>
                         <!-- Menu Quản lý Đặt sân (Dropdown gom nhóm các chức năng) -->
                         <li class="nav-item dropdown">
@@ -53,8 +53,8 @@
                             </a>
                             <ul class="dropdown-menu shadow-sm" aria-labelledby="datSanDropdown">
                                 <li>
-                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="LichSuDatSan">
-                                        📋 Lịch sử đặt sân
+                                    <a class="dropdown-item text-success fw-bold" asp-controller="DatSan" asp-action="Create">
+                                        ➕ Đặt sân mới
                                     </a>
                                 </li>
                                 <li>
@@ -62,12 +62,25 @@
                                         🔍 Tra cứu &amp; Tìm sân trống
                                     </a>
                                 </li>
-                                <li><hr class="dropdown-divider"></li>
                                 <li>
-                                    <a class="dropdown-item text-success fw-bold" asp-controller="DatSan" asp-action="Create">
-                                        ➕ Đặt sân mới
+                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="LichSuDatSan">
+                                        📋 Lịch sử đặt sân
                                     </a>
                                 </li>
+                                @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
+                                {
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="XacNhanDatSan" asp-action="Index">
+                                            ✅ Xác nhận đặt sân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="NhanSan" asp-action="Index">
+                                            🏟️ Nhận sân
+                                        </a>
+                                    </li>
+                                }
                             </ul>
                         </li>
                         @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
@@ -91,25 +104,11 @@
                                 </ul>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="KhachHang" asp-action="Index">Quản lý Khách hàng</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="XacNhanDatSan" asp-action="Index">Xác nhận đặt sân</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="NhanSan" asp-action="Index">Nhận sân</a>
+                                <a class="nav-link text-secondary fw-medium" asp-area="" asp-controller="KhachHang" asp-action="Index">Quản lý Khách hàng</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="DichVu" asp-action="Index">Dịch vụ</a>
                             </li>
-                            @if (Context.Session.GetString(SessionKeys.VaiTro) == "Admin")
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="TaiKhoan" asp-action="Index">
-                                        Quản lý tài khoản
-                                    </a>
-                                </li>
-                            }
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="ThanhToan" asp-action="ChoThanhToan">Thanh toán</a>
                             </li>
@@ -118,28 +117,32 @@
                                 <li class="nav-item"><a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
                             }
                             <li class="nav-item"><a class="nav-link" asp-controller="ThongKe" asp-action="Index">Thống kê</a></li>
+                            @if (Context.Session.GetString(SessionKeys.VaiTro) == "Admin")
+                            {
+                                <li class="nav-item">
+                                    <a class="nav-link text-dark" asp-controller="TaiKhoan" asp-action="Index">
+                                        Quản lý tài khoản
+                                    </a>
+                                </li>
+                            }
                         }
                         @if (Context.Session.GetString(SessionKeys.VaiTro) == "KhachHang")
                         {
                             <li class="nav-item"><a class="nav-link" asp-controller="LichSu" asp-action="CuaToi">Lịch sử của tôi</a></li>
-                        }
-                        else
-                        {
-                            <li class="nav-item">
-                                <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-controller="DatSan" asp-action="LichSuDatSan">Lịch sử đặt sân</a>
-                            </li>
                         }
                     </ul>
                     @{
                         var hoTen = Context.Session.GetString(SessionKeys.HoTen);
                         var vaiTro = Context.Session.GetString(SessionKeys.VaiTro);
                     }
-                    <ul class="navbar-nav">
+                    <ul class="navbar-nav ms-auto mb-2 mb-xl-0 align-items-xl-center flex-shrink-0">
                         @if (!string.IsNullOrEmpty(hoTen))
                         {
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark fw-semibold" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    <i class="bi bi-person-circle text-primary"></i> Xin chào, <strong>@hoTen</strong> (@vaiTro)
+                                <a class="nav-link dropdown-toggle text-dark fw-semibold navbar-user-toggle" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle text-primary"></i>
+                                    <span class="navbar-user-name"><strong>@hoTen</strong></span>
+                                    <span class="navbar-user-role text-muted">(@vaiTro)</span>
                                 </a>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenuDropdown">
                                     @if (vaiTro == "KhachHang")
@@ -170,10 +173,10 @@
                         else
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
+                                <a class="nav-link text-dark text-nowrap" asp-controller="TaiKhoan" asp-action="DangNhap">Đăng nhập</a>
                             </li>
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
+                                <a class="nav-link text-dark text-nowrap" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
                             </li>
                         }
                     </ul>
