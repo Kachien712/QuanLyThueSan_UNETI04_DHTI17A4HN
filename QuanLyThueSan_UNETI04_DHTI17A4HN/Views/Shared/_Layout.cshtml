@@ -32,6 +32,10 @@
                     <span class="navbar-toggler-icon"></span>
                 </button>
                 <div id="mainNavbarNav" class="navbar-collapse collapse justify-content-between">
+                    @{
+                        // Khách vãng lai chỉ xem sân; chữ "Khách hàng" chỉ dành cho Admin/Nhân viên quản lý
+                        var laQuanLyNav = Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien";
+                    }
                     <ul class="navbar-nav me-auto mb-2 mb-xl-0">
                         <li class="nav-item">
                             @if (Context.Session.GetString(SessionKeys.VaiTro) == "Admin")
@@ -83,14 +87,14 @@
 
                         @if (!string.IsNullOrEmpty(Context.Session.GetString(SessionKeys.VaiTro)))
                         {
-                            <!-- ===== MODULE 3: Khách hàng - Đặt sân - Tìm sân trống (chỉ hiện khi đã đăng nhập) ===== -->
+                            <!-- ===== MODULE 3: Đặt sân - Tìm sân trống (chỉ hiện khi đã đăng nhập) ===== -->
                             <li class="nav-item dropdown">
                                 <a class="nav-link dropdown-toggle text-dark fw-medium" href="#" id="module3Dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Khách hàng &amp; Đặt sân
+                                    @(laQuanLyNav ? "Khách hàng & Đặt sân" : "Đặt sân")
                                 </a>
                                 <ul class="dropdown-menu shadow-sm" aria-labelledby="module3Dropdown">
-                                    <li><h6 class="dropdown-header">Module 3 · Khách hàng &amp; đặt sân</h6></li>
-                                    @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
+                                    <li><h6 class="dropdown-header">@(laQuanLyNav ? "Module 3 · Khách hàng & đặt sân" : "Module 3 · Đặt sân & tìm sân trống")</h6></li>
+                                    @if (laQuanLyNav)
                                     {
                                         <li>
                                             <a class="dropdown-item" asp-controller="KhachHang" asp-action="Index">

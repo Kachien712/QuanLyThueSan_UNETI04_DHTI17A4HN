@@ -1,8 +1,99 @@
 ﻿@{
-    ViewData["Title"] = "Home Page";
+    ViewData["Title"] = "Trang chủ";
+    var vaiTroTrangChu = Context.Session.GetString(SessionKeys.VaiTro);
 }
 
-<div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+<div class="p-4 p-md-5 mb-4 bg-light border rounded-3">
+    <div class="container-fluid py-2">
+        <h1 class="display-6 fw-bold">Đặt sân thể thao trực tuyến</h1>
+        <p class="lead mb-4">
+            Xem danh sách sân, tra cứu sân trống theo ngày giờ và đặt lịch sử dụng sân.
+            Khách vãng lai có thể xem sân mà không cần đăng nhập.
+        </p>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-primary btn-lg" asp-controller="SanTheThao" asp-action="Index">
+                <i class="bi bi-list-ul me-1"></i> Xem danh sách sân
+            </a>
+            <a class="btn btn-outline-success btn-lg" asp-controller="DatSan" asp-action="TimSanTrong">
+                <i class="bi bi-search me-1"></i> Tìm sân trống
+            </a>
+            @if (string.IsNullOrEmpty(vaiTroTrangChu))
+            {
+                <a class="btn btn-success btn-lg" asp-controller="TaiKhoan" asp-action="DangNhap">
+                    Đăng nhập để đặt sân
+                </a>
+            }
+            else if (vaiTroTrangChu == "KhachHang")
+            {
+                <a class="btn btn-success btn-lg" asp-controller="DatSan" asp-action="Create">
+                    <i class="bi bi-plus-circle me-1"></i> Đặt sân ngay
+                </a>
+            }
+        </div>
+    </div>
+</div>
+
+<div class="row g-3">
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-building text-primary me-1"></i> Danh sách sân
+                </h5>
+                <p class="card-text text-muted">
+                    Xem thông tin sân, loại sân, khu vực và giá tham khảo. Có thể tìm kiếm, lọc và sắp xếp.
+                </p>
+                <a class="btn btn-sm btn-outline-primary" asp-controller="SanTheThao" asp-action="Index">Xem sân</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                <h5 class="card-title">
+                    <i class="bi bi-calendar-check text-success me-1"></i> Tìm sân trống
+                </h5>
+                <p class="card-text text-muted">
+                    Chọn ngày và khung giờ để xem những sân còn trống, kèm giá dự kiến.
+                </p>
+                <a class="btn btn-sm btn-outline-success" asp-controller="DatSan" asp-action="TimSanTrong">Tra cứu</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4">
+        <div class="card h-100 shadow-sm">
+            <div class="card-body">
+                @if (vaiTroTrangChu == "KhachHang")
+                {
+                    <h5 class="card-title">
+                        <i class="bi bi-clock-history text-info me-1"></i> Đơn của tôi
+                    </h5>
+                    <p class="card-text text-muted">
+                        Theo dõi trạng thái đơn đặt sân và lịch sử sử dụng sân của bạn.
+                    </p>
+                    <a class="btn btn-sm btn-outline-info" asp-controller="LichSu" asp-action="CuaToi">Lịch sử của tôi</a>
+                }
+                else if (vaiTroTrangChu is "Admin" or "NhanVien")
+                {
+                    <h5 class="card-title">
+                        <i class="bi bi-speedometer2 text-warning me-1"></i> Quản trị
+                    </h5>
+                    <p class="card-text text-muted">
+                        Xem tình hình sân, đơn đặt sân và các thống kê vận hành.
+                    </p>
+                    <a class="btn btn-sm btn-outline-warning" asp-controller="Dashboard" asp-action="Index">Vào Dashboard</a>
+                }
+                else
+                {
+                    <h5 class="card-title">
+                        <i class="bi bi-person-plus text-secondary me-1"></i> Tạo tài khoản
+                    </h5>
+                    <p class="card-text text-muted">
+                        Đăng ký tài khoản khách hàng để đặt sân và theo dõi lịch sử đặt sân.
+                    </p>
+                    <a class="btn btn-sm btn-outline-secondary" asp-controller="TaiKhoan" asp-action="DangKy">Đăng ký</a>
+                }
+            </div>
+        </div>
+    </div>
 </div>
