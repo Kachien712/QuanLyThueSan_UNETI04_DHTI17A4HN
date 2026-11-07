@@ -129,9 +129,6 @@
                                 <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-controller="DatSan" asp-action="LichSuDatSan">Lịch sử đặt sân</a>
                             </li>
                         }
-                        <li class="nav-item">
-                            <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách</a>
-                        </li>
                     </ul>
                     @{
                         var hoTen = Context.Session.GetString(SessionKeys.HoTen);
@@ -192,7 +189,7 @@
 
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2026 - QuanLyThueSan_UNETI04_DHTI17A4HN - <a asp-area="" asp-controller="Home" asp-action="Privacy">Privacy</a>
+            &copy; 2026 - QuanLyThueSan_UNETI04_DHTI17A4HN
         </div>
     </footer>
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
