@@ -43,54 +43,16 @@
                                 <a class="nav-link text-secondary fw-medium rounded" asp-area="" asp-controller="Home" asp-action="Index">Trang chủ</a>
                             }
                         </li>
-                        <li class="nav-item">
-                            <a class="nav-link text-dark fw-semibold rounded" asp-area="" asp-controller="SanTheThao" asp-action="Index">Quản lý sân thể thao</a>
-                        </li>
-                        <!-- Menu Quản lý Đặt sân (Dropdown gom nhóm các chức năng) -->
-                        <li class="nav-item dropdown">
-                            <a class="nav-link dropdown-toggle text-dark fw-bold text-success" href="#" id="datSanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                Quản lý Đặt sân
-                            </a>
-                            <ul class="dropdown-menu shadow-sm" aria-labelledby="datSanDropdown">
-                                <li>
-                                    <a class="dropdown-item text-success fw-bold" asp-controller="DatSan" asp-action="Create">
-                                        ➕ Đặt sân mới
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="TimSanTrong">
-                                        🔍 Tra cứu &amp; Tìm sân trống
-                                    </a>
-                                </li>
-                                <li>
-                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="LichSuDatSan">
-                                        📋 Lịch sử đặt sân
-                                    </a>
-                                </li>
-                                @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
-                                {
-                                    <li><hr class="dropdown-divider"></li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="XacNhanDatSan" asp-action="Index">
-                                            ✅ Xác nhận đặt sân
-                                        </a>
-                                    </li>
-                                    <li>
-                                        <a class="dropdown-item" asp-controller="NhanSan" asp-action="Index">
-                                            🏟️ Nhận sân
-                                        </a>
-                                    </li>
-                                }
-                            </ul>
-                        </li>
+
                         @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
                         {
-                            <!-- Menu Danh mục sân (Loại sân & Khu vực - Module 1) -->
+                            <!-- ===== MODULE 1: Tài khoản - Loại sân - Khu vực ===== -->
                             <li class="nav-item dropdown">
-                                <a class="nav-link dropdown-toggle text-dark fw-medium" href="#" id="danhMucSanDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
-                                    Danh mục sân
+                                <a class="nav-link dropdown-toggle text-dark fw-medium" href="#" id="module1Dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Tài khoản &amp; Danh mục
                                 </a>
-                                <ul class="dropdown-menu shadow-sm" aria-labelledby="danhMucSanDropdown">
+                                <ul class="dropdown-menu shadow-sm" aria-labelledby="module1Dropdown">
+                                    <li><h6 class="dropdown-header">Module 1 · Tài khoản, loại sân, khu vực</h6></li>
                                     <li>
                                         <a class="dropdown-item" asp-controller="LoaiSan" asp-action="Index">
                                             <i class="bi bi-tag-fill text-primary me-2"></i> Quản lý Loại sân
@@ -101,34 +63,130 @@
                                             <i class="bi bi-geo-alt-fill text-success me-2"></i> Quản lý Khu vực
                                         </a>
                                     </li>
+                                    @if (Context.Session.GetString(SessionKeys.VaiTro) == "Admin")
+                                    {
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="TaiKhoan" asp-action="Index">
+                                                <i class="bi bi-person-gear text-secondary me-2"></i> Quản lý tài khoản
+                                            </a>
+                                        </li>
+                                    }
                                 </ul>
                             </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-secondary fw-medium" asp-area="" asp-controller="KhachHang" asp-action="Index">Quản lý Khách hàng</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="DichVu" asp-action="Index">Dịch vụ</a>
-                            </li>
-                            <li class="nav-item">
-                                <a class="nav-link text-dark" asp-controller="ThanhToan" asp-action="ChoThanhToan">Thanh toán</a>
-                            </li>
-                            @if (Context.Session.GetString(SessionKeys.VaiTro) != "Admin")
-                            {
-                                <li class="nav-item"><a class="nav-link" asp-controller="Dashboard" asp-action="Index">Dashboard</a></li>
-                            }
-                            <li class="nav-item"><a class="nav-link" asp-controller="ThongKe" asp-action="Index">Thống kê</a></li>
-                            @if (Context.Session.GetString(SessionKeys.VaiTro) == "Admin")
-                            {
-                                <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="TaiKhoan" asp-action="Index">
-                                        Quản lý tài khoản
+                        }
+
+                        <!-- ===== MODULE 2: Quản lý sân - Bảng giá ===== -->
+                        <li class="nav-item">
+                            <a class="nav-link text-dark fw-semibold" asp-area="" asp-controller="SanTheThao" asp-action="Index">Sân thể thao</a>
+                        </li>
+
+                        <!-- ===== MODULE 3: Khách hàng - Đặt sân - Tìm sân trống ===== -->
+                        <li class="nav-item dropdown">
+                            <a class="nav-link dropdown-toggle text-dark fw-medium" href="#" id="module3Dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                Khách hàng &amp; Đặt sân
+                            </a>
+                            <ul class="dropdown-menu shadow-sm" aria-labelledby="module3Dropdown">
+                                <li><h6 class="dropdown-header">Module 3 · Khách hàng &amp; đặt sân</h6></li>
+                                @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
+                                {
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="KhachHang" asp-action="Index">
+                                            <i class="bi bi-people-fill text-primary me-2"></i> Quản lý Khách hàng
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                }
+                                <li>
+                                    <a class="dropdown-item text-success fw-bold" asp-controller="DatSan" asp-action="Create">
+                                        ➕ Đặt sân mới
                                     </a>
                                 </li>
-                            }
-                        }
-                        @if (Context.Session.GetString(SessionKeys.VaiTro) == "KhachHang")
+                                <li>
+                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="TimSanTrong">
+                                        🔍 Tra cứu &amp; Tìm sân trống
+                                    </a>
+                                </li>
+                            </ul>
+                        </li>
+
+                        @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
                         {
-                            <li class="nav-item"><a class="nav-link" asp-controller="LichSu" asp-action="CuaToi">Lịch sử của tôi</a></li>
+                            <!-- ===== MODULE 4: Xác nhận đặt sân - Nhận sân - Dịch vụ ===== -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark fw-medium" href="#" id="module4Dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Xác nhận &amp; Dịch vụ
+                                </a>
+                                <ul class="dropdown-menu shadow-sm" aria-labelledby="module4Dropdown">
+                                    <li><h6 class="dropdown-header">Module 4 · Xác nhận, nhận sân, dịch vụ</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="XacNhanDatSan" asp-action="Index">
+                                            ✅ Xác nhận đặt sân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="NhanSan" asp-action="Index">
+                                            🏟️ Nhận sân
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="DichVu" asp-action="Index">
+                                            🧾 Dịch vụ
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+
+                            <!-- ===== MODULE 5: Thanh toán - Lịch sử - Dashboard - Thống kê ===== -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark fw-medium" href="#" id="module5Dropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Thanh toán &amp; Thống kê
+                                </a>
+                                <ul class="dropdown-menu shadow-sm" aria-labelledby="module5Dropdown">
+                                    <li><h6 class="dropdown-header">Module 5 · Thanh toán, lịch sử, thống kê</h6></li>
+                                    @if (Context.Session.GetString(SessionKeys.VaiTro) != "Admin")
+                                    {
+                                        <li>
+                                            <a class="dropdown-item" asp-controller="Dashboard" asp-action="Index">
+                                                <i class="bi bi-speedometer2 text-primary me-2"></i> Dashboard
+                                            </a>
+                                        </li>
+                                    }
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="ThanhToan" asp-action="ChoThanhToan">
+                                            <i class="bi bi-cash-coin text-success me-2"></i> Thanh toán
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="DatSan" asp-action="LichSuDatSan">
+                                            <i class="bi bi-clock-history text-info me-2"></i> Lịch sử đặt sân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="ThongKe" asp-action="Index">
+                                            <i class="bi bi-bar-chart-fill text-warning me-2"></i> Thống kê
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
+                        }
+                        else if (Context.Session.GetString(SessionKeys.VaiTro) == "KhachHang")
+                        {
+                            <!-- ===== MODULE 5 (khách hàng): Lịch sử đặt sân ===== -->
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark fw-medium" href="#" id="module5KhachDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    Thanh toán &amp; Lịch sử
+                                </a>
+                                <ul class="dropdown-menu shadow-sm" aria-labelledby="module5KhachDropdown">
+                                    <li><h6 class="dropdown-header">Module 5 · Lịch sử đặt sân</h6></li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="LichSu" asp-action="CuaToi">
+                                            <i class="bi bi-clock-history text-info me-2"></i> Lịch sử của tôi
+                                        </a>
+                                    </li>
+                                </ul>
+                            </li>
                         }
                     </ul>
                     @{
