@@ -1,0 +1,363 @@
+@* 
+    Họ và tên: Đào Đức Kiên
+    Mã sinh viên: 23103100222
+    Nội dung thực hiện: Module 3 - Giao diện danh sách phiếu đặt sân (Tìm kiếm, Lọc đa tiêu chí, Sắp xếp, Phân trang LINQ, Hủy đơn)
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.DatSanIndexViewModel
+
+@{
+    bool laKhachHang = (ViewBag.LaKhachHang == true);
+    ViewData["Title"] = laKhachHang ? "Lịch sử đặt sân của tôi" : "Quản lý Đặt sân";
+}
+
+<div class="container-fluid px-0">
+    <!-- Tiêu đề trang và nút tác vụ nhanh -->
+    <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 gap-2">
+        <div>
+            <h2 class="text-primary fw-bold mb-1">
+                <i class="bi @(laKhachHang ? "bi-clock-history" : "bi-calendar-check")"></i> @ViewData["Title"]
+            </h2>
+            <p class="text-muted mb-0">
+                @(laKhachHang 
+                    ? $"Theo dõi danh sách các đơn đặt lịch của bạn ({ViewBag.TenKhachHangHienTai ?? "Khách hàng"})" 
+                    : "Hệ thống quản lý, tra cứu và kiểm soát tình trạng các đơn đặt sân")
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a asp-action="TimSanTrong" class="btn btn-outline-primary">
+                <i class="bi bi-search"></i> Tra cứu sân trống
+            </a>
+            <a asp-action="Create" class="btn btn-success fw-semibold">
+                <i class="bi bi-plus-circle"></i> Đặt sân mới
+            </a>
+        </div>
+    </div>
+
+    <!-- Thông báo kết quả thao tác -->
+    @if (TempData["ThanhCong"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-2 py-3 px-3 shadow-sm border-0 border-start border-4 border-success mb-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-4 text-success me-3"></i>
+                <div>
+                    <strong>Thành công!</strong> @TempData["ThanhCong"]
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Loi"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-2 py-3 px-3 shadow-sm border-0 border-start border-4 border-danger mb-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-4 text-danger me-3"></i>
+                <div>
+                    <strong>Lỗi:</strong> @TempData["Loi"]
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Thống kê nhanh số lượng đơn -->
+    <div class="row g-2 mb-4">
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm bg-light text-center py-2 h-100">
+                <small class="text-muted fw-bold">Tổng số</small>
+                <h4 class="mb-0 fw-bold text-dark">@Model.TongSoDon</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm bg-warning bg-opacity-10 border-start border-warning border-3 text-center py-2 h-100">
+                <small class="text-warning-emphasis fw-bold">Chờ xác nhận</small>
+                <h4 class="mb-0 fw-bold text-warning-emphasis">@Model.SoDonChoXacNhan</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm bg-info bg-opacity-10 border-start border-info border-3 text-center py-2 h-100">
+                <small class="text-info fw-bold">Đã xác nhận</small>
+                <h4 class="mb-0 fw-bold text-info">@Model.SoDonDaXacNhan</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm bg-success bg-opacity-10 border-start border-success border-3 text-center py-2 h-100">
+                <small class="text-success fw-bold">Đang sử dụng</small>
+                <h4 class="mb-0 fw-bold text-success">@Model.SoDonDangSuDung</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm bg-primary bg-opacity-10 border-start border-primary border-3 text-center py-2 h-100">
+                <small class="text-primary fw-bold">Hoàn thành</small>
+                <h4 class="mb-0 fw-bold text-primary">@Model.SoDonHoanThanh</h4>
+            </div>
+        </div>
+        <div class="col-6 col-md-4 col-lg-2">
+            <div class="card border-0 shadow-sm bg-danger bg-opacity-10 border-start border-danger border-3 text-center py-2 h-100">
+                <small class="text-danger fw-bold">Đã hủy</small>
+                <h4 class="mb-0 fw-bold text-danger">@Model.SoDonDaHuy</h4>
+            </div>
+        </div>
+    </div>
+
+    <!-- KHUNG TÌM KIẾM VÀ BỘ LỌC ĐA TIÊU CHÍ (Mục 15 file Word) -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-header bg-white py-3">
+            <h6 class="card-title fw-bold text-dark mb-0">
+                <i class="bi bi-funnel text-primary"></i> Bộ lọc & Tìm kiếm đơn đặt sân
+            </h6>
+        </div>
+        <div class="card-body p-3">
+            <form method="get" asp-action="Index">
+                <div class="row g-2 align-items-end">
+                    <!-- 1. Từ khóa tìm kiếm -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">Từ khóa tìm kiếm</label>
+                        <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control form-control-sm"
+                               placeholder="@(laKhachHang ? "Tìm mã đơn, tên sân..." : "Mã đơn, khách hàng, SĐT, sân...")" />
+                    </div>
+
+                    <!-- 2. Lọc theo ngày sử dụng -->
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">Ngày sử dụng</label>
+                        <input type="date" name="ngayFilter" value="@(Model.NgayFilter?.ToString("yyyy-MM-dd"))"
+                               class="form-control form-control-sm" />
+                    </div>
+
+                    <!-- 3. Lọc theo trạng thái -->
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">Trạng thái</label>
+                        <select name="trangThaiFilter" asp-items="Model.DanhSachTrangThai" class="form-select form-select-sm">
+                        </select>
+                    </div>
+
+                    <!-- 4. Lọc theo loại sân -->
+                    <div class="col-md-2">
+                        <label class="form-label small fw-semibold text-secondary">Loại sân</label>
+                        <select name="maLoaiSanFilter" asp-items="Model.DanhSachLoaiSan" class="form-select form-select-sm">
+                            <option value="">-- Tất cả loại --</option>
+                        </select>
+                    </div>
+
+                    <!-- 5. Sắp xếp -->
+                    <div class="col-md-3">
+                        <label class="form-label small fw-semibold text-secondary">Sắp xếp</label>
+                        <select name="sortOrder" class="form-select form-select-sm">
+                            <option value="" selected="@(string.IsNullOrEmpty(Model.SortOrder))">Mới đặt nhất</option>
+                            <option value="date_asc" selected="@(Model.SortOrder == "date_asc")">Ngày sử dụng tăng dần</option>
+                            <option value="date_desc" selected="@(Model.SortOrder == "date_desc")">Ngày sử dụng giảm dần</option>
+                            <option value="created_asc" selected="@(Model.SortOrder == "created_asc")">Đơn cũ nhất</option>
+                            @if (!laKhachHang)
+                            {
+                                <option value="name_asc" selected="@(Model.SortOrder == "name_asc")">Tên khách hàng A-Z</option>
+                            }
+                        </select>
+                    </div>
+
+                    <!-- Nút bấm tìm kiếm / bỏ lọc -->
+                    <div class="col-12 d-flex justify-content-end gap-2 mt-3 pt-2 border-top">
+                        <a asp-action="Index" class="btn btn-outline-secondary btn-sm">
+                            <i class="bi bi-arrow-counterclockwise"></i> Xóa bộ lọc
+                        </a>
+                        <button type="submit" class="btn btn-primary btn-sm px-3 fw-semibold">
+                            <i class="bi bi-search"></i> Áp dụng bộ lọc
+                        </button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- BẢNG DANH SÁCH ĐƠN ĐẶT SÂN -->
+    <div class="card shadow-sm border-0">
+        <div class="table-responsive">
+            <table class="table table-hover align-middle mb-0">
+                <thead class="table-light">
+                    <tr>
+                        <th class="ps-3" style="width: 85px;">Mã đơn</th>
+                        <th>Sân thể thao</th>
+                        @if (!laKhachHang)
+                        {
+                            <th>Khách hàng</th>
+                        }
+                        <th>Ngày sử dụng</th>
+                        <th>Khung giờ</th>
+                        <th class="text-center">Số người</th>
+                        <th class="text-center">Trạng thái</th>
+                        <th class="text-end pe-3" style="width: 140px;">Thao tác</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    @if (Model.DanhSachDatSan.Count == 0)
+                    {
+                        <tr>
+                            <td colspan="@(laKhachHang ? 7 : 8)" class="text-center py-5 text-muted">
+                                <i class="bi bi-inbox fs-1 d-block mb-2 text-secondary"></i>
+                                <span>Không tìm thấy đơn đặt sân nào phù hợp với điều kiện tìm kiếm.</span>
+                            </td>
+                        </tr>
+                    }
+                    else
+                    {
+                        foreach (var item in Model.DanhSachDatSan)
+                        {
+                            string badgeClass = item.TrangThai switch
+                            {
+                                "Chờ xác nhận" => "bg-warning text-dark",
+                                "Đã xác nhận" => "bg-info text-dark",
+                                "Đang sử dụng" => "bg-success",
+                                "Chờ thanh toán" => "bg-secondary",
+                                "Hoàn thành" => "bg-primary",
+                                "Đã hủy" => "bg-danger",
+                                _ => "bg-light text-dark"
+                            };
+
+                            <tr>
+                                <td class="ps-3 fw-bold text-secondary">#@item.MaDatSan</td>
+                                <td>
+                                    <div class="fw-bold text-dark">@(item.SanTheThao?.TenSan ?? "Sân #" + item.MaSan)</div>
+                                    <small class="text-muted">
+                                        @(item.SanTheThao?.LoaiSan?.TenLoaiSan ?? "Tiêu chuẩn") - @(item.SanTheThao?.KhuVuc?.TenKhuVuc ?? "")
+                                    </small>
+                                </td>
+                                @if (!laKhachHang)
+                                {
+                                    <td>
+                                        <div class="fw-semibold">@(item.KhachHang?.HoTen ?? "Khách #" + item.MaKhachHang)</div>
+                                        <small class="text-muted"><i class="bi bi-telephone"></i> @(item.KhachHang?.SoDienThoai ?? "-")</small>
+                                    </td>
+                                }
+                                <td>
+                                    <span class="fw-medium">@item.NgaySuDung.ToString("dd/MM/yyyy")</span>
+                                    <br />
+                                    <small class="text-muted">Đặt: @item.NgayDat.ToString("dd/MM HH:mm")</small>
+                                </td>
+                                <td>
+                                    <span class="badge bg-light text-dark border">
+                                        @item.GioBatDau.ToString(@"hh\:mm") - @item.GioKetThuc.ToString(@"hh\:mm")
+                                    </span>
+                                </td>
+                                <td class="text-center">@item.SoNguoi</td>
+                                <td class="text-center">
+                                    <span class="badge @badgeClass rounded-pill px-2 py-1">@item.TrangThai</span>
+                                </td>
+                                <td class="text-end pe-3">
+                                    <div class="btn-group btn-group-sm">
+                                        <a asp-action="Details" asp-route-id="@item.MaDatSan" class="btn btn-outline-info" title="Xem chi tiết">
+                                            <i class="bi bi-eye"></i>
+                                        </a>
+
+                                        @if (item.TrangThai == "Chờ xác nhận")
+                                        {
+                                            <button type="button" class="btn btn-outline-danger" title="Hủy đơn này"
+                                                    data-bs-toggle="modal" data-bs-target="#modalHuy_@item.MaDatSan">
+                                                <i class="bi bi-x-circle"></i>
+                                            </button>
+                                        }
+                                    </div>
+
+                                    <!-- MODAL XÁC NHẬN HỦY ĐƠN (Mục 7.6) -->
+                                    @if (item.TrangThai == "Chờ xác nhận")
+                                    {
+                                        <div class="modal fade" id="modalHuy_@item.MaDatSan" tabindex="-1" aria-hidden="true">
+                                            <div class="modal-dialog text-start">
+                                                <div class="modal-content">
+                                                    <form asp-action="HuyDatSan" method="post">
+                                                        @Html.AntiForgeryToken()
+                                                        <input type="hidden" name="id" value="@item.MaDatSan" />
+                                                        <div class="modal-header bg-danger text-white py-2">
+                                                            <h6 class="modal-title fw-bold">
+                                                                <i class="bi bi-exclamation-triangle-fill"></i> Xác nhận hủy đơn #@item.MaDatSan
+                                                            </h6>
+                                                            <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                        </div>
+                                                        <div class="modal-body">
+                                                            <p class="mb-2">
+                                                                Bạn có chắc chắn muốn hủy đơn đặt sân <strong>@(item.SanTheThao?.TenSan)</strong> vào ngày <strong>@item.NgaySuDung.ToString("dd/MM/yyyy")</strong> (@item.GioBatDau.ToString(@"hh\:mm") - @item.GioKetThuc.ToString(@"hh\:mm")) không?
+                                                            </p>
+                                                            <div class="mb-2">
+                                                                <label class="form-label small fw-semibold">Lý do hủy (nếu có):</label>
+                                                                <textarea name="lyDoHuy" class="form-control form-control-sm" rows="2" placeholder="Nhập lý do hủy đơn..."></textarea>
+                                                            </div>
+                                                            <small class="text-muted fst-italic">Lưu ý: Đơn sau khi hủy sẽ không thể hoàn tác.</small>
+                                                        </div>
+                                                        <div class="modal-footer py-2">
+                                                            <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                            <button type="submit" class="btn btn-danger btn-sm">Xác nhận hủy đơn</button>
+                                                        </div>
+                                                    </form>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    }
+                                </td>
+                            </tr>
+                        }
+                    }
+                </tbody>
+            </table>
+        </div>
+
+        <!-- PHÂN TRANG LINQ Skip() & Take() (Mục 15 file Word) -->
+        @if (Model.DanhSachDatSan.TongSoTrang > 1)
+        {
+            <div class="card-footer bg-white d-flex justify-content-between align-items-center py-3">
+                <small class="text-muted">
+                    Trang <strong>@Model.DanhSachDatSan.TrangHienTai</strong> / <strong>@Model.DanhSachDatSan.TongSoTrang</strong> 
+                    (Tổng số <strong>@Model.DanhSachDatSan.TongSoBanGhi</strong> đơn)
+                </small>
+                <nav aria-label="Page navigation">
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!Model.DanhSachDatSan.CoTrangTruoc ? "disabled" : "")">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-pageIndex="@(Model.DanhSachDatSan.TrangHienTai - 1)"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-ngayFilter="@(Model.NgayFilter?.ToString("yyyy-MM-dd"))"
+                               asp-route-trangThaiFilter="@Model.TrangThaiFilter"
+                               asp-route-maLoaiSanFilter="@Model.MaLoaiSanFilter"
+                               asp-route-maKhuVucFilter="@Model.MaKhuVucFilter"
+                               asp-route-maSanFilter="@Model.MaSanFilter"
+                               asp-route-sortOrder="@Model.SortOrder">
+                                <i class="bi bi-chevron-left"></i> Trước
+                            </a>
+                        </li>
+
+                        @for (int i = 1; i <= Model.DanhSachDatSan.TongSoTrang; i++)
+                        {
+                            <li class="page-item @(i == Model.DanhSachDatSan.TrangHienTai ? "active" : "")">
+                                <a class="page-link"
+                                   asp-action="Index"
+                                   asp-route-pageIndex="@i"
+                                   asp-route-tuKhoa="@Model.TuKhoa"
+                                   asp-route-ngayFilter="@(Model.NgayFilter?.ToString("yyyy-MM-dd"))"
+                                   asp-route-trangThaiFilter="@Model.TrangThaiFilter"
+                                   asp-route-maLoaiSanFilter="@Model.MaLoaiSanFilter"
+                                   asp-route-maKhuVucFilter="@Model.MaKhuVucFilter"
+                                   asp-route-maSanFilter="@Model.MaSanFilter"
+                                   asp-route-sortOrder="@Model.SortOrder">
+                                    @i
+                                </a>
+                            </li>
+                        }
+
+                        <li class="page-item @(!Model.DanhSachDatSan.CoTrangSau ? "disabled" : "")">
+                            <a class="page-link"
+                               asp-action="Index"
+                               asp-route-pageIndex="@(Model.DanhSachDatSan.TrangHienTai + 1)"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-ngayFilter="@(Model.NgayFilter?.ToString("yyyy-MM-dd"))"
+                               asp-route-trangThaiFilter="@Model.TrangThaiFilter"
+                               asp-route-maLoaiSanFilter="@Model.MaLoaiSanFilter"
+                               asp-route-maKhuVucFilter="@Model.MaKhuVucFilter"
+                               asp-route-maSanFilter="@Model.MaSanFilter"
+                               asp-route-sortOrder="@Model.SortOrder">
+                                Sau <i class="bi bi-chevron-right"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+</div>

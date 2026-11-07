@@ -4,6 +4,7 @@
 @*
     Họ và tên: Khuất Anh Chiến - MSSV: 23103100234 (Module 1 - Trạng thái đăng nhập/đăng xuất, Quản lý tài khoản, Loại sân, Khu vực)
     Đào Duy Khánh - MSSV: 23103100220 (Module 2 - Điều hướng Sân thể thao & Giao diện tối giản)
+    Đào Đức Kiên - MSSV: 23103100222 (Module 3 - Điều hướng Lịch sử đặt sân & Hồ sơ cá nhân của khách hàng)
     Lê Ngọc Hải Nam - MSSV: 23103100219 (Module 4 - Bổ sung liên kết nhận sân và quản lý dịch vụ)
     Khuất Anh Chiến - MSSV: 23103100234 (Module 4 - Bổ sung liên kết xác nhận đặt sân)
 *@
@@ -45,8 +46,8 @@
                             </a>
                             <ul class="dropdown-menu shadow-sm" aria-labelledby="datSanDropdown">
                                 <li>
-                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="Index">
-                                        📋 Danh sách đặt sân
+                                    <a class="dropdown-item" asp-controller="DatSan" asp-action="LichSuDatSan">
+                                        📋 Lịch sử đặt sân
                                     </a>
                                 </li>
                                 <li>
@@ -61,9 +62,6 @@
                                     </a>
                                 </li>
                             </ul>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="KhachHang" asp-action="Index">Quản lý Khách hàng</a>
                         </li>
                         @if (Context.Session.GetString(SessionKeys.VaiTro) is "Admin" or "NhanVien")
                         {
@@ -84,6 +82,9 @@
                                         </a>
                                     </li>
                                 </ul>
+                            </li>
+                            <li class="nav-item">
+                                <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="KhachHang" asp-action="Index">Quản lý Khách hàng</a>
                             </li>
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="XacNhanDatSan" asp-action="Index">Xác nhận đặt sân</a>
@@ -112,6 +113,12 @@
                         {
                             <li class="nav-item"><a class="nav-link" asp-controller="LichSu" asp-action="CuaToi">Lịch sử của tôi</a></li>
                         }
+                        else
+                        {
+                            <li class="nav-item">
+                                <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-controller="DatSan" asp-action="LichSuDatSan">Lịch sử đặt sân</a>
+                            </li>
+                        }
                         <li class="nav-item">
                             <a class="nav-link px-3 py-2 text-secondary fw-medium rounded" asp-area="" asp-controller="Home" asp-action="Privacy">Chính sách</a>
                         </li>
@@ -123,14 +130,31 @@
                     <ul class="navbar-nav">
                         @if (!string.IsNullOrEmpty(hoTen))
                         {
-                            <li class="nav-item">
-                                <span class="nav-link text-dark">Xin chào, <strong>@hoTen</strong> (@vaiTro)</span>
-                            </li>
-                            <li class="nav-item">
-                                <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="my-1">
-                                    @Html.AntiForgeryToken()
-                                    <button type="submit" class="btn btn-outline-secondary btn-sm">Đăng xuất</button>
-                                </form>
+                            <li class="nav-item dropdown">
+                                <a class="nav-link dropdown-toggle text-dark fw-semibold" href="#" id="userMenuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                                    <i class="bi bi-person-circle text-primary"></i> Xin chào, <strong>@hoTen</strong> (@vaiTro)
+                                </a>
+                                <ul class="dropdown-menu dropdown-menu-end shadow-sm" aria-labelledby="userMenuDropdown">
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="KhachHang" asp-action="HoSoCaNhan">
+                                            <i class="bi bi-person-badge me-2 text-primary"></i> Hồ sơ cá nhân
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a class="dropdown-item" asp-controller="DatSan" asp-action="LichSuDatSan">
+                                            <i class="bi bi-clock-history me-2 text-info"></i> Lịch sử đặt sân
+                                        </a>
+                                    </li>
+                                    <li><hr class="dropdown-divider"></li>
+                                    <li>
+                                        <form asp-controller="TaiKhoan" asp-action="DangXuat" method="post" class="px-2">
+                                            @Html.AntiForgeryToken()
+                                            <button type="submit" class="btn btn-outline-danger btn-sm w-100">
+                                                <i class="bi bi-box-arrow-right"></i> Đăng xuất
+                                            </button>
+                                        </form>
+                                    </li>
+                                </ul>
                             </li>
                         }
                         else
