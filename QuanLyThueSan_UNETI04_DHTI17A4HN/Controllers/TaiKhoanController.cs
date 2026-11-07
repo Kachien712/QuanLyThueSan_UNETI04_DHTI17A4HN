@@ -65,6 +65,10 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             if (!string.IsNullOrEmpty(returnUrl) && Url.IsLocalUrl(returnUrl))
                 return Redirect(returnUrl);
 
+            // Admin đăng nhập xong vào thẳng Dashboard thay vì trang chủ công khai
+            if (taiKhoan.VaiTro == "Admin")
+                return RedirectToAction("Index", "Dashboard");
+
             return RedirectToAction("Index", "Home");
         }
 
