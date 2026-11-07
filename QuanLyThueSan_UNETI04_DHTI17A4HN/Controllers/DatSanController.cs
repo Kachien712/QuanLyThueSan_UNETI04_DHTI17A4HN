@@ -1,6 +1,12 @@
-﻿// Họ và tên: Đào Đức Kiên
+// Họ và tên: Đào Đức Kiên
 // Mã sinh viên: 23103100222
-// Nội dung thực hiện: Module 3 - Controller Đặt sân & Tìm sân trống (Kiểm tra trùng lịch bằng LINQ, Validation thời gian và Action Create)
+// Nội dung thực hiện: Module 3 - Controller Đặt sân & Tìm sân trống
+// - Commit 1: Thuật toán kiểm tra trùng lịch LINQ
+// - Commit 2, 3, 4: Tìm sân trống và validation thời gian
+// - Commit 5, 6, 7, 8: Action Create GET/POST tạo đơn đặt sân
+// - Commit 9, 10: Tra cứu lịch sử đặt sân của khách hàng (LichSuDatSan)
+// - Commit 11, 12: Xem chi tiết đơn đặt sân (Details)
+// - Commit 13: Hủy đặt sân (HuyDatSan)
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -67,7 +73,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 model.GioKetThuc = new TimeSpan(9, 30, 0); // 09:30
             }
 
-            // ===== COMMIT 4: VALIDATION NGHIỆP VỤ THỜI GIAN TRA CỨU SÂN =====
+            // Validation nghiệp vụ thời gian tra cứu sân
             bool coLoiValidation = false;
 
             // 1. Ngày sử dụng không được trong quá khứ
@@ -110,19 +116,16 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 .Where(s => s.TinhTrang == "Đang hoạt động")
                 .AsQueryable();
 
-            // Lọc theo Loại sân nếu người dùng chọn
             if (model.MaLoaiSan.HasValue)
             {
                 querySan = querySan.Where(s => s.MaLoaiSan == model.MaLoaiSan.Value);
             }
 
-            // Lọc theo Khu vực nếu người dùng chọn
             if (model.MaKhuVuc.HasValue)
             {
                 querySan = querySan.Where(s => s.MaKhuVuc == model.MaKhuVuc.Value);
             }
 
-            // Lọc theo Sức chứa nếu có yêu cầu số người
             if (model.SoNguoiYeuCau.HasValue && model.SoNguoiYeuCau.Value > 0)
             {
                 querySan = querySan.Where(s => s.SucChua >= model.SoNguoiYeuCau.Value);
@@ -175,7 +178,6 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         {
             var viewModel = new DatSanCreateViewModel();
 
-            // Tự động nhận diện tài khoản đang đăng nhập trong Session
             var maTaiKhoan = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);
             var vaiTro = HttpContext.Session.GetString(SessionKeys.VaiTro);
 
@@ -249,14 +251,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 
         // =========================================================================
         // 4. XỬ LÝ LƯU ĐƠN ĐẶT SÂN (POST - Commit STT 7 & 8)
-        // Kiểm tra 7 quy tắc nghiệp vụ EF Core & LINQ:
-        //  1) Khách hàng hợp lệ và đang hoạt động
-        //  2) Sân hợp lệ và đang ở tình trạng "Đang hoạt động"
-        //  3) Không được đặt lịch lùi về quá khứ
-        //  4) Khung giờ hoạt động từ 05:00 đến 23:00
-        //  5) Thời lượng tối thiểu 30 phút (Giờ kết thúc > Giờ bắt đầu)
-        //  6) Số người tham gia không vượt quá sức chứa tối đa của sân
-        //  7) Gọi thuật toán LINQ kiểm tra trùng lịch (KiemTraTrungLichAsync)
+        // Kiểm tra 7 quy tắc nghiệp vụ EF Core & LINQ
         // =========================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -336,7 +331,6 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 ModelState.AddModelError("GioKetThuc", "Thời lượng thuê sân tối thiểu phải từ 30 phút trở lên.");
             }
 
-            // Nếu ngày là hôm nay thì giờ bắt đầu phải sau giờ hiện tại
             if (model.NgaySuDung.Date == DateTime.Today && model.GioBatDau <= DateTime.Now.TimeOfDay)
             {
                 ModelState.AddModelError("GioBatDau", "Giờ bắt đầu phải lớn hơn thời điểm hiện tại.");
@@ -352,7 +346,6 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 }
             }
 
-            // Nếu có bất kỳ lỗi nào, nạp lại dropdown và render lại view
             if (!ModelState.IsValid)
             {
                 await NapDropdownDatSanAsync(model);
@@ -369,18 +362,180 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 GioKetThuc = model.GioKetThuc,
                 NgayDat = DateTime.Now,
                 SoNguoi = model.SoNguoi,
-                TrangThai = "Chờ xác nhận", // Trạng thái mặc định theo quy trình duyệt đặt sân
+                TrangThai = "Chờ xác nhận",
                 GhiChu = model.GhiChu?.Trim()
             };
 
             _context.DatSans.Add(donDatSan);
             await _context.SaveChangesAsync();
 
-            // Thông báo thành công qua TempData
             TempData["ThanhCong"] = $"Tạo đơn đặt sân thành công (Mã đơn: #{donDatSan.MaDatSan})! Trạng thái: Chờ xác nhận.";
 
-            // Điều hướng sang Tìm sân trống kèm thông báo
-            return RedirectToAction(nameof(TimSanTrong));
+            // Điều hướng sang trang Lịch sử đặt sân của tôi (Commit 9 & 10)
+            return RedirectToAction(nameof(LichSuDatSan));
+        }
+
+        // =========================================================================
+        // 5. COMMIT 9 & 10: TRA CỨU LỊCH SỬ ĐẶT SÂN CỦA KHÁCH HÀNG (LichSuDatSan)
+        // Action GET lọc danh sách đặt sân theo MaKhachHang đang đăng nhập
+        // =========================================================================
+        [HttpGet]
+        [PhanQuyen]
+        public async Task<IActionResult> LichSuDatSan(string? trangThaiFilter)
+        {
+            var maTaiKhoan = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);
+            var vaiTro = HttpContext.Session.GetString(SessionKeys.VaiTro);
+
+            var query = _context.DatSans
+                .Include(d => d.KhachHang)
+                .Include(d => d.SanTheThao).ThenInclude(s => s.LoaiSan)
+                .Include(d => d.SanTheThao).ThenInclude(s => s.KhuVuc)
+                .AsNoTracking()
+                .AsQueryable();
+
+            // Nếu người dùng là Khách hàng: Luôn lọc danh sách theo MaKhachHang của chính họ
+            if (vaiTro == "KhachHang" && maTaiKhoan.HasValue)
+            {
+                var khachHang = await _context.KhachHangs.FirstOrDefaultAsync(k => k.MaTaiKhoan == maTaiKhoan.Value);
+                if (khachHang != null)
+                {
+                    query = query.Where(d => d.MaKhachHang == khachHang.MaKhachHang);
+                    ViewBag.TenKhachHang = khachHang.HoTen;
+                }
+                else
+                {
+                    query = query.Where(d => false);
+                }
+            }
+
+            ViewBag.VaiTro = vaiTro;
+            ViewBag.LaKhachHang = (vaiTro == "KhachHang");
+
+            // Lọc theo trạng thái nếu có
+            if (!string.IsNullOrWhiteSpace(trangThaiFilter))
+            {
+                query = query.Where(d => d.TrangThai == trangThaiFilter);
+            }
+
+            var danhSach = await query
+                .OrderByDescending(d => d.NgayDat)
+                .ThenByDescending(d => d.NgaySuDung)
+                .ToListAsync();
+
+            ViewBag.TrangThaiFilter = trangThaiFilter;
+
+            return View(danhSach);
+        }
+
+        // Action phụ trợ: Nếu người dùng truy cập /DatSan/Index thì tự động điều hướng sang LichSuDatSan
+        [HttpGet]
+        [PhanQuyen]
+        public IActionResult Index() => RedirectToAction(nameof(LichSuDatSan));
+
+        // =========================================================================
+        // 6. COMMIT 11 & 12: XEM CHI TIẾT ĐƠN ĐẶT SÂN (Details)
+        // Hiển thị đầy đủ thông tin: Sân, giờ thuê, khách hàng, thông tin dịch vụ kèm theo
+        // =========================================================================
+        [HttpGet]
+        [PhanQuyen]
+        public async Task<IActionResult> Details(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            var donDatSan = await _context.DatSans
+                .Include(d => d.KhachHang)
+                .Include(d => d.SanTheThao).ThenInclude(s => s.LoaiSan)
+                .Include(d => d.SanTheThao).ThenInclude(s => s.KhuVuc)
+                .Include(d => d.SuDungDichVus).ThenInclude(s => s.DichVu)
+                .AsNoTracking()
+                .FirstOrDefaultAsync(m => m.MaDatSan == id.Value);
+
+            if (donDatSan == null)
+            {
+                return NotFound();
+            }
+
+            var maTaiKhoan = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);
+            var vaiTro = HttpContext.Session.GetString(SessionKeys.VaiTro);
+
+            // Bảo mật: Khách hàng chỉ được xem đơn của chính mình
+            if (vaiTro == "KhachHang")
+            {
+                if (donDatSan.KhachHang == null || donDatSan.KhachHang.MaTaiKhoan != maTaiKhoan)
+                {
+                    TempData["Loi"] = "Bạn không có quyền xem thông tin đơn đặt sân của khách hàng khác.";
+                    return RedirectToAction(nameof(LichSuDatSan));
+                }
+            }
+
+            // Kiểm tra quy định hủy đơn (Commit 13):
+            // Khách hàng chỉ được hủy khi đơn ở trạng thái "Chờ xác nhận" và trước giờ bắt đầu tối thiểu 2 tiếng
+            var (choPhepKhachHuy, lyDoKhongChoHuy) = DatSanRuleHelper.KiemTraDieuKienHuy(
+                donDatSan.TrangThai, donDatSan.NgaySuDung, donDatSan.GioBatDau, DateTime.Now);
+
+            ViewBag.ChoPhepKhachHuy = choPhepKhachHuy;
+            ViewBag.LyDoKhongChoHuy = lyDoKhongChoHuy;
+
+            return View(donDatSan);
+        }
+
+        // =========================================================================
+        // 7. COMMIT 13: HỦY ĐẶT SÂN (HuyDatSan)
+        // Khách hàng chỉ được hủy khi đơn ở trạng thái "Chờ xác nhận" và trước giờ bắt đầu tối thiểu 2 tiếng
+        // Cập nhật trạng thái thành "Đã hủy"
+        // =========================================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [PhanQuyen]
+        public async Task<IActionResult> HuyDatSan(int id, string? lyDoHuy)
+        {
+            var donDatSan = await _context.DatSans
+                .Include(d => d.KhachHang)
+                .FirstOrDefaultAsync(d => d.MaDatSan == id);
+
+            if (donDatSan == null)
+            {
+                return NotFound();
+            }
+
+            var maTaiKhoan = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);
+            var vaiTro = HttpContext.Session.GetString(SessionKeys.VaiTro);
+
+            // Bảo mật: Khách hàng chỉ được hủy đơn của chính mình
+            if (vaiTro == "KhachHang")
+            {
+                if (donDatSan.KhachHang == null || donDatSan.KhachHang.MaTaiKhoan != maTaiKhoan)
+                {
+                    TempData["Loi"] = "Bạn không có quyền hủy đơn đặt sân của khách hàng khác.";
+                    return RedirectToAction(nameof(LichSuDatSan));
+                }
+            }
+
+            // Kiểm tra điều kiện hủy theo quy định Commit 13
+            var (choPhep, lyDo) = DatSanRuleHelper.KiemTraDieuKienHuy(
+                donDatSan.TrangThai, donDatSan.NgaySuDung, donDatSan.GioBatDau, DateTime.Now);
+
+            if (!choPhep)
+            {
+                TempData["Loi"] = lyDo;
+                return RedirectToAction(nameof(Details), new { id });
+            }
+
+            // Cập nhật trạng thái thành "Đã hủy"
+            donDatSan.TrangThai = "Đã hủy";
+            string thongTinHuy = $"[Đã hủy lúc {DateTime.Now:HH:mm dd/MM/yyyy}]: {(string.IsNullOrWhiteSpace(lyDoHuy) ? "Khách hàng yêu cầu hủy đơn" : lyDoHuy.Trim())}";
+            donDatSan.GhiChu = string.IsNullOrWhiteSpace(donDatSan.GhiChu)
+                ? thongTinHuy
+                : $"{donDatSan.GhiChu} | {thongTinHuy}";
+
+            _context.Update(donDatSan);
+            await _context.SaveChangesAsync();
+
+            TempData["ThanhCong"] = $"Hủy đơn đặt sân #{donDatSan.MaDatSan} thành công!";
+            return RedirectToAction(nameof(LichSuDatSan));
         }
 
         // =========================================================================

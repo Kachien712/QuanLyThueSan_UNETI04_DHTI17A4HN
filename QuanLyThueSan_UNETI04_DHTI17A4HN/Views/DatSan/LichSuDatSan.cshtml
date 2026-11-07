@@ -1,0 +1,257 @@
+@* 
+    Họ và tên: Đào Đức Kiên
+    Mã sinh viên: 23103100222
+    Nội dung thực hiện: Module 3 - Giao diện tra cứu lịch sử đặt sân của Khách hàng (Commit 9 & 10)
+    - Hiển thị danh sách phiếu đặt sân theo tài khoản đang đăng nhập
+    - Lọc theo trạng thái và hiển thị Badge trực quan
+    - Tích hợp nút xem chi tiết và hủy đơn đặt sân (Commit 13)
+*@
+@model IEnumerable<QuanLyThueSan_UNETI04_DHTI17A4HN.Models.DatSan>
+
+@{
+    ViewData["Title"] = "Lịch sử đặt sân của tôi";
+    string? currentFilter = ViewBag.TrangThaiFilter as string;
+}
+
+<div class="container-fluid px-0">
+    <!-- Breadcrumb điều hướng -->
+    <nav aria-label="breadcrumb" class="mb-3">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Trang chủ</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Lịch sử đặt sân</li>
+        </ol>
+    </nav>
+
+    <!-- Tiêu đề trang và nút thao tác nhanh -->
+    <div class="card shadow-sm border-0 mb-4 bg-light">
+        <div class="card-body p-4 d-flex flex-wrap justify-content-between align-items-center gap-3">
+            <div>
+                <h3 class="fw-bold text-dark mb-1">
+                    <i class="bi bi-clock-history text-primary"></i> Lịch sử đặt sân của tôi
+                </h3>
+                <p class="text-muted mb-0">
+                    Theo dõi, kiểm tra tình trạng và quản lý các lịch đặt sân của bạn 
+                    @(ViewBag.TenKhachHang != null ? $"({ViewBag.TenKhachHang})" : "")
+                </p>
+            </div>
+            <div class="d-flex gap-2">
+                <a asp-action="TimSanTrong" class="btn btn-outline-primary">
+                    <i class="bi bi-search"></i> Tra cứu sân trống
+                </a>
+                <a asp-action="Create" class="btn btn-success fw-semibold">
+                    <i class="bi bi-plus-circle"></i> Đặt sân mới
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thông báo kết quả thao tác -->
+    @if (TempData["ThanhCong"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show rounded-2 py-3 px-3 shadow-sm border-0 border-start border-4 border-success mb-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-check-circle-fill fs-4 text-success me-3"></i>
+                <div>
+                    <strong>Thành công!</strong> @TempData["ThanhCong"]
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["Loi"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show rounded-2 py-3 px-3 shadow-sm border-0 border-start border-4 border-danger mb-3" role="alert">
+            <div class="d-flex align-items-center">
+                <i class="bi bi-exclamation-triangle-fill fs-4 text-danger me-3"></i>
+                <div>
+                    <strong>Lỗi:</strong> @TempData["Loi"]
+                </div>
+            </div>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- THANH LỌC TRẠNG THÁI DẠNG PILLS/TABS (Commit 9 & 10) -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body py-2 px-3">
+            <div class="d-flex flex-wrap align-items-center gap-2">
+                <span class="text-muted small fw-semibold me-2"><i class="bi bi-funnel"></i> Trạng thái:</span>
+                <a asp-action="LichSuDatSan" 
+                   class="btn btn-sm @(string.IsNullOrEmpty(currentFilter) ? "btn-primary" : "btn-outline-secondary") rounded-pill px-3">
+                    Tất cả
+                </a>
+                <a asp-action="LichSuDatSan" asp-route-trangThaiFilter="Chờ xác nhận"
+                   class="btn btn-sm @(currentFilter == "Chờ xác nhận" ? "btn-warning text-dark fw-bold" : "btn-outline-secondary") rounded-pill px-3">
+                    Chờ xác nhận
+                </a>
+                <a asp-action="LichSuDatSan" asp-route-trangThaiFilter="Đã xác nhận"
+                   class="btn btn-sm @(currentFilter == "Đã xác nhận" ? "btn-info text-dark fw-bold" : "btn-outline-secondary") rounded-pill px-3">
+                    Đã xác nhận
+                </a>
+                <a asp-action="LichSuDatSan" asp-route-trangThaiFilter="Đang sử dụng"
+                   class="btn btn-sm @(currentFilter == "Đang sử dụng" ? "btn-success" : "btn-outline-secondary") rounded-pill px-3">
+                    Đang sử dụng
+                </a>
+                <a asp-action="LichSuDatSan" asp-route-trangThaiFilter="Hoàn thành"
+                   class="btn btn-sm @(currentFilter == "Hoàn thành" ? "btn-primary" : "btn-outline-secondary") rounded-pill px-3">
+                    Hoàn thành
+                </a>
+                <a asp-action="LichSuDatSan" asp-route-trangThaiFilter="Đã hủy"
+                   class="btn btn-sm @(currentFilter == "Đã hủy" ? "btn-danger" : "btn-outline-secondary") rounded-pill px-3">
+                    Đã hủy
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- DANH SÁCH LỊCH SỬ ĐẶT SÂN -->
+    @if (Model == null || !Model.Any())
+    {
+        <div class="card shadow-sm border-0 text-center py-5">
+            <div class="card-body">
+                <i class="bi bi-inbox text-muted" style="font-size: 3.5rem;"></i>
+                <h5 class="fw-bold text-dark mt-3">Chưa có lịch sử đặt sân nào</h5>
+                <p class="text-muted mb-4">
+                    @(string.IsNullOrEmpty(currentFilter) 
+                        ? "Bạn chưa thực hiện đơn đặt sân thể thao nào trong hệ thống." 
+                        : $"Không tìm thấy đơn đặt sân nào ở trạng thái '{currentFilter}'.")
+                </p>
+                <div class="d-flex justify-content-center gap-2">
+                    <a asp-action="TimSanTrong" class="btn btn-primary px-4">
+                        <i class="bi bi-search"></i> Tra cứu sân trống ngay
+                    </a>
+                    @if (!string.IsNullOrEmpty(currentFilter))
+                    {
+                        <a asp-action="LichSuDatSan" class="btn btn-outline-secondary">
+                            Xem tất cả trạng thái
+                        </a>
+                    }
+                </div>
+            </div>
+        </div>
+    }
+    else
+    {
+        <div class="card shadow-sm border-0">
+            <div class="card-header bg-white py-3 d-flex justify-content-between align-items-center">
+                <h5 class="fw-bold text-dark mb-0">
+                    <i class="bi bi-list-check text-primary"></i> Danh sách đơn đặt sân (@Model.Count() đơn)
+                </h5>
+            </div>
+            <div class="table-responsive">
+                <table class="table table-hover align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="text-center" style="width: 80px;">Mã đơn</th>
+                            <th>Sân thể thao</th>
+                            <th>Ngày sử dụng</th>
+                            <th>Khung giờ thuê</th>
+                            <th class="text-center">Số người</th>
+                            <th>Ngày tạo đơn</th>
+                            <th class="text-center">Trạng thái</th>
+                            <th class="text-end" style="width: 180px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var item in Model)
+                        {
+                            string badgeClass = item.TrangThai switch
+                            {
+                                "Chờ xác nhận" => "bg-warning text-dark",
+                                "Đã xác nhận" => "bg-info text-dark",
+                                "Đang sử dụng" => "bg-success",
+                                "Chờ thanh toán" => "bg-secondary",
+                                "Hoàn thành" => "bg-primary",
+                                "Đã hủy" => "bg-danger",
+                                _ => "bg-light text-dark"
+                            };
+
+                            // Kiểm tra điều kiện hủy: Trạng thái "Chờ xác nhận" và trước giờ bắt đầu tối thiểu 2 tiếng
+                            DateTime thoiDiemBatDau = item.NgaySuDung.Date.Add(item.GioBatDau);
+                            bool duDieuKienHuy = (item.TrangThai == "Chờ xác nhận" && (thoiDiemBatDau - DateTime.Now >= TimeSpan.FromHours(2)));
+                            double thoiLuong = Math.Round((item.GioKetThuc - item.GioBatDau).TotalHours, 1);
+
+                            <tr>
+                                <td class="text-center fw-bold text-primary">
+                                    #@item.MaDatSan
+                                </td>
+                                <td>
+                                    <div class="fw-bold text-dark">@(item.SanTheThao?.TenSan ?? "Sân #" + item.MaSan)</div>
+                                    <small class="text-muted">
+                                        @(item.SanTheThao?.LoaiSan?.TenLoaiSan ?? "Tiêu chuẩn") 
+                                        &bull; @(item.SanTheThao?.KhuVuc?.TenKhuVuc ?? "Chưa phân khu")
+                                    </small>
+                                </td>
+                                <td>
+                                    <strong class="text-dark">@item.NgaySuDung.ToString("dd/MM/yyyy")</strong>
+                                    <small class="d-block text-muted">@item.NgaySuDung.ToString("dddd", new System.Globalization.CultureInfo("vi-VN"))</small>
+                                </td>
+                                <td>
+                                    <span class="fw-semibold">@item.GioBatDau.ToString(@"hh\:mm") - @item.GioKetThuc.ToString(@"hh\:mm")</span>
+                                    <small class="text-muted d-block">(@thoiLuong giờ)</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge bg-light text-dark border">@item.SoNguoi người</span>
+                                </td>
+                                <td>
+                                    <small class="text-muted">@item.NgayDat.ToString("HH:mm dd/MM/yyyy")</small>
+                                </td>
+                                <td class="text-center">
+                                    <span class="badge @badgeClass px-2 py-1 rounded-pill">@item.TrangThai</span>
+                                </td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-1">
+                                        <a asp-action="Details" asp-route-id="@item.MaDatSan" class="btn btn-outline-primary btn-sm" title="Xem chi tiết đơn">
+                                            <i class="bi bi-eye"></i> Chi tiết
+                                        </a>
+
+                                        @if (duDieuKienHuy)
+                                        {
+                                            <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                    data-bs-toggle="modal" data-bs-target="#modalHuyDon_@item.MaDatSan" title="Hủy đặt sân">
+                                                <i class="bi bi-x-circle"></i> Hủy
+                                            </button>
+
+                                            <!-- Modal Xác nhận Hủy đơn -->
+                                            <div class="modal fade text-start" id="modalHuyDon_@item.MaDatSan" tabindex="-1" aria-hidden="true">
+                                                <div class="modal-dialog">
+                                                    <div class="modal-content">
+                                                        <form asp-action="HuyDatSan" method="post">
+                                                            @Html.AntiForgeryToken()
+                                                            <input type="hidden" name="id" value="@item.MaDatSan" />
+                                                            <div class="modal-header bg-danger text-white py-2">
+                                                                <h6 class="modal-title fw-bold">
+                                                                    <i class="bi bi-exclamation-triangle-fill"></i> Xác nhận hủy đơn #@item.MaDatSan
+                                                                </h6>
+                                                                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                                                            </div>
+                                                            <div class="modal-body">
+                                                                <p class="mb-2">
+                                                                    Bạn có chắc chắn muốn hủy đơn đặt sân <strong>@(item.SanTheThao?.TenSan)</strong> vào ngày <strong>@item.NgaySuDung.ToString("dd/MM/yyyy")</strong> (@item.GioBatDau.ToString(@"hh\:mm") - @item.GioKetThuc.ToString(@"hh\:mm")) không?
+                                                                </p>
+                                                                <div class="mb-2">
+                                                                    <label class="form-label small fw-semibold">Lý do hủy đơn:</label>
+                                                                    <textarea name="lyDoHuy" class="form-control" rows="3" placeholder="Nhập lý do hủy (VD: Bận việc đột xuất, đổi lịch thi đấu...)" required></textarea>
+                                                                </div>
+                                                                <small class="text-danger fst-italic">Lưu ý: Chỉ hủy được trước giờ bắt đầu tối thiểu 2 tiếng. Sau khi hủy sẽ không thể hoàn tác.</small>
+                                                            </div>
+                                                            <div class="modal-footer py-2">
+                                                                <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Đóng</button>
+                                                                <button type="submit" class="btn btn-danger btn-sm px-3">Xác nhận hủy đơn</button>
+                                                            </div>
+                                                        </form>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        }
+                                    </div>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    }
+</div>
