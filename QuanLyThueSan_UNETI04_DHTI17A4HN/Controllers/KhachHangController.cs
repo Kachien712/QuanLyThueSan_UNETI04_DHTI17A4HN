@@ -277,7 +277,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // Cho phép Khách hàng đăng nhập tự quản lý thông tin: Họ tên, SĐT, Email, Địa chỉ
         // =========================================================================
         [HttpGet]
-        [PhanQuyen]
+        [PhanQuyen("KhachHang")]
         public async Task<IActionResult> HoSoCaNhan()
         {
             var maTaiKhoan = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);
@@ -331,7 +331,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        [PhanQuyen]
+        [PhanQuyen("KhachHang")]
         public async Task<IActionResult> HoSoCaNhan(KhachHangHoSoViewModel model)
         {
             var maTaiKhoan = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);

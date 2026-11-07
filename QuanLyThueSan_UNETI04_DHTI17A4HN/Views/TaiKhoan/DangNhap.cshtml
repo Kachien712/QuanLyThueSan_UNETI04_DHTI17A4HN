@@ -16,6 +16,13 @@
                 <h5 class="card-title mb-0">Đăng nhập hệ thống</h5>
             </div>
             <div class="card-body p-4">
+                @if (Context.Request.Query["biKhoa"] == "1")
+                {
+                    <div class="alert alert-warning" role="alert">
+                        Tài khoản của bạn đã bị khóa hoặc không còn tồn tại. Vui lòng liên hệ quản trị viên.
+                    </div>
+                }
+
                 <form asp-action="DangNhap" method="post">
                     @Html.AntiForgeryToken()
                     <input type="hidden" name="returnUrl" value="@ViewData["ReturnUrl"]" />

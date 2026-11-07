@@ -124,7 +124,7 @@
                             <th>Email</th>
                             <th class="text-center" style="width: 140px;">Vai trò</th>
                             <th class="text-center" style="width: 130px;">Trạng thái</th>
-                            <th class="text-end pe-3" style="width: 250px;">Thao tác</th>
+                            <th class="text-end pe-3" style="width: 340px;">Thao tác</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -170,10 +170,25 @@
                                         }
                                     </td>
                                     <td class="text-end pe-3">
-                                        <div class="d-inline-flex gap-1">
-                                            <!-- Nút Khóa / Mở khóa -->
+                                        <div class="d-flex flex-wrap gap-1 justify-content-end align-items-center">
                                             @if (!isCurrentUser)
                                             {
+                                                <!-- Đổi vai trò (Admin / Nhân viên / Khách hàng) -->
+                                                <form asp-action="DoiVaiTro" asp-route-id="@item.MaTaiKhoan" method="post" class="d-inline-flex align-items-center gap-1">
+                                                    @Html.AntiForgeryToken()
+                                                    <select name="vaiTroMoi" class="form-select form-select-sm" style="width: 125px;" title="Chọn vai trò mới">
+                                                        <option value="Admin" selected="@(item.VaiTro == "Admin" ? "selected" : null)">Quản trị viên</option>
+                                                        <option value="NhanVien" selected="@(item.VaiTro == "NhanVien" ? "selected" : null)">Nhân viên</option>
+                                                        <option value="KhachHang" selected="@(item.VaiTro == "KhachHang" ? "selected" : null)">Khách hàng</option>
+                                                    </select>
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary"
+                                                            onclick="return confirm('Đổi vai trò cho tài khoản @item.TenDangNhap? Quyền mới có hiệu lực ngay từ lần truy cập kế tiếp.');"
+                                                            title="Cập nhật vai trò">
+                                                        <i class="bi bi-person-gear"></i>
+                                                    </button>
+                                                </form>
+
+                                                <!-- Nút Khóa / Mở khóa -->
                                                 <form asp-action="DoiTrangThai" asp-route-id="@item.MaTaiKhoan" method="post" class="d-inline">
                                                     @Html.AntiForgeryToken()
                                                     <button type="submit" class="btn btn-sm @(item.TrangThai ? "btn-outline-danger" : "btn-outline-success")"
