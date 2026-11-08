@@ -1,7 +1,7 @@
 @* 
     Họ và tên: Đào Duy Khánh
     Mã sinh viên: 23103100220
-    Nội dung thực hiện: Module 2 - Giao diện Danh sách Bảng giá thuê sân theo khung giờ (Minimalism style)
+    Nội dung thực hiện: Module 2 - Giao diện Danh sách Bảng giá thuê sân & Tiện ích tra cứu giá phù hợp (Mục 6.2, 6.3, 6.8 Minimalism style)
 *@
 @model IEnumerable<QuanLyThueSan_UNETI04_DHTI17A4HN.Models.BangGia>
 
@@ -50,6 +50,47 @@
                     <a asp-action="Index" class="btn btn-outline-secondary btn-sm w-100 rounded-1">Xem tất cả</a>
                 </div>
             </form>
+        </div>
+    </div>
+
+
+    <!-- TIỆN ÍCH TRA CỨU ĐƠN GIÁ PHÙ HỢP THEO KHUNG GIỜ (MỤC 6.8) -->
+    <div class="border rounded-2 bg-white mb-3">
+        <div class="border-bottom py-2 px-3 d-flex justify-content-between align-items-center bg-light bg-opacity-50">
+            <span class="fw-semibold small text-muted text-uppercase">
+                Tra cứu đơn giá áp dụng theo khung giờ (Mục 6.8)
+            </span>
+            <span class="badge bg-secondary bg-opacity-10 text-secondary border small fw-normal">Xác định giá tự động</span>
+        </div>
+        <div class="p-3">
+            <div class="row g-2 align-items-end">
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label small text-muted mb-1">Sân thể thao</label>
+                    <select id="tcMaSan" asp-items="ViewBag.DanhSachSan" class="form-select form-select-sm rounded-1">
+                        <option value="">-- Chọn sân tra cứu --</option>
+                    </select>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <label class="form-label small text-muted mb-1">Ngày sử dụng</label>
+                    <input type="date" id="tcNgay" class="form-control form-control-sm rounded-1" value="@DateTime.Today.ToString("yyyy-MM-dd")" />
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <label class="form-label small text-muted mb-1">Giờ bắt đầu</label>
+                    <input type="time" id="tcGioBatDau" class="form-control form-control-sm rounded-1" value="08:00" />
+                </div>
+                <div class="col-md-2 col-sm-6">
+                    <label class="form-label small text-muted mb-1">Giờ kết thúc</label>
+                    <input type="time" id="tcGioKetThuc" class="form-control form-control-sm rounded-1" value="10:00" />
+                </div>
+                <div class="col-md-2 col-sm-12">
+                    <button type="button" id="btnTraCuuGia" class="btn btn-dark btn-sm w-100 rounded-1">
+                        Xác định giá
+                    </button>
+                </div>
+            </div>
+
+            <!-- Vùng hiển thị kết quả -->
+            <div id="vungKetQuaGia" class="mt-3 p-2 rounded-1 border small d-none"></div>
         </div>
     </div>
 
@@ -121,3 +162,43 @@
         </div>
     </div>
 </div>
+
+
+@section Scripts {
+    <script>
+        document.getElementById('btnTraCuuGia')?.addEventListener('click', function () {
+            const maSan = document.getElementById('tcMaSan').value;
+            const ngay = document.getElementById('tcNgay').value;
+            const gioBatDau = document.getElementById('tcGioBatDau').value;
+            const gioKetThuc = document.getElementById('tcGioKetThuc').value;
+            const vungKetQua = document.getElementById('vungKetQuaGia');
+
+            if (!maSan) {
+                vungKetQua.className = 'mt-3 p-2 rounded-1 border small text-danger bg-danger bg-opacity-10';
+                vungKetQua.innerHTML = '<strong>Lỗi:</strong> Vui lòng chọn sân thể thao để tra cứu.';
+                vungKetQua.classList.remove('d-none');
+                return;
+            }
+
+            vungKetQua.className = 'mt-3 p-2 rounded-1 border small text-muted bg-light';
+            vungKetQua.innerHTML = 'Đang dùng thuật toán LINQ xác định bảng giá phù hợp...';
+            vungKetQua.classList.remove('d-none');
+
+            fetch(`/BangGia/XacDinhGiaPhuHop?maSan=${encodeURIComponent(maSan)}&ngaySuDung=${encodeURIComponent(ngay)}&gioBatDau=${encodeURIComponent(gioBatDau)}&gioKetThuc=${encodeURIComponent(gioKetThuc)}`)
+                .then(res => res.json())
+                .then(data => {
+                    if (data.thanhCong) {
+                        vungKetQua.className = 'mt-3 p-2 rounded-1 border small text-success bg-success bg-opacity-10';
+                        vungKetQua.innerHTML = `<strong>Thành công:</strong> ${data.thongBao} | <strong>Thời lượng:</strong> ${data.soGio} giờ | <strong>Thành tiền dự kiến:</strong> ${data.thanhTienDinhDang}`;
+                    } else {
+                        vungKetQua.className = 'mt-3 p-2 rounded-1 border small text-danger bg-danger bg-opacity-10';
+                        vungKetQua.innerHTML = `<strong>Không khớp bảng giá:</strong> ${data.thongBao}`;
+                    }
+                })
+                .catch(() => {
+                    vungKetQua.className = 'mt-3 p-2 rounded-1 border small text-danger bg-danger bg-opacity-10';
+                    vungKetQua.innerHTML = 'Có lỗi kết nối máy chủ trong quá trình tra cứu giá.';
+                });
+        });
+    </script>
+}

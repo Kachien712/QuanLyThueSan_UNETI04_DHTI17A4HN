@@ -1,6 +1,6 @@
 // Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 2 - Controller quản lý Bảng giá thuê sân theo khung giờ (Mục 6.2, 6.3, 6.8 file Word)
+// Nội dung thực hiện: Module 2 - Controller quản lý Bảng giá thuê sân, kiểm tra khung giờ và xác định giá phù hợp (Mục 6.2, 6.3, 6.8 file Word)
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -265,6 +265,94 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 
             TempData["ThanhCong"] = $"Đã cập nhật bảng giá \"{bgCanSua.TenBangGia}\" thành công!";
             return RedirectToAction(nameof(Index), new { maSan = bgCanSua.MaSan });
+        }
+        // =========================================================================================
+        // PHƯƠNG THỨC LINQ: Xác định bảng giá hiệu lực phù hợp (Mục 6.8 file Word)
+        // Nghiệp vụ: Khi khách hàng chọn sân, ngày và thời gian dự kiến, hệ thống tự động xác định
+        // bảng giá đang hiệu lực phù hợp. Không cho người dùng tự nhập đơn giá.
+        // Quy tắc nhóm đã thống nhất: Đơn đặt sân phải nằm TRỌN trong một khung giá đang hiệu lực.
+        // =========================================================================================
+        public static async Task<BangGia?> LayBangGiaHieuLucAsync(
+            ApplicationDbContext context,
+            int maSan,
+            DateTime ngaySuDung,
+            TimeSpan gioBatDau,
+            TimeSpan gioKetThuc)
+        {
+            if (gioKetThuc <= gioBatDau)
+            {
+                return null;
+            }
+
+            var ngay = ngaySuDung.Date;
+
+            // Tìm bảng giá của sân, đang hoạt động, trong khoảng ngày áp dụng,
+            // và khung giờ chứa trọn vẹn thời gian đặt (GioBatDau <= batDau && GioKetThuc >= ketThuc)
+            return await context.BangGias
+                .Include(b => b.SanTheThao)
+                .AsNoTracking()
+                .Where(b => b.MaSan == maSan
+                            && b.TrangThai
+                            && b.NgayApDungTu <= ngay
+                            && b.NgayApDungDen >= ngay
+                            && b.GioBatDau <= gioBatDau
+                            && b.GioKetThuc >= gioKetThuc)
+                .OrderByDescending(b => b.NgayApDungTu)
+                .FirstOrDefaultAsync();
+        }
+
+        // =========================================================================================
+        // GET: /BangGia/XacDinhGiaPhuHop
+        // Action API tra cứu đơn giá phù hợp realtime (Mục 6.8 file Word)
+        // Trả về JSON cho giao diện hoặc các module khác gọi dùng chung
+        // =========================================================================================
+        [HttpGet]
+        public async Task<IActionResult> XacDinhGiaPhuHop(int maSan, DateTime? ngaySuDung, TimeSpan? gioBatDau, TimeSpan? gioKetThuc)
+        {
+            if (maSan <= 0)
+            {
+                return Json(new { thanhCong = false, thongBao = "Vui lòng chọn sân thể thao." });
+            }
+
+            if (!gioBatDau.HasValue || !gioKetThuc.HasValue)
+            {
+                return Json(new { thanhCong = false, thongBao = "Vui lòng chọn đầy đủ giờ bắt đầu và giờ kết thúc." });
+            }
+
+            if (gioKetThuc.Value <= gioBatDau.Value)
+            {
+                return Json(new { thanhCong = false, thongBao = "Giờ kết thúc phải lớn hơn giờ bắt đầu." });
+            }
+
+            var ngay = ngaySuDung ?? DateTime.Today;
+
+            var bangGia = await LayBangGiaHieuLucAsync(_context, maSan, ngay, gioBatDau.Value, gioKetThuc.Value);
+
+            if (bangGia == null)
+            {
+                return Json(new
+                {
+                    thanhCong = false,
+                    thongBao = "Không tìm thấy bảng giá phù hợp cho sân vào ngày và khung giờ này. Theo quy định tại Mục 6.8, đơn đặt sân phải nằm trọn trong một khung giá đang hiệu lực."
+                });
+            }
+
+            decimal soGio = (decimal)(gioKetThuc.Value - gioBatDau.Value).TotalMinutes / 60m;
+            decimal thanhTienDuKien = soGio * bangGia.DonGiaMoiGio;
+
+            return Json(new
+            {
+                thanhCong = true,
+                maBangGia = bangGia.MaBangGia,
+                tenBangGia = bangGia.TenBangGia,
+                tenSan = bangGia.SanTheThao?.TenSan,
+                donGiaMoiGio = bangGia.DonGiaMoiGio,
+                donGiaDinhDang = bangGia.DonGiaMoiGio.ToString("N0") + " đ/giờ",
+                soGio = Math.Round(soGio, 2),
+                thanhTienDuKien = thanhTienDuKien,
+                thanhTienDinhDang = thanhTienDuKien.ToString("N0") + " đ",
+                thongBao = $"Áp dụng bảng giá: \"{bangGia.TenBangGia}\" ({bangGia.DonGiaMoiGio:N0} đ/giờ)"
+            });
         }
     }
 }
