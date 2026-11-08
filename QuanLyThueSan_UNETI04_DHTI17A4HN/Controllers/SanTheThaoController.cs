@@ -1,11 +1,12 @@
-// Họ và tên: Đào Duy Khánh
+﻿// Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới, Chi tiết, Chỉnh sửa)
+// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới, Chi tiết, Chỉnh sửa, Phân quyền Mục 6.3)
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Data;
+using QuanLyThueSan_UNETI04_DHTI17A4HN.Filters;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Models;
 using QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels;
@@ -139,7 +140,9 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // =========================================================================================
         // GET: /SanTheThao/Create
         // Nghiệp vụ: Hiển thị form thêm mới sân thể thao (Mục 6.3 file Word)
+        // Phân quyền: Chỉ Admin và Nhân viên quản lý mới được thêm sân (Mục 6.3)
         // =========================================================================================
+        [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Create()
         {
             var vm = new SanTheThaoFormViewModel
@@ -170,6 +173,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // =========================================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Create(SanTheThaoFormViewModel vm)
         {
             // Kiểm tra tên sân không được trùng (Mục 13 file Word)
@@ -241,7 +245,9 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // =========================================================================================
         // GET: /SanTheThao/Edit/{id}
         // Nghiệp vụ: Hiển thị form chỉnh sửa thông tin sân thể thao (Mục 6.3 file Word)
+        // Phân quyền: Chỉ Admin và Nhân viên quản lý mới được sửa sân (Mục 6.3)
         // =========================================================================================
+        [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int? id)
         {
             if (id == null)
@@ -291,6 +297,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // =========================================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int id, SanTheThaoFormViewModel vm)
         {
             if (id != vm.MaSan)

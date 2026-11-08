@@ -1,7 +1,7 @@
 @* 
     Họ và tên: Đào Duy Khánh
     Mã sinh viên: 23103100220
-    Nội dung thực hiện: Module 2 - Giao diện danh sách sân thể thao, tìm kiếm, bộ lọc đa tiêu chí và phân trang (Minimalism style)
+    Nội dung thực hiện: Module 2 - Giao diện danh sách sân thể thao, tìm kiếm, lọc, phân trang và phân quyền quản lý (Mục 6.3, Minimalism style)
 *@
 @model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.SanTheThaoIndexViewModel
 
@@ -22,9 +22,12 @@
     <div class="border rounded-2 bg-white mb-3">
         <div class="border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
             <span class="fw-bold text-uppercase small text-muted tracking-wide">Bộ lọc và Tìm kiếm</span>
-            <a asp-action="Create" class="btn btn-dark btn-sm px-3 rounded-1">
-                Thêm sân mới
-            </a>
+            @if (Context.Session.GetString(QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers.SessionKeys.VaiTro) is "Admin" or "NhanVien")
+            {
+                <a asp-action="Create" class="btn btn-dark btn-sm px-3 rounded-1">
+                    Thêm sân mới
+                </a>
+            }
         </div>
         <div class="p-3 bg-light bg-opacity-25">
             <form method="get" asp-action="Index" class="row g-2 align-items-end">
@@ -158,10 +161,13 @@
                                            class="btn btn-sm btn-outline-dark rounded-1 px-2 py-0 small">
                                             Chi tiết
                                         </a>
-                                        <a asp-action="Edit" asp-route-id="@item.MaSan" 
-                                           class="btn btn-sm btn-outline-secondary rounded-1 px-2 py-0 small">
-                                            Sửa
-                                        </a>
+                                        @if (Context.Session.GetString(QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers.SessionKeys.VaiTro) is "Admin" or "NhanVien")
+                                        {
+                                            <a asp-action="Edit" asp-route-id="@item.MaSan" 
+                                               class="btn btn-sm btn-outline-secondary rounded-1 px-2 py-0 small">
+                                                Sửa
+                                            </a>
+                                        }
                                         <a asp-controller="BangGia" asp-action="Index" asp-route-maSan="@item.MaSan" 
                                            class="btn btn-sm btn-outline-secondary rounded-1 px-2 py-0 small">
                                             Giá
