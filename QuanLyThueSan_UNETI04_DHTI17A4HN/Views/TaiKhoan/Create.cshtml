@@ -22,8 +22,10 @@
 
                     <div class="mb-3">
                         <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
-                        <input asp-for="TenDangNhap" class="form-control" placeholder="Ví dụ: nhanvien_ca1, quanly_san..." autofocus />
+                        <input asp-for="TenDangNhap" class="form-control" placeholder="Ví dụ: nhanvien_ca1, quanly_san..." autofocus
+                               data-kiem-tra="1" data-url="@Url.Action("KiemTraTaiKhoan")" data-param="giaTri" data-truong="TenDangNhap" />
                         <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                        <span data-thong-bao class="small"></span>
                         <div class="form-text">Tên đăng nhập bắt buộc và không được trùng lặp.</div>
                     </div>
 
@@ -48,8 +50,10 @@
 
                     <div class="mb-3">
                         <label asp-for="Email" class="form-label fw-semibold"></label>
-                        <input asp-for="Email" type="email" class="form-control" placeholder="Ví dụ: nhanvien@quanyttt.edu.vn" />
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Ví dụ: nhanvien@quanyttt.edu.vn"
+                               data-kiem-tra="1" data-url="@Url.Action("KiemTraTaiKhoan")" data-param="giaTri" data-truong="Email" />
                         <span asp-validation-for="Email" class="text-danger small"></span>
+                        <span data-thong-bao class="small"></span>
                     </div>
 
                     <div class="mb-3">
@@ -85,4 +89,5 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/ajax-kiem-tra.js" asp-append-version="true"></script>
 }

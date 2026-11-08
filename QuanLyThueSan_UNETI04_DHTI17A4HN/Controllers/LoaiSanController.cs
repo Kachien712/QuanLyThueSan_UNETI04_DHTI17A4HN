@@ -82,6 +82,28 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         }
 
         // =========================================================================================
+        // GET: /LoaiSan/KiemTraTrungTen?ten=...&id=...
+        // Nghiệp vụ: AJAX kiểm tra trùng tên loại sân ngay khi nhập (Validation dùng chung).
+        // POST Create/Edit vẫn kiểm tra lại phía server nên không phụ thuộc vào JavaScript.
+        // =========================================================================================
+        [HttpGet]
+        public async Task<IActionResult> KiemTraTrungTen(string? ten, int? id)
+        {
+            if (string.IsNullOrWhiteSpace(ten))
+                return Json(new { trung = false, thongBao = "" });
+
+            var giaTri = ten.Trim().ToLower();
+            var trung = await _context.LoaiSans.AnyAsync(l => l.TenLoaiSan.ToLower() == giaTri
+                                                           && (id == null || l.MaLoaiSan != id));
+
+            return Json(new
+            {
+                trung,
+                thongBao = trung ? "Tên loại sân đã tồn tại, vui lòng chọn tên khác." : "Tên loại sân hợp lệ."
+            });
+        }
+
+        // =========================================================================================
         // GET: /LoaiSan/Create
         // =========================================================================================
         [HttpGet]

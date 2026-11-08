@@ -51,7 +51,7 @@
             <div class="card border-0 shadow-sm bg-success text-white">
                 <div class="card-body py-2 text-center">
                     <small>Đang hoạt động</small>
-                    <h4 class="mb-0 fw-bold">@Model.SoTaiKhoanHoatDong</h4>
+                    <h4 class="mb-0 fw-bold" id="soHoatDong">@Model.SoTaiKhoanHoatDong</h4>
                 </div>
             </div>
         </div>
@@ -59,7 +59,7 @@
             <div class="card border-0 shadow-sm bg-danger text-white">
                 <div class="card-body py-2 text-center">
                     <small>Đang bị khóa</small>
-                    <h4 class="mb-0 fw-bold">@Model.SoTaiKhoanBiKhoa</h4>
+                    <h4 class="mb-0 fw-bold" id="soBiKhoa">@Model.SoTaiKhoanBiKhoa</h4>
                 </div>
             </div>
         </div>
@@ -89,6 +89,34 @@
         </div>
     </div>
 
+    <!-- Biểu đồ thống kê (Chart.js) -->
+    <div class="row g-3 mb-4">
+        <div class="col-lg-5">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-pie-chart-fill text-primary me-1"></i> Tài khoản theo vai trò
+                </div>
+                <div class="card-body">
+                    <div style="height: 220px;">
+                        <canvas id="chartVaiTro"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-7">
+            <div class="card shadow-sm border-0 h-100">
+                <div class="card-header bg-white fw-semibold">
+                    <i class="bi bi-bar-chart-fill text-success me-1"></i> Tài khoản đang hoạt động / bị khóa
+                </div>
+                <div class="card-body">
+                    <div style="height: 220px;">
+                        <canvas id="chartTrangThai"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- Thanh Tìm kiếm và Bộ lọc -->
     <div class="card shadow-sm border-0 mb-4">
         <div class="card-body">
@@ -110,6 +138,8 @@
             </form>
         </div>
     </div>
+
+    <div id="thongBaoAjax" class="mb-3"></div>
 
     <!-- Bảng danh sách Tài khoản -->
     <div class="card shadow-sm border-0">
@@ -133,7 +163,6 @@
                             foreach (var item in Model.DanhSachTaiKhoan)
                             {
                                 var isCurrentUser = item.MaTaiKhoan == currentUserId;
-                                var actionLockText = item.TrangThai ? "KHÓA" : "MỞ KHÓA";
                                 <tr>
                                     <td class="ps-3 fw-bold text-muted">#@item.MaTaiKhoan</td>
                                     <td>
@@ -160,14 +189,9 @@
                                         }
                                     </td>
                                     <td class="text-center">
-                                        @if (item.TrangThai)
-                                        {
-                                            <span class="badge bg-success">Hoạt động</span>
-                                        }
-                                        else
-                                        {
-                                            <span class="badge bg-danger">Bị khóa</span>
-                                        }
+                                        <span class="badge-trang-thai badge @(item.TrangThai ? "bg-success" : "bg-danger")">
+                                            @(item.TrangThai ? "Hoạt động" : "Bị khóa")
+                                        </span>
                                     </td>
                                     <td class="text-end pe-3">
                                         <div class="d-flex flex-wrap gap-1 justify-content-end align-items-center">
@@ -188,11 +212,11 @@
                                                     </button>
                                                 </form>
 
-                                                <!-- Nút Khóa / Mở khóa -->
-                                                <form asp-action="DoiTrangThai" asp-route-id="@item.MaTaiKhoan" method="post" class="d-inline">
+                                                <!-- Nút Khóa / Mở khóa (AJAX, không tải lại trang) -->
+                                                <form asp-action="DoiTrangThaiAjax" asp-route-id="@item.MaTaiKhoan" method="post"
+                                                      class="d-inline form-doi-trang-thai" data-ten="@item.TenDangNhap">
                                                     @Html.AntiForgeryToken()
-                                                    <button type="submit" class="btn btn-sm @(item.TrangThai ? "btn-outline-danger" : "btn-outline-success")"
-                                                            onclick="return confirm('Bạn có chắc muốn @actionLockText tài khoản này?');"
+                                                    <button type="submit" class="btn btn-sm btn-doi-trang-thai @(item.TrangThai ? "btn-outline-danger" : "btn-outline-success")"
                                                             title="@(item.TrangThai ? "Khóa tài khoản" : "Mở khóa")">
                                                         <i class="bi @(item.TrangThai ? "bi-lock-fill" : "bi-unlock-fill")"></i>
                                                         @(item.TrangThai ? "Khóa" : "Mở")
@@ -276,3 +300,135 @@
         }
     </div>
 </div>
+
+@section Scripts {
+    <script src="~/lib/chartjs/chart.umd.min.js"></script>
+    <script>
+        // ===== Chart.js: thống kê tài khoản (dữ liệu đếm bằng LINQ ở TaiKhoanController.Index) =====
+        (function () {
+            var bieuDoVaiTro = document.getElementById('chartVaiTro');
+            if (bieuDoVaiTro && window.Chart) {
+                new Chart(bieuDoVaiTro, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Quản trị viên', 'Nhân viên', 'Khách hàng'],
+                        datasets: [{
+                            data: [@Model.SoAdmin, @Model.SoNhanVien, @Model.SoKhachHang],
+                            backgroundColor: ['#dc3545', '#0dcaf0', '#6c757d'],
+                            borderWidth: 0
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { position: 'bottom' } }
+                    }
+                });
+            }
+
+            var bieuDoTrangThai = document.getElementById('chartTrangThai');
+            if (bieuDoTrangThai && window.Chart) {
+                new Chart(bieuDoTrangThai, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Đang hoạt động', 'Bị khóa'],
+                        datasets: [{
+                            label: 'Số tài khoản',
+                            data: [@Model.SoTaiKhoanHoatDong, @Model.SoTaiKhoanBiKhoa],
+                            backgroundColor: ['#198754', '#dc3545'],
+                            borderRadius: 6,
+                            maxBarThickness: 90
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: { legend: { display: false } },
+                        scales: { y: { beginAtZero: true, ticks: { precision: 0 } } }
+                    }
+                });
+            }
+        })();
+
+        // ===== AJAX khóa / mở khóa tài khoản (không tải lại trang) =====
+        (function () {
+            var khuVucThongBao = document.getElementById('thongBaoAjax');
+            var henGioAn = null;
+
+            function hienThiThongBao(noiDung, thanhCong) {
+                if (!khuVucThongBao) return;
+                khuVucThongBao.innerHTML = '<div class="alert alert-' + (thanhCong ? 'success' : 'danger') +
+                    ' alert-dismissible fade show shadow-sm mb-0" role="alert">' + noiDung +
+                    '<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>';
+                clearTimeout(henGioAn);
+                henGioAn = setTimeout(function () { khuVucThongBao.innerHTML = ''; }, 5000);
+            }
+
+            function capNhatDong(form, dangHoatDong) {
+                var dong = form.closest('tr');
+                if (!dong) return;
+
+                var huy = dong.querySelector('.badge-trang-thai');
+                if (huy) {
+                    huy.textContent = dangHoatDong ? 'Hoạt động' : 'Bị khóa';
+                    huy.className = 'badge-trang-thai badge ' + (dangHoatDong ? 'bg-success' : 'bg-danger');
+                }
+
+                var nut = form.querySelector('.btn-doi-trang-thai');
+                if (nut) {
+                    nut.className = 'btn btn-sm btn-doi-trang-thai ' + (dangHoatDong ? 'btn-outline-danger' : 'btn-outline-success');
+                    nut.innerHTML = '<i class="bi ' + (dangHoatDong ? 'bi-lock-fill' : 'bi-unlock-fill') + '"></i> ' +
+                        (dangHoatDong ? 'Khóa' : 'Mở');
+                    nut.title = dangHoatDong ? 'Khóa tài khoản' : 'Mở khóa';
+                }
+
+                var soHoatDong = document.getElementById('soHoatDong');
+                var soBiKhoa = document.getElementById('soBiKhoa');
+                if (soHoatDong && soBiKhoa) {
+                    var hd = parseInt(soHoatDong.textContent, 10) || 0;
+                    var bk = parseInt(soBiKhoa.textContent, 10) || 0;
+                    soHoatDong.textContent = dangHoatDong ? hd + 1 : Math.max(0, hd - 1);
+                    soBiKhoa.textContent = dangHoatDong ? Math.max(0, bk - 1) : bk + 1;
+                }
+            }
+
+            document.querySelectorAll('.form-doi-trang-thai').forEach(function (form) {
+                form.addEventListener('submit', function (suKien) {
+                    suKien.preventDefault();
+
+                    var ten = form.getAttribute('data-ten') || 'này';
+                    if (!window.confirm('Bạn có chắc muốn thay đổi trạng thái tài khoản "' + ten + '"?')) {
+                        return;
+                    }
+
+                    var nut = form.querySelector('.btn-doi-trang-thai');
+                    if (nut) nut.disabled = true;
+
+                    fetch(form.getAttribute('action') || window.location.href, {
+                        method: 'POST',
+                        body: new FormData(form),
+                        headers: { 'X-Requested-With': 'XMLHttpRequest' }
+                    })
+                        .then(function (phanHoi) {
+                            if (!phanHoi.ok) throw new Error('HTTP ' + phanHoi.status);
+                            return phanHoi.json();
+                        })
+                        .then(function (duLieu) {
+                            if (!duLieu.thanhCong) {
+                                hienThiThongBao(duLieu.thongBao, false);
+                                return;
+                            }
+                            capNhatDong(form, duLieu.trangThai);
+                            hienThiThongBao(duLieu.thongBao, true);
+                        })
+                        .catch(function () {
+                            hienThiThongBao('Không thể kết nối máy chủ, vui lòng thử lại.', false);
+                        })
+                        .finally(function () {
+                            if (nut) nut.disabled = false;
+                        });
+                });
+            });
+        })();
+    </script>
+}

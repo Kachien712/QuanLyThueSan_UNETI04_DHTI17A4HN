@@ -83,6 +83,27 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         }
 
         // =========================================================================================
+        // GET: /KhuVuc/KiemTraTrungTen?ten=...&id=...
+        // Nghiệp vụ: AJAX kiểm tra trùng tên khu vực ngay khi nhập (Validation dùng chung).
+        // =========================================================================================
+        [HttpGet]
+        public async Task<IActionResult> KiemTraTrungTen(string? ten, int? id)
+        {
+            if (string.IsNullOrWhiteSpace(ten))
+                return Json(new { trung = false, thongBao = "" });
+
+            var giaTri = ten.Trim().ToLower();
+            var trung = await _context.KhuVucs.AnyAsync(k => k.TenKhuVuc.ToLower() == giaTri
+                                                          && (id == null || k.MaKhuVuc != id));
+
+            return Json(new
+            {
+                trung,
+                thongBao = trung ? "Tên khu vực đã tồn tại, vui lòng chọn tên khác." : "Tên khu vực hợp lệ."
+            });
+        }
+
+        // =========================================================================================
         // GET: /KhuVuc/Create
         // =========================================================================================
         [HttpGet]
