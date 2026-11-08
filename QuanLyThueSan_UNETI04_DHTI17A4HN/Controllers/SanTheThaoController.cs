@@ -1,6 +1,6 @@
 ﻿// Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp, Phân trang, Thêm mới, Chi tiết, Chỉnh sửa, Phân quyền Mục 6.3)
+// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp theo tên/sức chứa/đơn giá, Phân trang, CRUD Sân, Phân quyền Mục 6.3, 6.6)
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -78,10 +78,12 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 query = query.Where(s => s.SucChua >= sucChuaToiThieu.Value);
             }
 
-            // 4. Sắp xếp LINQ (Mục 6.6)
+            // 4. Sắp xếp LINQ (Mục 6.6: Tên sân A-Z, Z-A; Sức chứa tăng/giảm; Đơn giá tăng/giảm; Loại sân; Khu vực)
             query = sortOrder switch
             {
                 "ten_desc" => query.OrderByDescending(s => s.TenSan),
+                "dongia_asc" => query.OrderBy(s => s.BangGias.Where(b => b.TrangThai).OrderBy(b => b.DonGiaMoiGio).Select(b => (decimal?)b.DonGiaMoiGio).FirstOrDefault() ?? 0).ThenBy(s => s.TenSan),
+                "dongia_desc" => query.OrderByDescending(s => s.BangGias.Where(b => b.TrangThai).OrderByDescending(b => b.DonGiaMoiGio).Select(b => (decimal?)b.DonGiaMoiGio).FirstOrDefault() ?? 0).ThenBy(s => s.TenSan),
                 "succhua_asc" => query.OrderBy(s => s.SucChua).ThenBy(s => s.TenSan),
                 "succhua_desc" => query.OrderByDescending(s => s.SucChua).ThenBy(s => s.TenSan),
                 "loai_asc" => query.OrderBy(s => s.LoaiSan != null ? s.LoaiSan.TenLoaiSan : "").ThenBy(s => s.TenSan),

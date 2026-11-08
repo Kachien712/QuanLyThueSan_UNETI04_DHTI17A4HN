@@ -1,7 +1,7 @@
 @* 
     Họ và tên: Đào Duy Khánh
     Mã sinh viên: 23103100220
-    Nội dung thực hiện: Module 2 - Giao diện danh sách sân thể thao, tìm kiếm, lọc, phân trang và phân quyền quản lý (Mục 6.3, Minimalism style)
+    Nội dung thực hiện: Module 2 - Giao diện danh sách sân thể thao, tìm kiếm, lọc, sắp xếp (Mục 6.6), phân trang và phân quyền (Mục 6.3, Minimalism style)
 *@
 @model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.SanTheThaoIndexViewModel
 
@@ -68,6 +68,8 @@
                     <select name="sortOrder" class="form-select form-select-sm rounded-1">
                         <option value="" selected="@(string.IsNullOrEmpty(Model.SortOrder))">Tên sân (A - Z)</option>
                         <option value="ten_desc" selected="@(Model.SortOrder == "ten_desc")">Tên sân (Z - A)</option>
+                        <option value="dongia_asc" selected="@(Model.SortOrder == "dongia_asc")">Đơn giá tăng dần (Mục 6.6)</option>
+                        <option value="dongia_desc" selected="@(Model.SortOrder == "dongia_desc")">Đơn giá giảm dần (Mục 6.6)</option>
                         <option value="succhua_asc" selected="@(Model.SortOrder == "succhua_asc")">Sức chứa tăng dần</option>
                         <option value="succhua_desc" selected="@(Model.SortOrder == "succhua_desc")">Sức chứa giảm dần</option>
                         <option value="loai_asc" selected="@(Model.SortOrder == "loai_asc")">Theo loại sân</option>
@@ -114,6 +116,18 @@
                             <tr>
                                 <td class="ps-3">
                                     <div class="fw-semibold text-dark">@item.TenSan</div>
+                                    @{
+                                        var giaHienThi = item.BangGias?
+                                            .Where(b => b.TrangThai)
+                                            .OrderBy(b => b.DonGiaMoiGio)
+                                            .FirstOrDefault()?.DonGiaMoiGio;
+                                    }
+                                    @if (giaHienThi.HasValue)
+                                    {
+                                        <div class="text-muted small">
+                                            Giá từ: <span class="fw-semibold text-dark">@giaHienThi.Value.ToString("N0") đ/h</span>
+                                        </div>
+                                    }
                                     @if (!string.IsNullOrEmpty(item.MoTa))
                                     {
                                         <div class="text-muted small text-truncate" style="max-width: 260px;">
