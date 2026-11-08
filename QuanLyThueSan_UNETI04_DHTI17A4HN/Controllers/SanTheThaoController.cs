@@ -1,6 +1,9 @@
-﻿// Họ và tên: Đào Duy Khánh
+// Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
 // Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp theo tên/sức chứa/đơn giá, Phân trang, CRUD Sân, Phân quyền Mục 6.3, 6.6)
+// Họ và tên: Trần Văn Lợi
+// Mã sinh viên: 23103100237
+// Nội dung thực hiện: Module 5 - Nạp lịch sử sử dụng trong chi tiết sân
 
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
@@ -144,6 +147,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // Nghiệp vụ: Hiển thị form thêm mới sân thể thao (Mục 6.3 file Word)
         // Phân quyền: Chỉ Admin và Nhân viên quản lý mới được thêm sân (Mục 6.3)
         // =========================================================================================
+        [HttpGet]
         [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Create()
         {
@@ -185,6 +189,21 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             if (tenBiTrung)
             {
                 ModelState.AddModelError(nameof(vm.TenSan), "Tên sân này đã tồn tại. Vui lòng nhập tên khác.");
+            }
+
+            // Mục 5.4 & 5.5: Loại sân / khu vực đã ngừng hoạt động không được dùng để tạo sân mới
+            bool loaiSanHopLe = await _context.LoaiSans
+                .AnyAsync(l => l.MaLoaiSan == vm.MaLoaiSan && l.TrangThai);
+            if (!loaiSanHopLe)
+            {
+                ModelState.AddModelError(nameof(vm.MaLoaiSan), "Loại sân không tồn tại hoặc đã ngừng hoạt động.");
+            }
+
+            bool khuVucHopLe = await _context.KhuVucs
+                .AnyAsync(k => k.MaKhuVuc == vm.MaKhuVuc && k.TrangThai);
+            if (!khuVucHopLe)
+            {
+                ModelState.AddModelError(nameof(vm.MaKhuVuc), "Khu vực không tồn tại hoặc đã ngừng hoạt động.");
             }
 
             if (!ModelState.IsValid)
@@ -233,6 +252,10 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 .Include(s => s.LoaiSan)
                 .Include(s => s.KhuVuc)
                 .Include(s => s.BangGias.OrderBy(b => b.GioBatDau))
+                .Include(s => s.DatSans).ThenInclude(d => d.KhachHang)
+                .Include(s => s.DatSans).ThenInclude(d => d.ThanhToan)
+                .Include(s => s.DatSans).ThenInclude(d => d.SuDungDichVus).ThenInclude(d => d.DichVu)
+                .AsSplitQuery()
                 .AsNoTracking()
                 .FirstOrDefaultAsync(m => m.MaSan == id);
 
@@ -249,6 +272,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // Nghiệp vụ: Hiển thị form chỉnh sửa thông tin sân thể thao (Mục 6.3 file Word)
         // Phân quyền: Chỉ Admin và Nhân viên quản lý mới được sửa sân (Mục 6.3)
         // =========================================================================================
+        [HttpGet]
         [PhanQuyen("Admin", "NhanVien")]
         public async Task<IActionResult> Edit(int? id)
         {
@@ -307,6 +331,12 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 return NotFound();
             }
 
+            var sanCanSua = await _context.SanTheThaos.FindAsync(id);
+            if (sanCanSua == null)
+            {
+                return NotFound();
+            }
+
             // Kiểm tra tên sân không được trùng với sân khác (Mục 13 file Word)
             bool tenBiTrung = await _context.SanTheThaos
                 .AnyAsync(s => s.TenSan.ToLower() == vm.TenSan.Trim().ToLower() && s.MaSan != id);
@@ -314,6 +344,22 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             if (tenBiTrung)
             {
                 ModelState.AddModelError(nameof(vm.TenSan), "Tên sân này đã được sử dụng bởi một sân khác. Vui lòng nhập tên khác.");
+            }
+
+            // Mục 5.4 & 5.5: chỉ cho phép giữ nguyên loại sân/khu vực cũ nếu chúng đã ngừng hoạt động,
+            // không được đổi sang một loại sân/khu vực ngừng hoạt động khác
+            bool loaiSanHopLe = await _context.LoaiSans
+                .AnyAsync(l => l.MaLoaiSan == vm.MaLoaiSan && (l.TrangThai || l.MaLoaiSan == sanCanSua.MaLoaiSan));
+            if (!loaiSanHopLe)
+            {
+                ModelState.AddModelError(nameof(vm.MaLoaiSan), "Loại sân không tồn tại hoặc đã ngừng hoạt động.");
+            }
+
+            bool khuVucHopLe = await _context.KhuVucs
+                .AnyAsync(k => k.MaKhuVuc == vm.MaKhuVuc && (k.TrangThai || k.MaKhuVuc == sanCanSua.MaKhuVuc));
+            if (!khuVucHopLe)
+            {
+                ModelState.AddModelError(nameof(vm.MaKhuVuc), "Khu vực không tồn tại hoặc đã ngừng hoạt động.");
             }
 
             if (!ModelState.IsValid)
@@ -327,12 +373,6 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                     "MaKhuVuc", "TenKhuVuc", vm.MaKhuVuc);
 
                 return View(vm);
-            }
-
-            var sanCanSua = await _context.SanTheThaos.FindAsync(id);
-            if (sanCanSua == null)
-            {
-                return NotFound();
             }
 
             // Cập nhật các trường thông tin

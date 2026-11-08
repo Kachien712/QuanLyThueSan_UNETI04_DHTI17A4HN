@@ -1,6 +1,9 @@
+// Họ và tên: Trần Văn Lợi
+// Mã sinh viên: 23103100237
+// Nội dung thực hiện: Module 5 - Gọi seed demo riêng sau dữ liệu các module
 // Họ và tên: Đào Duy Khánh - MSSV: 23103100220 (Module 2 - Sân & Bảng giá)
 // Đào Đức Kiên - MSSV: 23103100222 (Module 3 - 25 Khách hàng)
-// Khuất Anh Chiến - MSSV: 23103100234 (Module 1 - Tài khoản Admin/Nhân viên)
+// Khuất Anh Chiến - MSSV: 23103100234 (Module 1 - Tài khoản Admin/Nhân viên/Tài khoản kiểm thử)
 // Nội dung thực hiện: Lớp điều phối khởi tạo CSDL dùng chung cho cả nhóm (Mục 16 file Word)
 
 using QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers;
@@ -24,7 +27,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
             SeedData_23103100222_DaoDucKien.Seed(context);
 
             // 3. MODULE 1 (Khuất Anh Chiến - 23103100234):
-            // Tài khoản quản trị mặc định để kiểm thử phân quyền (Mục 16 file Word)
+            // Tài khoản quản trị mặc định và tài khoản bị khóa để kiểm thử phân quyền (Mục 16, 22.1 file Word)
             if (!context.TaiKhoans.Any(t => t.VaiTro == "Admin"))
             {
                 context.TaiKhoans.AddRange(
@@ -45,6 +48,15 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
                         Email = "nhanvien@quanyttt.edu.vn",
                         VaiTro = "NhanVien",
                         TrangThai = true
+                    },
+                    new TaiKhoan
+                    {
+                        TenDangNhap = "taikhoan_khoa",
+                        MatKhau = MatKhauHelper.MaHoa("123456"),
+                        HoTen = "Tài khoản bị khóa kiểm thử",
+                        Email = "khoa@quanyttt.edu.vn",
+                        VaiTro = "KhachHang",
+                        TrangThai = false
                     });
                 context.SaveChanges();
             }
@@ -91,6 +103,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
             {
                 context.SaveChanges();
             }
+            SeedDataModule5.Seed(context);
         }
     }
 }

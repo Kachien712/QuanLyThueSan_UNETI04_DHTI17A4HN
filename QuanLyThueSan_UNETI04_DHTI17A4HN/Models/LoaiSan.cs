@@ -1,6 +1,6 @@
-﻿// Họ và tên: [Họ tên SV1]
-// Mã sinh viên: [MSSV SV1]
-// Nội dung thực hiện: Module 1 - Entity Loại sân thể thao
+// Họ và tên: Khuất Anh Chiến
+// Mã sinh viên: 23103100234
+// Nội dung thực hiện: Module 1 - Entity Loại sân thể thao (Mục 5.4 file Word)
 using System.ComponentModel.DataAnnotations;
 
 namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Models

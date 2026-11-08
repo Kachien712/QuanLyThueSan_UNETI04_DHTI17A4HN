@@ -1,0 +1,278 @@
+@* 
+    Họ và tên: Khuất Anh Chiến
+    Mã sinh viên: 23103100234
+    Nội dung thực hiện: Module 1 - Giao diện quản lý tài khoản người dùng dành cho Admin (Mục 1, 5.1 - 5.3 file Word)
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.TaiKhoanIndexViewModel
+
+@{
+    ViewData["Title"] = "Quản lý Tài khoản & Phân quyền";
+    var currentUserId = Context.Session.GetInt32(QuanLyThueSan_UNETI04_DHTI17A4HN.Helpers.SessionKeys.MaTaiKhoan);
+}
+
+<div class="container-fluid px-0">
+    <div class="d-flex justify-content-between align-items-center mb-3">
+        <div>
+            <h2 class="text-primary mb-1"><i class="bi bi-shield-lock-fill"></i> Quản lý Tài khoản & Phân quyền</h2>
+            <p class="text-muted mb-0">Quản lý người dùng, phân quyền truy cập và kiểm soát trạng thái đăng nhập hệ thống</p>
+        </div>
+        <a asp-action="Create" class="btn btn-success">
+            <i class="bi bi-person-plus-fill"></i> Thêm tài khoản mới
+        </a>
+    </div>
+
+    @if (TempData["SuccessMessage"] != null)
+    {
+        <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
+            <strong>Thông báo:</strong> @TempData["SuccessMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    @if (TempData["ErrorMessage"] != null)
+    {
+        <div class="alert alert-danger alert-dismissible fade show shadow-sm" role="alert">
+            <strong>Cảnh báo:</strong> @TempData["ErrorMessage"]
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    }
+
+    <!-- Thống kê tổng quan -->
+    <div class="row g-3 mb-4">
+        <div class="col-md-2 col-sm-4">
+            <div class="card border-0 shadow-sm bg-primary text-white">
+                <div class="card-body py-2 text-center">
+                    <small>Tổng tài khoản</small>
+                    <h4 class="mb-0 fw-bold">@Model.TongSoTaiKhoan</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card border-0 shadow-sm bg-success text-white">
+                <div class="card-body py-2 text-center">
+                    <small>Đang hoạt động</small>
+                    <h4 class="mb-0 fw-bold">@Model.SoTaiKhoanHoatDong</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card border-0 shadow-sm bg-danger text-white">
+                <div class="card-body py-2 text-center">
+                    <small>Đang bị khóa</small>
+                    <h4 class="mb-0 fw-bold">@Model.SoTaiKhoanBiKhoa</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card border-0 shadow-sm bg-dark text-white">
+                <div class="card-body py-2 text-center">
+                    <small>Quản trị viên (Admin)</small>
+                    <h4 class="mb-0 fw-bold">@Model.SoAdmin</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card border-0 shadow-sm bg-info text-white">
+                <div class="card-body py-2 text-center">
+                    <small>Nhân viên trực sân</small>
+                    <h4 class="mb-0 fw-bold">@Model.SoNhanVien</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-2 col-sm-4">
+            <div class="card border-0 shadow-sm bg-secondary text-white">
+                <div class="card-body py-2 text-center">
+                    <small>Khách hàng</small>
+                    <h4 class="mb-0 fw-bold">@Model.SoKhachHang</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Thanh Tìm kiếm và Bộ lọc -->
+    <div class="card shadow-sm border-0 mb-4">
+        <div class="card-body">
+            <form method="get" asp-action="Index" class="row g-2 align-items-center">
+                <div class="col-md-5">
+                    <input type="text" name="tuKhoa" value="@Model.TuKhoa" class="form-control" 
+                           placeholder="Tìm theo tên đăng nhập, họ tên, email..." />
+                </div>
+                <div class="col-md-3">
+                    <select name="vaiTroFilter" asp-items="Model.DanhSachVaiTro" class="form-select"></select>
+                </div>
+                <div class="col-md-2">
+                    <select name="trangThaiFilter" asp-items="Model.DanhSachTrangThai" class="form-select"></select>
+                </div>
+                <div class="col-md-2 d-flex gap-1">
+                    <button type="submit" class="btn btn-primary w-100">Tìm</button>
+                    <a asp-action="Index" class="btn btn-outline-secondary">Đặt lại</a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Bảng danh sách Tài khoản -->
+    <div class="card shadow-sm border-0">
+        <div class="card-body p-0">
+            <div class="table-responsive">
+                <table class="table table-hover table-striped align-middle mb-0">
+                    <thead class="table-light">
+                        <tr>
+                            <th class="ps-3" style="width: 70px;">Mã</th>
+                            <th>Tên đăng nhập</th>
+                            <th>Họ và tên</th>
+                            <th>Email</th>
+                            <th class="text-center" style="width: 140px;">Vai trò</th>
+                            <th class="text-center" style="width: 130px;">Trạng thái</th>
+                            <th class="text-end pe-3" style="width: 340px;">Thao tác</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @if (Model.DanhSachTaiKhoan.Any())
+                        {
+                            foreach (var item in Model.DanhSachTaiKhoan)
+                            {
+                                var isCurrentUser = item.MaTaiKhoan == currentUserId;
+                                var actionLockText = item.TrangThai ? "KHÓA" : "MỞ KHÓA";
+                                <tr>
+                                    <td class="ps-3 fw-bold text-muted">#@item.MaTaiKhoan</td>
+                                    <td>
+                                        <span class="fw-semibold text-dark">@item.TenDangNhap</span>
+                                        @if (isCurrentUser)
+                                        {
+                                            <span class="badge bg-primary ms-1">Bạn</span>
+                                        }
+                                    </td>
+                                    <td>@item.HoTen</td>
+                                    <td class="small text-muted">@item.Email</td>
+                                    <td class="text-center">
+                                        @switch (item.VaiTro)
+                                        {
+                                            case "Admin":
+                                                <span class="badge bg-danger">Quản trị viên</span>
+                                                break;
+                                            case "NhanVien":
+                                                <span class="badge bg-info text-dark">Nhân viên</span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-secondary">Khách hàng</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td class="text-center">
+                                        @if (item.TrangThai)
+                                        {
+                                            <span class="badge bg-success">Hoạt động</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">Bị khóa</span>
+                                        }
+                                    </td>
+                                    <td class="text-end pe-3">
+                                        <div class="d-flex flex-wrap gap-1 justify-content-end align-items-center">
+                                            @if (!isCurrentUser)
+                                            {
+                                                <!-- Đổi vai trò (Admin / Nhân viên / Khách hàng) -->
+                                                <form asp-action="DoiVaiTro" asp-route-id="@item.MaTaiKhoan" method="post" class="d-inline-flex align-items-center gap-1">
+                                                    @Html.AntiForgeryToken()
+                                                    <select name="vaiTroMoi" class="form-select form-select-sm" style="width: 125px;" title="Chọn vai trò mới">
+                                                        <option value="Admin" selected="@(item.VaiTro == "Admin" ? "selected" : null)">Quản trị viên</option>
+                                                        <option value="NhanVien" selected="@(item.VaiTro == "NhanVien" ? "selected" : null)">Nhân viên</option>
+                                                        <option value="KhachHang" selected="@(item.VaiTro == "KhachHang" ? "selected" : null)">Khách hàng</option>
+                                                    </select>
+                                                    <button type="submit" class="btn btn-sm btn-outline-primary"
+                                                            onclick="return confirm('Đổi vai trò cho tài khoản @item.TenDangNhap? Quyền mới có hiệu lực ngay từ lần truy cập kế tiếp.');"
+                                                            title="Cập nhật vai trò">
+                                                        <i class="bi bi-person-gear"></i>
+                                                    </button>
+                                                </form>
+
+                                                <!-- Nút Khóa / Mở khóa -->
+                                                <form asp-action="DoiTrangThai" asp-route-id="@item.MaTaiKhoan" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm @(item.TrangThai ? "btn-outline-danger" : "btn-outline-success")"
+                                                            onclick="return confirm('Bạn có chắc muốn @actionLockText tài khoản này?');"
+                                                            title="@(item.TrangThai ? "Khóa tài khoản" : "Mở khóa")">
+                                                        <i class="bi @(item.TrangThai ? "bi-lock-fill" : "bi-unlock-fill")"></i>
+                                                        @(item.TrangThai ? "Khóa" : "Mở")
+                                                    </button>
+                                                </form>
+
+                                                <!-- Nút Reset Mật khẩu -->
+                                                <form asp-action="DatLaiMatKhau" asp-route-id="@item.MaTaiKhoan" method="post" class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit" class="btn btn-sm btn-outline-warning" 
+                                                            onclick="return confirm('Đặt lại mật khẩu cho tài khoản này về mặc định (123456)?');"
+                                                            title="Đặt lại mật khẩu về 123456">
+                                                        <i class="bi bi-key-fill"></i> Reset
+                                                    </button>
+                                                </form>
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small fst-italic">Đang đăng nhập</span>
+                                            }
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        }
+                        else
+                        {
+                            <tr>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <i class="bi bi-inbox fs-2 d-block mb-2"></i>
+                                    Không tìm thấy tài khoản nào phù hợp với điều kiện tìm kiếm.
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Phân trang LINQ Skip / Take -->
+        @if (Model.DanhSachTaiKhoan.TongSoTrang > 1)
+        {
+            <div class="card-footer bg-white border-top py-3 d-flex justify-content-between align-items-center">
+                <span class="small text-muted">
+                    Hiển thị trang <strong>@Model.DanhSachTaiKhoan.TrangHienTai</strong> / <strong>@Model.DanhSachTaiKhoan.TongSoTrang</strong> 
+                    (Tổng cộng @Model.DanhSachTaiKhoan.TongSoBanGhi tài khoản)
+                </span>
+                <nav>
+                    <ul class="pagination pagination-sm mb-0">
+                        <li class="page-item @(!Model.DanhSachTaiKhoan.CoTrangTruoc ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-pageIndex="@(Model.DanhSachTaiKhoan.TrangHienTai - 1)"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-vaiTroFilter="@Model.VaiTroFilter"
+                               asp-route-trangThaiFilter="@Model.TrangThaiFilter">
+                                &laquo; Trước
+                            </a>
+                        </li>
+                        @for (int i = 1; i <= Model.DanhSachTaiKhoan.TongSoTrang; i++)
+                        {
+                            <li class="page-item @(i == Model.DanhSachTaiKhoan.TrangHienTai ? "active" : "")">
+                                <a class="page-link" asp-action="Index" 
+                                   asp-route-pageIndex="@i"
+                                   asp-route-tuKhoa="@Model.TuKhoa"
+                                   asp-route-vaiTroFilter="@Model.VaiTroFilter"
+                                   asp-route-trangThaiFilter="@Model.TrangThaiFilter">@i</a>
+                            </li>
+                        }
+                        <li class="page-item @(!Model.DanhSachTaiKhoan.CoTrangSau ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index" 
+                               asp-route-pageIndex="@(Model.DanhSachTaiKhoan.TrangHienTai + 1)"
+                               asp-route-tuKhoa="@Model.TuKhoa"
+                               asp-route-vaiTroFilter="@Model.VaiTroFilter"
+                               asp-route-trangThaiFilter="@Model.TrangThaiFilter">
+                                Sau &raquo;
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+        }
+    </div>
+</div>
