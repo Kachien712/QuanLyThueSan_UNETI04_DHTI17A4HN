@@ -230,6 +230,75 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         }
 
         // =========================================================================================
+        // GET: /TaiKhoan/KiemTraDangKy?truong=TenDangNhap&giaTri=abc
+        // Nghiệp vụ: AJAX kiểm tra trùng dữ liệu ngay khi khách hàng nhập ở form Đăng ký.
+        // Controller vẫn là nơi quyết định cuối cùng; POST DangKy vẫn kiểm tra lại (không tin client).
+        // =========================================================================================
+        [HttpGet]
+        public async Task<IActionResult> KiemTraDangKy(string? truong, string? giaTri)
+        {
+            if (string.IsNullOrWhiteSpace(giaTri))
+                return Json(new { trung = false, thongBao = "" });
+
+            var gt = giaTri.Trim();
+            bool trung;
+            string thongBao;
+
+            switch (truong)
+            {
+                case "TenDangNhap":
+                    trung = await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap.ToLower() == gt.ToLower());
+                    thongBao = "Tên đăng nhập này đã có người sử dụng.";
+                    break;
+                case "Email":
+                    trung = await _context.TaiKhoans.AnyAsync(t => t.Email.ToLower() == gt.ToLower())
+                         || await _context.KhachHangs.AnyAsync(k => k.Email.ToLower() == gt.ToLower());
+                    thongBao = "Email này đã được sử dụng.";
+                    break;
+                case "SoDienThoai":
+                    trung = await _context.KhachHangs.AnyAsync(k => k.SoDienThoai == gt);
+                    thongBao = "Số điện thoại này đã được sử dụng.";
+                    break;
+                default:
+                    return BadRequest();
+            }
+
+            return Json(new { trung, thongBao = trung ? thongBao : "Có thể sử dụng." });
+        }
+
+        // =========================================================================================
+        // GET: /TaiKhoan/KiemTraTaiKhoan?truong=TenDangNhap&giaTri=abc
+        // Nghiệp vụ: AJAX kiểm tra trùng tên đăng nhập / email ở form Admin tạo tài khoản.
+        // =========================================================================================
+        [HttpGet]
+        [PhanQuyen("Admin")]
+        public async Task<IActionResult> KiemTraTaiKhoan(string? truong, string? giaTri)
+        {
+            if (string.IsNullOrWhiteSpace(giaTri))
+                return Json(new { trung = false, thongBao = "" });
+
+            var gt = giaTri.Trim();
+            bool trung;
+            string thongBao;
+
+            switch (truong)
+            {
+                case "TenDangNhap":
+                    trung = await _context.TaiKhoans.AnyAsync(t => t.TenDangNhap.ToLower() == gt.ToLower());
+                    thongBao = "Tên đăng nhập đã tồn tại, vui lòng chọn tên khác.";
+                    break;
+                case "Email":
+                    trung = await _context.TaiKhoans.AnyAsync(t => t.Email.ToLower() == gt.ToLower());
+                    thongBao = "Địa chỉ Email này đã được sử dụng.";
+                    break;
+                default:
+                    return BadRequest();
+            }
+
+            return Json(new { trung, thongBao = trung ? thongBao : "Có thể sử dụng." });
+        }
+
+        // =========================================================================================
         // GET: /TaiKhoan/Create
         // =========================================================================================
         [HttpGet]
@@ -305,24 +374,64 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
         // =========================================================================================
         // POST: /TaiKhoan/DoiTrangThai/{id}
         // Nghiệp vụ: Admin Khóa hoặc Mở khóa tài khoản (Mục 5.1: tài khoản bị khóa không được đăng nhập)
+        // Dùng chung logic với phiên bản AJAX bên dưới.
         // =========================================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
         [PhanQuyen("Admin")]
         public async Task<IActionResult> DoiTrangThai(int id)
         {
+            var ketQua = await XuLyDoiTrangThai(id);
+
+            if (!ketQua.TimThay)
+                return NotFound();
+
+            if (ketQua.ThanhCong)
+                TempData["SuccessMessage"] = ketQua.ThongBao;
+            else
+                TempData["ErrorMessage"] = ketQua.ThongBao;
+
+            return RedirectToAction(nameof(Index));
+        }
+
+        // =========================================================================================
+        // POST: /TaiKhoan/DoiTrangThaiAjax/{id}
+        // Nghiệp vụ: AJAX khóa / mở khóa tài khoản, trả JSON để cập nhật bảng mà không tải lại trang.
+        // Vẫn giữ [ValidateAntiForgeryToken] và [PhanQuyen("Admin")] nên không thể gọi lậu từ client.
+        // =========================================================================================
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        [PhanQuyen("Admin")]
+        public async Task<IActionResult> DoiTrangThaiAjax(int id)
+        {
+            var ketQua = await XuLyDoiTrangThai(id);
+
+            if (!ketQua.TimThay)
+                return NotFound();
+
+            return Json(new
+            {
+                thanhCong = ketQua.ThanhCong,
+                thongBao = ketQua.ThongBao,
+                trangThai = ketQua.TrangThaiMoi
+            });
+        }
+
+        // Hàm dùng chung: đảo trạng thái tài khoản, chặn tự khóa chính mình và đồng bộ KhachHang
+        private async Task<(bool TimThay, bool ThanhCong, string ThongBao, bool TrangThaiMoi)> XuLyDoiTrangThai(int id)
+        {
             var hienTaiId = HttpContext.Session.GetInt32(SessionKeys.MaTaiKhoan);
             if (hienTaiId == id)
             {
-                TempData["ErrorMessage"] = "Bạn không thể tự khóa tài khoản Admin đang đăng nhập của chính mình!";
-                return RedirectToAction(nameof(Index));
+                return (true, false, "Bạn không thể tự khóa tài khoản Admin đang đăng nhập của chính mình!", true);
             }
 
             var taiKhoan = await _context.TaiKhoans
                 .Include(t => t.KhachHang)
                 .FirstOrDefaultAsync(t => t.MaTaiKhoan == id);
 
-            if (taiKhoan == null) return NotFound();
+            if (taiKhoan == null)
+                return (false, false, "Không tìm thấy tài khoản.", false);
 
             taiKhoan.TrangThai = !taiKhoan.TrangThai;
 
@@ -335,9 +444,8 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
             await _context.SaveChangesAsync();
 
             var trangThaiText = taiKhoan.TrangThai ? "Đang hoạt động" : "Bị khóa";
-            TempData["SuccessMessage"] = $"Tài khoản \"{taiKhoan.TenDangNhap}\" đã được chuyển sang trạng thái: {trangThaiText}.";
-
-            return RedirectToAction(nameof(Index));
+            var thongBao = $"Tài khoản \"{taiKhoan.TenDangNhap}\" đã được chuyển sang trạng thái: {trangThaiText}.";
+            return (true, true, thongBao, taiKhoan.TrangThai);
         }
 
         // =========================================================================================

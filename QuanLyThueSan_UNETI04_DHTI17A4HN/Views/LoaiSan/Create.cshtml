@@ -22,8 +22,10 @@
 
                     <div class="mb-3">
                         <label asp-for="TenLoaiSan" class="form-label fw-semibold"></label>
-                        <input asp-for="TenLoaiSan" class="form-control" placeholder="Ví dụ: Sân bóng đá 7 người, Sân Pickleball..." autofocus />
+                        <input asp-for="TenLoaiSan" class="form-control" placeholder="Ví dụ: Sân bóng đá 7 người, Sân Pickleball..." autofocus
+                               data-kiem-tra="1" data-url="@Url.Action("KiemTraTrungTen")" data-param="ten" />
                         <span asp-validation-for="TenLoaiSan" class="text-danger small"></span>
+                        <span data-thong-bao class="small"></span>
                         <div class="form-text">Tên loại sân là duy nhất trên hệ thống, không được trùng lặp.</div>
                     </div>
 
@@ -57,4 +59,5 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/ajax-kiem-tra.js" asp-append-version="true"></script>
 }

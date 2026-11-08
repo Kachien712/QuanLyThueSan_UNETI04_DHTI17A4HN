@@ -22,8 +22,10 @@
 
                     <div class="mb-3">
                         <label asp-for="TenDangNhap" class="form-label fw-semibold"></label>
-                        <input asp-for="TenDangNhap" class="form-control" placeholder="Từ 3 - 50 ký tự..." />
+                        <input asp-for="TenDangNhap" class="form-control" placeholder="Từ 3 - 50 ký tự..."
+                               data-kiem-tra="1" data-url="@Url.Action("KiemTraDangKy")" data-param="giaTri" data-truong="TenDangNhap" />
                         <span asp-validation-for="TenDangNhap" class="text-danger small"></span>
+                        <span data-thong-bao class="small"></span>
                     </div>
 
                     <div class="row">
@@ -47,14 +49,18 @@
 
                     <div class="mb-3">
                         <label asp-for="Email" class="form-label fw-semibold"></label>
-                        <input asp-for="Email" type="email" class="form-control" placeholder="Ví dụ: nguyenan@gmail.com" />
+                        <input asp-for="Email" type="email" class="form-control" placeholder="Ví dụ: nguyenan@gmail.com"
+                               data-kiem-tra="1" data-url="@Url.Action("KiemTraDangKy")" data-param="giaTri" data-truong="Email" />
                         <span asp-validation-for="Email" class="text-danger small"></span>
+                        <span data-thong-bao class="small"></span>
                     </div>
 
                     <div class="mb-4">
                         <label asp-for="SoDienThoai" class="form-label fw-semibold"></label>
-                        <input asp-for="SoDienThoai" class="form-control" placeholder="Ví dụ: 0912345678" />
+                        <input asp-for="SoDienThoai" class="form-control" placeholder="Ví dụ: 0912345678"
+                               data-kiem-tra="1" data-url="@Url.Action("KiemTraDangKy")" data-param="giaTri" data-truong="SoDienThoai" />
                         <span asp-validation-for="SoDienThoai" class="text-danger small"></span>
+                        <span data-thong-bao class="small"></span>
                     </div>
 
                     <div class="d-flex justify-content-between">
@@ -69,4 +75,5 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/ajax-kiem-tra.js" asp-append-version="true"></script>
 }

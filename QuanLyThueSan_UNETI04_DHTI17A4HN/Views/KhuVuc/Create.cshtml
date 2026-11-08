@@ -22,8 +22,10 @@
 
                     <div class="mb-3">
                         <label asp-for="TenKhuVuc" class="form-label fw-semibold"></label>
-                        <input asp-for="TenKhuVuc" class="form-control" placeholder="Ví dụ: Khu A - Sân bóng đá trong nhà..." autofocus />
+                        <input asp-for="TenKhuVuc" class="form-control" placeholder="Ví dụ: Khu A - Sân bóng đá trong nhà..." autofocus
+                               data-kiem-tra="1" data-url="@Url.Action("KiemTraTrungTen")" data-param="ten" />
                         <span asp-validation-for="TenKhuVuc" class="text-danger small"></span>
+                        <span data-thong-bao class="small"></span>
                         <div class="form-text">Tên khu vực là duy nhất theo quy định đề tài.</div>
                     </div>
 
@@ -56,4 +58,5 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script src="~/js/ajax-kiem-tra.js" asp-append-version="true"></script>
 }
