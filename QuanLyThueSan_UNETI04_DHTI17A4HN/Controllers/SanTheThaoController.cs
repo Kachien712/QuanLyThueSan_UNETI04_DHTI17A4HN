@@ -1,6 +1,9 @@
 // Họ và tên: Đào Duy Khánh
 // Mã sinh viên: 23103100220
-// Nội dung thực hiện: Module 2 - Controller quản lý Sân thể thao (Tìm kiếm, Lọc, Sắp xếp theo tên/sức chứa/đơn giá, Phân trang, CRUD Sân, Phân quyền Mục 6.3, 6.6)
+// Nội dung thực hiện: Module 2 - Quản lý Sân thể thao & Bảng giá
+// - Cơ bản: Tìm kiếm, Lọc đa tiêu chí, Sắp xếp (Mục 6.6), Phân trang (Mục 6.7), CRUD Sân, Phân quyền Admin/NhanVien (Mục 6.3)
+// - Nâng cao (Mục 19.1): Upload ảnh đại diện sân thể thao (lưu trữ wwwroot/images/san, validate định dạng & dung lượng, xóa file cũ)
+// - Nâng cao (Mục 19.6): AJAX Live Search & Filter (trả PartialView _DanhSachSanPartial cho request AJAX/fetch không cần tải lại trang)
 // Họ và tên: Trần Văn Lợi
 // Mã sinh viên: 23103100237
 // Nội dung thực hiện: Module 5 - Nạp lịch sử sử dụng trong chi tiết sân
@@ -19,16 +22,18 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
     public class SanTheThaoController : Controller
     {
         private readonly ApplicationDbContext _context;
+        private readonly IWebHostEnvironment _env;
 
-        public SanTheThaoController(ApplicationDbContext context)
+        public SanTheThaoController(ApplicationDbContext context, IWebHostEnvironment env)
         {
             _context = context;
+            _env = env;
         }
 
         // =========================================================================================
         // GET: /SanTheThao/Index
         // Nghiệp vụ: Tìm kiếm + Lọc đa tiêu chí + Sắp xếp + Phân trang bằng LINQ (Mục 6.4 - 6.7)
-        // Luồng: Truy vấn -> Tìm kiếm -> Lọc -> Sắp xếp -> Phân trang -> Hiển thị
+        // Chức năng nâng cao: Hỗ trợ AJAX Live Search & Filter (Mục 19.6)
         // =========================================================================================
         public async Task<IActionResult> Index(
             string? tuKhoa,
@@ -139,6 +144,15 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 DanhSachTinhTrang = new SelectList(danhSachTinhTrang, tinhTrang)
             };
 
+            // Chức năng nâng cao: Kiểm tra request AJAX (Mục 19.6)
+            bool isAjax = Request.Headers["X-Requested-With"] == "XMLHttpRequest"
+                       || string.Equals(Request.Query["isAjax"], "true", StringComparison.OrdinalIgnoreCase);
+
+            if (isAjax)
+            {
+                return PartialView("_DanhSachSanPartial", viewModel);
+            }
+
             return View(viewModel);
         }
 
@@ -175,7 +189,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 
         // =========================================================================================
         // POST: /SanTheThao/Create
-        // Nghiệp vụ: Tiếp nhận form, validate, kiểm tra tên trùng, lưu sân mới vào DB (Mục 6.3, 13)
+        // Nghiệp vụ: Tiếp nhận form, validate, kiểm tra tên trùng, upload ảnh sân, lưu vào DB (Mục 6.3, 13, 19.1)
         // =========================================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -206,6 +220,21 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 ModelState.AddModelError(nameof(vm.MaKhuVuc), "Khu vực không tồn tại hoặc đã ngừng hoạt động.");
             }
 
+            // Chức năng nâng cao: Validate file ảnh sân (Mục 19.1)
+            if (vm.FileAnh != null && vm.FileAnh.Length > 0)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".svg" };
+                var ext = Path.GetExtension(vm.FileAnh.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(ext))
+                {
+                    ModelState.AddModelError(nameof(vm.FileAnh), "Định dạng ảnh không hợp lệ. Chỉ chấp nhận .jpg, .jpeg, .png, .webp, .svg");
+                }
+                else if (vm.FileAnh.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError(nameof(vm.FileAnh), "Dung lượng file ảnh vượt quá 5MB.");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
                 // Nạp lại dropdown khi form lỗi
@@ -220,6 +249,13 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 return View(vm);
             }
 
+            // Xử lý lưu ảnh nếu có upload
+            string? tenFileAnh = null;
+            if (vm.FileAnh != null && vm.FileAnh.Length > 0)
+            {
+                tenFileAnh = await LuuFileAnhAsync(vm.FileAnh);
+            }
+
             var sanMoi = new SanTheThao
             {
                 TenSan     = vm.TenSan.Trim(),
@@ -227,7 +263,8 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 MaKhuVuc   = vm.MaKhuVuc,
                 SucChua    = vm.SucChua,
                 MoTa       = vm.MoTa?.Trim(),
-                TinhTrang  = vm.TinhTrang
+                TinhTrang  = vm.TinhTrang,
+                HinhAnh    = tenFileAnh
             };
 
             _context.SanTheThaos.Add(sanMoi);
@@ -296,6 +333,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 SucChua = san.SucChua,
                 MoTa = san.MoTa,
                 TinhTrang = san.TinhTrang,
+                HinhAnhHienTai = san.HinhAnh,
 
                 DanhSachLoaiSan = new SelectList(
                     await _context.LoaiSans
@@ -319,7 +357,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 
         // =========================================================================================
         // POST: /SanTheThao/Edit/{id}
-        // Nghiệp vụ: Xác thực dữ liệu, kiểm tra tên trùng (trừ chính nó) và cập nhật thông tin sân (Mục 6.3, 13)
+        // Nghiệp vụ: Xác thực dữ liệu, kiểm tra tên trùng, cập nhật ảnh đại diện sân (Mục 6.3, 13, 19.1)
         // =========================================================================================
         [HttpPost]
         [ValidateAntiForgeryToken]
@@ -362,8 +400,24 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                 ModelState.AddModelError(nameof(vm.MaKhuVuc), "Khu vực không tồn tại hoặc đã ngừng hoạt động.");
             }
 
+            // Validate file ảnh nếu có upload
+            if (vm.FileAnh != null && vm.FileAnh.Length > 0)
+            {
+                var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".svg" };
+                var ext = Path.GetExtension(vm.FileAnh.FileName).ToLowerInvariant();
+                if (!allowedExtensions.Contains(ext))
+                {
+                    ModelState.AddModelError(nameof(vm.FileAnh), "Định dạng ảnh không hợp lệ. Chỉ chấp nhận .jpg, .jpeg, .png, .webp, .svg");
+                }
+                else if (vm.FileAnh.Length > 5 * 1024 * 1024)
+                {
+                    ModelState.AddModelError(nameof(vm.FileAnh), "Dung lượng file ảnh vượt quá 5MB.");
+                }
+            }
+
             if (!ModelState.IsValid)
             {
+                vm.HinhAnhHienTai = sanCanSua.HinhAnh;
                 vm.DanhSachLoaiSan = new SelectList(
                     await _context.LoaiSans.Where(l => l.TrangThai || l.MaLoaiSan == vm.MaLoaiSan).OrderBy(l => l.TenLoaiSan).AsNoTracking().ToListAsync(),
                     "MaLoaiSan", "TenLoaiSan", vm.MaLoaiSan);
@@ -373,6 +427,17 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
                     "MaKhuVuc", "TenKhuVuc", vm.MaKhuVuc);
 
                 return View(vm);
+            }
+
+            // Chức năng nâng cao: Cập nhật ảnh sân mới và xóa ảnh cũ nếu có (Mục 19.1)
+            if (vm.FileAnh != null && vm.FileAnh.Length > 0)
+            {
+                var fileAnhMoi = await LuuFileAnhAsync(vm.FileAnh);
+                if (!string.IsNullOrEmpty(fileAnhMoi))
+                {
+                    XoaFileAnhCu(sanCanSua.HinhAnh);
+                    sanCanSua.HinhAnh = fileAnhMoi;
+                }
             }
 
             // Cập nhật các trường thông tin
@@ -387,6 +452,55 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Controllers
 
             TempData["ThanhCong"] = $"Đã cập nhật thông tin sân \"{sanCanSua.TenSan}\" thành công!";
             return RedirectToAction(nameof(Index));
+        }
+
+        // =========================================================================================
+        // HÀM HỖ TRỢ XỬ LÝ UPLOAD VÀ XÓA FILE ẢNH SÂN THỂ THAO (Mục 19.1)
+        // =========================================================================================
+        private async Task<string?> LuuFileAnhAsync(IFormFile? file)
+        {
+            if (file == null || file.Length == 0) return null;
+
+            var allowedExtensions = new[] { ".jpg", ".jpeg", ".png", ".webp", ".svg" };
+            var ext = Path.GetExtension(file.FileName).ToLowerInvariant();
+            if (!allowedExtensions.Contains(ext)) return null;
+
+            var uploadsFolder = Path.Combine(_env.WebRootPath, "images", "san");
+            if (!Directory.Exists(uploadsFolder))
+            {
+                Directory.CreateDirectory(uploadsFolder);
+            }
+
+            var uniqueFileName = $"san_{Guid.NewGuid():N}{ext}";
+            var filePath = Path.Combine(uploadsFolder, uniqueFileName);
+
+            using (var stream = new FileStream(filePath, FileMode.Create))
+            {
+                await file.CopyToAsync(stream);
+            }
+
+            return uniqueFileName;
+        }
+
+        private void XoaFileAnhCu(string? fileName)
+        {
+            if (string.IsNullOrWhiteSpace(fileName)) return;
+
+            // Không xóa các file ảnh svg mặc định của hệ thống
+            if (fileName.StartsWith("default-") || fileName.StartsWith("san-")) return;
+
+            try
+            {
+                var filePath = Path.Combine(_env.WebRootPath, "images", "san", fileName);
+                if (System.IO.File.Exists(filePath))
+                {
+                    System.IO.File.Delete(filePath);
+                }
+            }
+            catch
+            {
+                // Bỏ qua nếu file đang bị lock
+            }
         }
     }
 }

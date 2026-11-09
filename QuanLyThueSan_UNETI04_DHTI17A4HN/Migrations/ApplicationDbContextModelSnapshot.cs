@@ -260,6 +260,10 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("MaSan"));
 
+                    b.Property<string>("HinhAnh")
+                        .HasMaxLength(255)
+                        .HasColumnType("nvarchar(255)");
+
                     b.Property<int>("MaKhuVuc")
                         .HasColumnType("int");
 

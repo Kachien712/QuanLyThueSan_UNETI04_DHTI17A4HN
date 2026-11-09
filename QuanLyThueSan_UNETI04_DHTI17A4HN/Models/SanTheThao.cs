@@ -31,6 +31,10 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Models
         [StringLength(50)]
         public string TinhTrang { get; set; } = "Đang hoạt động"; // Đang hoạt động, Tạm ngừng, Đang bảo trì, Ngừng sử dụng
 
+        [StringLength(255)]
+        [Display(Name = "Hình ảnh sân")]
+        public string? HinhAnh { get; set; }
+
         [ForeignKey("MaLoaiSan")]
         public virtual LoaiSan? LoaiSan { get; set; }
 

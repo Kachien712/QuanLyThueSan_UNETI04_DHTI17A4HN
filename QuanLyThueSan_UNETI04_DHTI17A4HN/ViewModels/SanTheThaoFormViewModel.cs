@@ -2,6 +2,7 @@
 // Mã sinh viên: 23103100220
 // Nội dung thực hiện: Module 2 - ViewModel dùng chung cho form Thêm mới và Chỉnh sửa Sân thể thao
 
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using System.ComponentModel.DataAnnotations;
 
@@ -35,6 +36,13 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels
         [Required(ErrorMessage = "Vui lòng chọn tình trạng sân")]
         [Display(Name = "Tình trạng")]
         public string TinhTrang { get; set; } = "Đang hoạt động";
+
+        // Chức năng nâng cao: Upload ảnh sân (Mục 19.1)
+        [Display(Name = "Hình ảnh hiện tại")]
+        public string? HinhAnhHienTai { get; set; }
+
+        [Display(Name = "Ảnh đại diện sân")]
+        public IFormFile? FileAnh { get; set; }
 
         // Danh sách dropdown (nạp từ DB trong Controller)
         public SelectList? DanhSachLoaiSan { get; set; }

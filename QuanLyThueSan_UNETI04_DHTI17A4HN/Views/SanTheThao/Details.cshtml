@@ -5,6 +5,7 @@
     Họ và tên: Đào Duy Khánh
     Mã sinh viên: 23103100220
     Nội dung thực hiện: Module 2 - Giao diện Xem chi tiết Sân thể thao và Bảng giá áp dụng (Minimalism style)
+    - Tích hợp hiển thị ảnh đại diện sân thể thao (Mục 19.1)
 *@
 @model QuanLyThueSan_UNETI04_DHTI17A4HN.Models.SanTheThao
 
@@ -33,82 +34,104 @@
         </div>
     </div>
 
-    <!-- KHỐI 1: THÔNG TIN CƠ BẢN CỦA SÂN -->
+    <!-- KHỐI 1: THÔNG TIN CƠ BẢN CỦA SÂN (Kèm ảnh sân thể thao - Mục 19.1) -->
     <div class="border rounded-2 bg-white mb-3">
         <div class="border-bottom py-2 px-3">
             <span class="fw-bold text-uppercase small text-muted tracking-wide">Thông tin sân thể thao</span>
         </div>
         <div class="p-3">
             <div class="row g-3">
-                <div class="col-md-6">
-                    <label class="text-muted small d-block mb-1">Tên sân thể thao</label>
-                    <span class="fs-6 fw-bold text-dark">@Model.TenSan</span>
+                <!-- Cột hiển thị ảnh sân thể thao -->
+                <div class="col-md-4 col-lg-3 text-center">
+                    <div class="border rounded-2 overflow-hidden bg-light shadow-sm" style="height: 180px;">
+                        @if (!string.IsNullOrEmpty(Model.HinhAnh))
+                        {
+                            <img src="~/images/san/@Model.HinhAnh" alt="@Model.TenSan" 
+                                 style="width: 100%; height: 100%; object-fit: cover;"
+                                 onerror="this.onerror=null;this.src='/images/san/default-san.svg';" />
+                        }
+                        else
+                        {
+                            <img src="~/images/san/default-san.svg" alt="@Model.TenSan" 
+                                 style="width: 100%; height: 100%; object-fit: cover;" />
+                        }
+                    </div>
+                    <div class="small text-muted mt-1">Ảnh đại diện sân</div>
                 </div>
-                <div class="col-md-6">
-                    <label class="text-muted small d-block mb-1">Tình trạng</label>
-                    @switch (Model.TinhTrang)
-                    {
-                        case "Đang hoạt động":
-                            <span class="badge border border-dark text-dark bg-white px-2 py-1 small fw-normal">
-                                Đang hoạt động
-                            </span>
-                            break;
-                        case "Tạm ngừng":
-                            <span class="badge border border-secondary text-secondary bg-white px-2 py-1 small fw-normal">
-                                Tạm ngừng
-                            </span>
-                            break;
-                        case "Đang bảo trì":
-                            <span class="badge border border-secondary text-muted bg-light px-2 py-1 small fw-normal">
-                                Đang bảo trì
-                            </span>
-                            break;
-                        default:
-                            <span class="badge border border-danger text-danger bg-white px-2 py-1 small fw-normal">
-                                Ngừng sử dụng
-                            </span>
-                            break;
-                    }
-                </div>
-                <div class="col-md-4">
-                    <label class="text-muted small d-block mb-1">Loại sân</label>
-                    <span class="text-dark small">@(Model.LoaiSan?.TenLoaiSan ?? "-")</span>
-                </div>
-                <div class="col-md-4">
-                    <label class="text-muted small d-block mb-1">Khu vực</label>
-                    <span class="text-dark small">@(Model.KhuVuc?.TenKhuVuc ?? "-")</span>
-                </div>
-                <div class="col-md-4">
-                    <label class="text-muted small d-block mb-1">Sức chứa</label>
-                    <span class="text-dark small">@Model.SucChua người</span>
-                </div>
-                <div class="col-12">
-                    <label class="text-muted small d-block mb-1">Mô tả đặc điểm</label>
-                    <p class="text-dark small mb-0 bg-light p-2 rounded-1 border">
-                        @(string.IsNullOrWhiteSpace(Model.MoTa) ? "Chưa có mô tả chi tiết." : Model.MoTa)
-                    </p>
+
+                <!-- Cột thông tin chi tiết -->
+                <div class="col-md-8 col-lg-9">
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block mb-1">Tên sân thể thao</label>
+                            <span class="fs-6 fw-bold text-dark">@Model.TenSan</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block mb-1">Tình trạng</label>
+                            @switch (Model.TinhTrang)
+                            {
+                                case "Đang hoạt động":
+                                    <span class="badge border border-dark text-dark bg-white px-2 py-1 small fw-normal">
+                                        Đang hoạt động
+                                    </span>
+                                    break;
+                                case "Tạm ngừng":
+                                    <span class="badge border border-secondary text-secondary bg-white px-2 py-1 small fw-normal">
+                                        Tạm ngừng
+                                    </span>
+                                    break;
+                                case "Đang bảo trì":
+                                    <span class="badge border border-secondary text-muted bg-light px-2 py-1 small fw-normal">
+                                        Đang bảo trì
+                                    </span>
+                                    break;
+                                default:
+                                    <span class="badge border border-danger text-danger bg-white px-2 py-1 small fw-normal">
+                                        Ngừng sử dụng
+                                    </span>
+                                    break;
+                            }
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block mb-1">Loại sân</label>
+                            <span class="text-dark">@(Model.LoaiSan?.TenLoaiSan ?? "Chưa phân loại")</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block mb-1">Khu vực</label>
+                            <span class="text-dark">@(Model.KhuVuc?.TenKhuVuc ?? "Chưa phân khu vực")</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block mb-1">Sức chứa tối đa</label>
+                            <span class="text-dark">@Model.SucChua người</span>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="text-muted small d-block mb-1">Mô tả đặc điểm</label>
+                            <span class="text-dark">@(string.IsNullOrWhiteSpace(Model.MoTa) ? "Chưa có mô tả" : Model.MoTa)</span>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- KHỐI 2: DANH SÁCH BẢNG GIÁ THEO KHUNG GIỜ CỦA SÂN -->
+    <!-- KHỐI 2: DANH SÁCH BẢNG GIÁ ÁP DỤNG -->
     <div class="border rounded-2 bg-white">
         <div class="border-bottom py-2 px-3 d-flex justify-content-between align-items-center">
-            <span class="fw-bold text-uppercase small text-muted tracking-wide">Bảng giá thuê theo khung giờ</span>
-            <span class="small text-muted">
-                @(Model.BangGias?.Count ?? 0) khung giá
-            </span>
+            <span class="fw-bold text-uppercase small text-muted tracking-wide">Bảng giá đang áp dụng</span>
+            <a asp-controller="BangGia" asp-action="Create" asp-route-maSan="@Model.MaSan" class="btn btn-dark btn-sm rounded-1 px-3">
+                Thêm bảng giá
+            </a>
         </div>
         <div class="table-responsive">
             <table class="table table-hover align-middle mb-0">
                 <thead class="bg-light text-muted small text-uppercase">
                     <tr>
-                        <th style="width: 28%;" class="border-0 ps-3">Tên bảng giá</th>
-                        <th style="width: 22%;" class="border-0 text-center">Khung giờ</th>
-                        <th style="width: 20%;" class="border-0 text-end">Đơn giá / giờ</th>
-                        <th style="width: 20%;" class="border-0 text-center">Thời gian áp dụng</th>
-                        <th style="width: 10%;" class="border-0 text-center pe-3">Trạng thái</th>
+                        <th class="border-0 ps-3">Tên bảng giá</th>
+                        <th class="border-0 text-center">Khung giờ áp dụng</th>
+                        <th class="border-0 text-end">Đơn giá / giờ</th>
+                        <th class="border-0 text-center">Ngày hiệu lực</th>
+                        <th class="border-0 text-center">Trạng thái</th>
+                        <th class="border-0 text-center pe-3">Thao tác</th>
                     </tr>
                 </thead>
                 <tbody class="border-top">
@@ -117,29 +140,31 @@
                         foreach (var bg in Model.BangGias)
                         {
                             <tr>
-                                <td class="ps-3 text-dark small fw-semibold">@bg.TenBangGia</td>
-                                <td class="text-center small">
+                                <td class="ps-3 fw-medium text-dark">@bg.TenBangGia</td>
+                                <td class="text-center small text-dark">
                                     @bg.GioBatDau.ToString(@"hh\:mm") - @bg.GioKetThuc.ToString(@"hh\:mm")
                                 </td>
-                                <td class="text-end text-dark small fw-bold">
-                                    @bg.DonGiaMoiGio.ToString("#,##0") đ
+                                <td class="text-end fw-semibold text-dark">
+                                    @bg.DonGiaMoiGio.ToString("N0") đ
                                 </td>
-                                <td class="text-center text-muted small">
-                                    @bg.NgayApDungTu.ToString("dd/MM/yyyy") - @bg.NgayApDungDen.ToString("dd/MM/yyyy")
+                                <td class="text-center small text-muted">
+                                    @bg.NgayApDungTu.ToString("dd/MM/yyyy") -> @bg.NgayApDungDen.ToString("dd/MM/yyyy")
                                 </td>
-                                <td class="text-center pe-3">
+                                <td class="text-center">
                                     @if (bg.TrangThai)
                                     {
-                                        <span class="badge border border-dark text-dark bg-white px-2 py-1 small fw-normal">
-                                            Áp dụng
-                                        </span>
+                                        <span class="badge border border-dark text-dark bg-white px-2 py-1 small fw-normal">Đang dùng</span>
                                     }
                                     else
                                     {
-                                        <span class="badge border border-secondary text-muted bg-light px-2 py-1 small fw-normal">
-                                            Hết hạn
-                                        </span>
+                                        <span class="badge border border-secondary text-secondary bg-white px-2 py-1 small fw-normal">Tạm tắt</span>
                                     }
+                                </td>
+                                <td class="text-center pe-3">
+                                    <a asp-controller="BangGia" asp-action="Edit" asp-route-id="@bg.MaBangGia" 
+                                       class="btn btn-sm btn-outline-secondary rounded-1 px-2 py-0 small">
+                                        Sửa giá
+                                    </a>
                                 </td>
                             </tr>
                         }
@@ -147,8 +172,8 @@
                     else
                     {
                         <tr>
-                            <td colspan="5" class="text-center py-4 text-muted small">
-                                Sân này hiện chưa được cấu hình bảng giá thuê nào.
+                            <td colspan="6" class="text-center py-4 text-muted small">
+                                Sân này chưa có bảng giá nào. Nhấn "Thêm bảng giá" để thiết lập mức giá cho sân.
                             </td>
                         </tr>
                     }
