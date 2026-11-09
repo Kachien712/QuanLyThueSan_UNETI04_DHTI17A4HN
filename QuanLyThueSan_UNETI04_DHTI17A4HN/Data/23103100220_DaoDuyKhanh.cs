@@ -58,7 +58,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
                 var danhSachSan = new List<SanTheThao>
                 {
                     // Sân bóng đá (Khu A & B)
-                    new SanTheThao { TenSan = "Sân Bóng Đá Mini A1", MaLoaiSan = loaiBongDa, MaKhuVuc = khuA, SucChua = 14, MoTa = "Mặt cỏ nhân tạo cao cấp, đèn LED chiếu sáng ban đêm", TinhTrang = "Đang hoạt động" },
+                    new SanTheThao { TenSan = "Sân Bóng Đá Mini A1", MaLoaiSan = loaiBongDa, MaKhuVuc = khuA, SucChua = 14, MoTa = "Mặt cỏ nhân tạo cao cấp, đèn LED chiếu sáng ban đêm", TinhTrang = "Đang hoạt động", HinhAnh = "san-bong-da.svg" },
                     new SanTheThao { TenSan = "Sân Bóng Đá Mini A2", MaLoaiSan = loaiBongDa, MaKhuVuc = khuA, SucChua = 14, MoTa = "Sân 7 người, khán đài mini bên cạnh", TinhTrang = "Đang hoạt động" },
                     new SanTheThao { TenSan = "Sân Bóng Đá Mini A3", MaLoaiSan = loaiBongDa, MaKhuVuc = khuA, SucChua = 10, MoTa = "Sân 5 người tiêu chuẩn cho sinh viên", TinhTrang = "Tạm ngừng" },
                     new SanTheThao { TenSan = "Sân Bóng Đá B1", MaLoaiSan = loaiBongDa, MaKhuVuc = khuB, SucChua = 14, MoTa = "Sân cỏ nhân tạo mới thay mặt cỏ", TinhTrang = "Đang hoạt động" },
@@ -85,6 +85,21 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN.Data
                 };
 
                 context.SanTheThaos.AddRange(danhSachSan);
+                context.SaveChanges();
+            }
+
+            // Gán ảnh mặc định theo từng môn thể thao cho các sân chưa có ảnh (Mục 19.1)
+            var sanChuaCoAnh = context.SanTheThaos.Where(s => string.IsNullOrEmpty(s.HinhAnh)).ToList();
+            if (sanChuaCoAnh.Any())
+            {
+                foreach (var san in sanChuaCoAnh)
+                {
+                    if (san.MaLoaiSan == loaiBongDa) san.HinhAnh = "san-bong-da.svg";
+                    else if (san.MaLoaiSan == loaiCauLong) san.HinhAnh = "san-cau-long.svg";
+                    else if (san.MaLoaiSan == loaiTennis) san.HinhAnh = "san-tennis.svg";
+                    else if (san.MaLoaiSan == loaiBongRo) san.HinhAnh = "san-bong-ro.svg";
+                    else san.HinhAnh = "default-san.svg";
+                }
                 context.SaveChanges();
             }
 

@@ -2,6 +2,7 @@
     Họ và tên: Đào Duy Khánh
     Mã sinh viên: 23103100220
     Nội dung thực hiện: Module 2 - Giao diện Chỉnh sửa Sân thể thao (Minimalism style)
+    - Tích hợp Upload cập nhật ảnh đại diện sân (Mục 19.1) kèm xem trước
 *@
 @model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.SanTheThaoFormViewModel
 
@@ -21,11 +22,12 @@
             </div>
 
             <div class="border rounded-2 bg-white p-4">
-                <form asp-action="Edit" method="post">
+                <form asp-action="Edit" method="post" enctype="multipart/form-data">
                     @Html.AntiForgeryToken()
 
-                    <!-- Khóa chính MaSan ẩn để gửi về server -->
+                    <!-- Khóa chính MaSan và Ảnh hiện tại ẩn để gửi về server -->
                     <input type="hidden" asp-for="MaSan" />
+                    <input type="hidden" asp-for="HinhAnhHienTai" />
 
                     <div asp-validation-summary="ModelOnly" class="text-danger small mb-3"></div>
 
@@ -87,6 +89,38 @@
                         </div>
                     </div>
 
+                    <!-- Upload ảnh sân thể thao (Chức năng nâng cao Mục 19.1) -->
+                    <div class="mb-3">
+                        <label asp-for="FileAnh" class="form-label small text-muted mb-1">
+                            Ảnh đại diện sân (Chọn ảnh mới để thay thế ảnh hiện tại)
+                        </label>
+                        
+                        @if (!string.IsNullOrEmpty(Model.HinhAnhHienTai))
+                        {
+                            <div class="mb-2 d-flex align-items-center gap-3 p-2 border rounded-1 bg-light" style="max-width: 380px;">
+                                <img src="~/images/san/@Model.HinhAnhHienTai" alt="@Model.TenSan" 
+                                     class="rounded-1" style="width: 80px; height: 60px; object-fit: cover; border: 1px solid #dee2e6;"
+                                     onerror="this.onerror=null;this.src='/images/san/default-san.svg';" />
+                                <div class="small">
+                                    <div class="fw-semibold text-dark">Ảnh hiện tại:</div>
+                                    <div class="text-muted text-truncate" style="max-width: 240px;">@Model.HinhAnhHienTai</div>
+                                </div>
+                            </div>
+                        }
+
+                        <input asp-for="FileAnh" type="file" accept=".jpg,.jpeg,.png,.webp,.svg" 
+                               class="form-control rounded-1" id="inputUploadAnh" />
+                        <div class="form-text small text-muted">Định dạng hỗ trợ: JPG, PNG, WEBP, SVG. Tối đa 5MB. Bỏ trống nếu muốn giữ nguyên ảnh hiện tại.</div>
+                        <span asp-validation-for="FileAnh" class="text-danger small"></span>
+
+                        <!-- Khung xem trước ảnh mới -->
+                        <div id="khungXemTruocAnh" class="mt-2 p-2 border rounded-1 bg-light text-center" style="display: none; max-width: 280px;">
+                            <div class="small text-muted mb-1">Ảnh mới được chọn:</div>
+                            <img id="anhXemTruoc" src="" alt="Xem trước ảnh sân mới" class="img-fluid rounded-1" style="max-height: 160px; object-fit: cover;" />
+                            <div class="small text-muted mt-1" id="tenFileAnh"></div>
+                        </div>
+                    </div>
+
                     <!-- Mô tả -->
                     <div class="mb-4">
                         <label asp-for="MoTa" class="form-label small text-muted mb-1">Mô tả đặc điểm sân</label>
@@ -110,4 +144,26 @@
 
 @section Scripts {
     @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+    <script>
+        const inputUpload = document.getElementById('inputUploadAnh');
+        const khungXemTruoc = document.getElementById('khungXemTruocAnh');
+        const anhXemTruoc = document.getElementById('anhXemTruoc');
+        const tenFileAnh = document.getElementById('tenFileAnh');
+        if (inputUpload) {
+            inputUpload.addEventListener('change', function () {
+                const file = this.files && this.files[0];
+                if (file) {
+                    const reader = new FileReader();
+                    reader.onload = function (e) {
+                        anhXemTruoc.src = e.target.result;
+                        tenFileAnh.textContent = file.name + ' (' + (file.size / 1024).toFixed(1) + ' KB)';
+                        khungXemTruoc.style.display = 'block';
+                    };
+                    reader.readAsDataURL(file);
+                } else {
+                    khungXemTruoc.style.display = 'none';
+                }
+            });
+        }
+    </script>
 }
