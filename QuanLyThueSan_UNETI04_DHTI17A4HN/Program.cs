@@ -2,6 +2,9 @@
 // Mã sinh viên: 23103100234
 // Nội dung thực hiện: Cấu hình Session, đăng ký xác thực Cookie và pipeline Middleware (Module 1)
 // (Nếu thành viên khác cũng sửa file này, ghi rõ nội dung của từng người bên dưới)
+// Họ và tên: Lê Ngọc Hải Nam
+// Mã sinh viên: 23103100219
+// Nội dung thực hiện: Module 4 tuần 4 - Đăng ký SuDungDichVuService.
 
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.EntityFrameworkCore;
@@ -44,6 +47,7 @@ namespace QuanLyThueSan_UNETI04_DHTI17A4HN
             builder.Services.AddControllersWithViews();
             builder.Services.AddScoped<XacNhanDatSanService>();
             builder.Services.AddScoped<NhanSanService>();
+            builder.Services.AddScoped<SuDungDichVuService>();
 
             var app = builder.Build();
 

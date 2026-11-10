@@ -24,9 +24,11 @@
                 <td>@don.GioBatDau.ToString(@"hh\:mm")–@don.GioKetThuc.ToString(@"hh\:mm")</td>
                 <td>
                     <form asp-action="XacNhan" asp-route-id="@don.MaDatSan" method="post" class="mb-2">
+                        @Html.AntiForgeryToken()
                         <button class="btn btn-success btn-sm" type="submit">Xác nhận</button>
                     </form>
                     <form asp-action="TuChoi" asp-route-id="@don.MaDatSan" method="post" class="d-flex gap-1">
+                        @Html.AntiForgeryToken()
                         <input name="lyDo" class="form-control form-control-sm" aria-label="Lý do từ chối" placeholder="Lý do từ chối" maxlength="450" required />
                         <button class="btn btn-outline-danger btn-sm" type="submit">Từ chối</button>
                     </form>

@@ -24,6 +24,7 @@
                 <td>@don.GioBatDau.ToString(@"hh\:mm")–@don.GioKetThuc.ToString(@"hh\:mm")</td>
                 <td>
                     <form asp-action="Nhan" asp-route-id="@don.MaDatSan" method="post">
+                        @Html.AntiForgeryToken()
                         <button class="btn btn-primary btn-sm" type="submit">Nhận sân</button>
                     </form>
                 </td>

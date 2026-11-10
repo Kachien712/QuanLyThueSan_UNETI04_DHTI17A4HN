@@ -1,0 +1,63 @@
+@*
+    Họ và tên: Lê Ngọc Hải Nam
+    Mã sinh viên: 23103100219
+    Nội dung thực hiện: Module 4 tuần 4 - Ghi nhận và xem dịch vụ khách đã sử dụng theo đơn.
+*@
+@model QuanLyThueSan_UNETI04_DHTI17A4HN.ViewModels.SuDungDichVuChiTietViewModel
+@{ ViewData["Title"] = "Dịch vụ của đơn #" + Model.Don.MaDatSan; }
+
+<h1>Dịch vụ của đơn #@Model.Don.MaDatSan</h1>
+<p>Khách hàng: <strong>@(Model.Don.KhachHang?.HoTen ?? $"#{Model.Don.MaKhachHang}")</strong> ·
+   Sân: <strong>@(Model.Don.SanTheThao?.TenSan ?? $"#{Model.Don.MaSan}")</strong></p>
+@if (TempData["Success"] is string success) { <div class="alert alert-success">@success</div> }
+@if (TempData["Error"] is string error) { <div class="alert alert-danger">@error</div> }
+
+<h2 class="h4 mt-4">Thêm dịch vụ</h2>
+<form asp-action="Them" asp-route-id="@Model.Don.MaDatSan" method="post" class="row g-2 align-items-end mb-4">
+    @Html.AntiForgeryToken()
+    <div class="col-md-6">
+        <label for="maDichVu" class="form-label">Dịch vụ</label>
+        <select id="maDichVu" name="MaDichVu" class="form-select" required>
+            <option value="">Chọn dịch vụ</option>
+            @foreach (var dichVu in Model.DanhMuc)
+            {
+                <option value="@dichVu.MaDichVu">@dichVu.TenDichVu - @dichVu.DonGia.ToString("N0") đ / @dichVu.DonViTinh (tồn: @(dichVu.SoLuongTon?.ToString() ?? "không quản lý"))</option>
+            }
+        </select>
+    </div>
+    <div class="col-md-2">
+        <label for="soLuong" class="form-label">Số lượng</label>
+        <input id="soLuong" name="SoLuong" type="number" min="1" max="1000" value="1" required class="form-control" />
+    </div>
+    <div class="col-md-2"><button type="submit" class="btn btn-primary" disabled="@(Model.DanhMuc.Count == 0)">Ghi nhận</button></div>
+</form>
+@if (Model.DanhMuc.Count == 0) { <p class="text-muted">Không có dịch vụ đang hoạt động và còn số lượng.</p> }
+
+<h2 class="h4">Dịch vụ đã ghi nhận</h2>
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Dịch vụ</th><th>Số lượng</th><th>Đơn giá lúc dùng</th><th>Thành tiền</th><th>Thời điểm thêm</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var item in Model.PhatSinh)
+        {
+            <tr>
+                <td>@(item.DichVu?.TenDichVu ?? $"#{item.MaDichVu}")</td>
+                <td>@item.SoLuong</td>
+                <td>@item.DonGia.ToString("N0") đ</td>
+                <td>@item.ThanhTien.ToString("N0") đ</td>
+                <td>@item.ThoiGianThem.ToString("dd/MM/yyyy HH:mm")</td>
+                <td>
+                    <form asp-action="Xoa" asp-route-id="@Model.Don.MaDatSan" method="post" onsubmit="return confirm('Xóa dòng dịch vụ này và hoàn lại tồn kho?');">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="maSuDung" value="@item.MaSuDung" />
+                        <button type="submit" class="btn btn-outline-danger btn-sm">Xóa</button>
+                    </form>
+                </td>
+            </tr>
+        }
+        @if (Model.PhatSinh.Count == 0) { <tr><td colspan="6">Đơn chưa sử dụng dịch vụ.</td></tr> }
+        </tbody>
+        <tfoot><tr><th colspan="3" class="text-end">Tổng tiền dịch vụ</th><th>@Model.TongTienDichVu.ToString("N0") đ</th><td colspan="2"></td></tr></tfoot>
+    </table>
+</div>
+<a asp-action="Index" class="btn btn-outline-secondary">Quay lại danh sách đơn</a>

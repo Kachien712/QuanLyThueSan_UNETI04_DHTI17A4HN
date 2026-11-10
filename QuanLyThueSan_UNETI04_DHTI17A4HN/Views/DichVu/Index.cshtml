@@ -37,6 +37,7 @@
                 <td>
                     <a class="btn btn-outline-primary btn-sm" asp-action="Edit" asp-route-id="@item.MaDichVu">Sửa</a>
                     <form asp-action="DoiTrangThai" asp-route-id="@item.MaDichVu" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
                         <button class="btn btn-outline-secondary btn-sm" type="submit">@(item.TrangThai ? "Ngừng" : "Kích hoạt")</button>
                     </form>
                 </td>

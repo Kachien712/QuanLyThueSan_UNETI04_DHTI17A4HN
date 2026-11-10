@@ -1,0 +1,31 @@
+@*
+    Họ và tên: Lê Ngọc Hải Nam
+    Mã sinh viên: 23103100219
+    Nội dung thực hiện: Module 4 tuần 4 - Chọn đơn đang sử dụng để ghi nhận dịch vụ.
+*@
+@model IReadOnlyList<QuanLyThueSan_UNETI04_DHTI17A4HN.Models.DatSan>
+@{ ViewData["Title"] = "Dịch vụ phát sinh"; }
+
+<h1>Dịch vụ phát sinh</h1>
+<p>Chọn đơn đang sử dụng sân để ghi nhận dịch vụ khách dùng.</p>
+@if (TempData["Success"] is string success) { <div class="alert alert-success">@success</div> }
+@if (TempData["Error"] is string error) { <div class="alert alert-danger">@error</div> }
+<div class="table-responsive">
+    <table class="table table-striped align-middle">
+        <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Sân</th><th>Ngày</th><th>Giờ đặt</th><th></th></tr></thead>
+        <tbody>
+        @foreach (var don in Model)
+        {
+            <tr>
+                <td>@don.MaDatSan</td>
+                <td>@(don.KhachHang?.HoTen ?? $"#{don.MaKhachHang}")</td>
+                <td>@(don.SanTheThao?.TenSan ?? $"#{don.MaSan}")</td>
+                <td>@don.NgaySuDung.ToString("dd/MM/yyyy")</td>
+                <td>@don.GioBatDau.ToString(@"hh\:mm")–@don.GioKetThuc.ToString(@"hh\:mm")</td>
+                <td><a class="btn btn-primary btn-sm" asp-action="ChiTiet" asp-route-id="@don.MaDatSan">Ghi nhận dịch vụ</a></td>
+            </tr>
+        }
+        @if (Model.Count == 0) { <tr><td colspan="6">Chưa có đơn đang sử dụng sân.</td></tr> }
+        </tbody>
+    </table>
+</div>

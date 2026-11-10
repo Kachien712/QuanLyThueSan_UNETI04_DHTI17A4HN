@@ -1,6 +1,6 @@
-// Họ và tên: [Họ tên SV4]
-// Mã sinh viên: [MSSV SV4]
-// Nội dung thực hiện: Module 4 - Entity Dịch vụ sử dụng phát sinh
+// Họ và tên: Lê Ngọc Hải Nam
+// Mã sinh viên: 23103100219
+// Nội dung thực hiện: Module 4 tuần 4 - Entity ghi nhận dịch vụ sử dụng phát sinh.
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
