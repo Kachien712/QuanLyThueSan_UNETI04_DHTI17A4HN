@@ -1,31 +1,36 @@
 @*
     Họ và tên: Lê Ngọc Hải Nam
     Mã sinh viên: 23103100219
-    Nội dung thực hiện: Module 4 tuần 4 - Chọn đơn đang sử dụng để ghi nhận dịch vụ.
+    Nội dung thực hiện: Module 4 tuần 4 - Quản lý sân đang hoạt động, ghi nhận dịch vụ và kết thúc lượt sân.
 *@
 @model IReadOnlyList<QuanLyThueSan_UNETI04_DHTI17A4HN.Models.DatSan>
-@{ ViewData["Title"] = "Dịch vụ phát sinh"; }
+@{ ViewData["Title"] = "Quản lý sân đang hoạt động"; }
 
-<h1>Dịch vụ phát sinh</h1>
-<p>Chọn đơn đang sử dụng sân để ghi nhận dịch vụ khách dùng.</p>
+<section class="module4-page">
+<div class="module4-hero">
+    <span class="module4-eyebrow"><i class="bi bi-receipt"></i> Module 4 · Bán tại sân</span>
+    <h1>Quản lý sân đang hoạt động</h1>
+    <p>Theo dõi lượt khách đang chơi, ghi nhận dịch vụ và chủ động kết thúc sân để chuyển sang thanh toán.</p>
+</div>
 @if (TempData["Success"] is string success) { <div class="alert alert-success">@success</div> }
 @if (TempData["Error"] is string error) { <div class="alert alert-danger">@error</div> }
-<div class="table-responsive">
-    <table class="table table-striped align-middle">
+<div class="module4-panel table-responsive">
+    <table class="table module4-table align-middle mb-0">
         <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Sân</th><th>Ngày</th><th>Giờ đặt</th><th></th></tr></thead>
         <tbody>
         @foreach (var don in Model)
         {
             <tr>
-                <td>@don.MaDatSan</td>
+                <td><span class="module4-id">#@don.MaDatSan</span></td>
                 <td>@(don.KhachHang?.HoTen ?? $"#{don.MaKhachHang}")</td>
                 <td>@(don.SanTheThao?.TenSan ?? $"#{don.MaSan}")</td>
                 <td>@don.NgaySuDung.ToString("dd/MM/yyyy")</td>
                 <td>@don.GioBatDau.ToString(@"hh\:mm")–@don.GioKetThuc.ToString(@"hh\:mm")</td>
-                <td><a class="btn btn-primary btn-sm" asp-action="ChiTiet" asp-route-id="@don.MaDatSan">Ghi nhận dịch vụ</a></td>
+                <td><a class="btn module4-btn-primary btn-sm" asp-action="ChiTiet" asp-route-id="@don.MaDatSan"><i class="bi bi-gear"></i> Quản lý lượt sân</a></td>
             </tr>
         }
         @if (Model.Count == 0) { <tr><td colspan="6">Chưa có đơn đang sử dụng sân.</td></tr> }
         </tbody>
     </table>
 </div>
+</section>

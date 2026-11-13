@@ -8,8 +8,13 @@
     var isEdit = Model.MaDichVu > 0;
     ViewData["Title"] = isEdit ? "Sửa dịch vụ" : "Thêm dịch vụ";
 }
-<h1>@ViewData["Title"]</h1>
-<form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@(isEdit ? Model.MaDichVu : null)" method="post" class="col-md-6">
+<section class="module4-page">
+<div class="module4-hero module4-hero-compact">
+    <span class="module4-eyebrow"><i class="bi bi-box-seam"></i> Module 4 · Dịch vụ</span>
+    <h1>@ViewData["Title"]</h1>
+    <p>Thiết lập thông tin bán hàng và số lượng tồn kho của dịch vụ.</p>
+</div>
+<form asp-action="@(isEdit ? "Edit" : "Create")" asp-route-id="@(isEdit ? Model.MaDichVu : null)" method="post" class="module4-form-card col-lg-7">
     @Html.AntiForgeryToken()
     <input asp-for="MaDichVu" type="hidden" />
     <div asp-validation-summary="ModelOnly" class="text-danger"></div>
@@ -37,7 +42,8 @@
         <input asp-for="TrangThai" class="form-check-input" />
         <label asp-for="TrangThai" class="form-check-label"></label>
     </div>
-    <button class="btn btn-primary" type="submit">Lưu</button>
-    <a class="btn btn-outline-secondary" asp-action="Index">Quay lại</a>
+    <div class="d-flex gap-2 mt-4"><button class="btn module4-btn-primary" type="submit"><i class="bi bi-check2"></i> Lưu dịch vụ</button>
+    <a class="btn module4-btn-outline" asp-action="Index">Quay lại</a></div>
 </form>
+</section>
 @section Scripts { <partial name="_ValidationScriptsPartial" /> }

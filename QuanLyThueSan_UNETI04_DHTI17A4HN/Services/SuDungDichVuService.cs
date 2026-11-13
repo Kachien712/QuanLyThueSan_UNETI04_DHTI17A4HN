@@ -12,6 +12,19 @@ public record KetQuaSuDungDichVu(bool ThanhCong, string ThongBao);
 
 public class SuDungDichVuService(ApplicationDbContext db)
 {
+    public async Task<KetQuaSuDungDichVu> KetThucSanAsync(int maDatSan, CancellationToken ct = default)
+    {
+        // Cập nhật có điều kiện để hai nhân viên không thể cùng kết thúc một lượt sân.
+        var soDong = await db.DatSans
+            .Where(x => x.MaDatSan == maDatSan && x.TrangThai == "Đang sử dụng")
+            .ExecuteUpdateAsync(setters => setters
+                .SetProperty(x => x.TrangThai, "Chờ thanh toán"), ct);
+
+        return soDong == 1
+            ? new(true, "Đã kết thúc lượt sân. Đơn đã được chuyển sang chờ thanh toán.")
+            : new(false, "Đơn không còn ở trạng thái Đang sử dụng. Hãy tải lại danh sách.");
+    }
+
     public async Task<KetQuaSuDungDichVu> ThemAsync(int maDatSan, int maDichVu, int soLuong, CancellationToken ct = default)
     {
         if (soLuong is < 1 or > 1000)

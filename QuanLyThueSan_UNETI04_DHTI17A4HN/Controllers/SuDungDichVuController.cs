@@ -73,4 +73,18 @@ public class SuDungDichVuController(ApplicationDbContext db, SuDungDichVuService
         TempData[result.ThanhCong ? "Success" : "Error"] = result.ThongBao;
         return RedirectToAction(nameof(ChiTiet), new { id });
     }
+
+    [HttpPost, ValidateAntiForgeryToken]
+    public async Task<IActionResult> KetThucSan(int id, CancellationToken ct)
+    {
+        var result = await service.KetThucSanAsync(id, ct);
+        if (!result.ThanhCong)
+        {
+            TempData["Error"] = result.ThongBao;
+            return RedirectToAction(nameof(ChiTiet), new { id });
+        }
+
+        TempData["SuccessMessage"] = result.ThongBao;
+        return RedirectToAction("ChoThanhToan", "ThanhToan");
+    }
 }

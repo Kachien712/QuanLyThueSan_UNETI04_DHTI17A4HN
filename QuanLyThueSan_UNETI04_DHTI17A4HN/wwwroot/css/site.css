@@ -120,3 +120,85 @@ body {
     padding: .45rem .65rem;
   }
 }
+
+/* ============================================================
+   Họ và tên: Lê Ngọc Hải Nam - MSSV: 23103100219
+   Nội dung thực hiện: Module 4 - Giao diện vận hành sân tông vàng nhẹ.
+   ============================================================ */
+.module4-page {
+  --m4-ink: #3d3324;
+  --m4-muted: #806f59;
+  --m4-gold: #d99a26;
+  --m4-gold-dark: #9a6611;
+  --m4-cream: #fffaf0;
+  --m4-line: #f0ddb9;
+  color: var(--m4-ink);
+  padding: 1.5rem 0 2.5rem;
+}
+
+.module4-hero {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--m4-line);
+  border-radius: 1.15rem;
+  padding: 1.6rem 1.75rem;
+  margin-bottom: 1.25rem;
+  background: linear-gradient(125deg, #fff8e8 0%, #fffdf8 72%);
+  box-shadow: 0 10px 30px rgba(128, 91, 27, .08);
+}
+
+.module4-hero::after {
+  content: "";
+  position: absolute;
+  width: 150px;
+  height: 150px;
+  right: -55px;
+  top: -70px;
+  border: 30px solid rgba(225, 171, 63, .16);
+  border-radius: 50%;
+}
+
+.module4-hero-compact { padding-block: 1.3rem; }
+.module4-hero h1 { margin: .25rem 0 .4rem; font-size: clamp(1.55rem, 2.5vw, 2rem); font-weight: 750; }
+.module4-hero p { margin: 0; color: var(--m4-muted); max-width: 48rem; }
+.module4-eyebrow { color: var(--m4-gold-dark); font-size: .82rem; font-weight: 700; letter-spacing: .04em; text-transform: uppercase; }
+
+.module4-panel, .module4-form-card {
+  border: 1px solid var(--m4-line);
+  border-radius: 1rem;
+  background: #fff;
+  box-shadow: 0 8px 24px rgba(88, 63, 24, .06);
+}
+
+.module4-form-card { padding: 1.35rem; margin-inline: 0; }
+.module4-filter { margin-inline: 0; padding: .85rem; border: 1px solid var(--m4-line); border-radius: .9rem; background: var(--m4-cream); }
+.module4-table thead th { background: #fff5dc; color: #74501a; font-size: .8rem; text-transform: uppercase; letter-spacing: .03em; white-space: nowrap; }
+.module4-table > :not(caption) > * > * { padding: .85rem .75rem; border-bottom-color: #f6ead2; }
+.module4-table tbody tr:hover { background: #fffdf8; }
+.module4-id { color: var(--m4-gold-dark); font-weight: 750; }
+.module4-stock { display: inline-block; padding: .22rem .55rem; background: #fff5dc; color: #85601c; border-radius: 999px; font-size: .86rem; }
+.module4-status { display: inline-block; padding: .28rem .62rem; border-radius: 999px; font-size: .8rem; font-weight: 700; }
+.module4-status.is-active { color: #276344; background: #e7f6eb; }
+.module4-status.is-inactive { color: #7a5b28; background: #f7eddc; }
+.module4-alert { border-radius: .8rem; border: 0; box-shadow: 0 5px 15px rgba(0, 0, 0, .05); }
+
+.module4-btn-primary, .module4-btn-confirm {
+  border: 1px solid #d79822;
+  color: #3f2b09;
+  background: linear-gradient(135deg, #ffd976, #efb33b);
+  font-weight: 700;
+  box-shadow: 0 4px 10px rgba(191, 132, 24, .18);
+}
+.module4-btn-primary:hover, .module4-btn-primary:focus, .module4-btn-confirm:hover, .module4-btn-confirm:focus { color: #2f2109; background: #f3c35b; border-color: #c88516; }
+.module4-btn-outline { color: #946318; border-color: #dfb76a; background: #fffdf8; font-weight: 650; }
+.module4-btn-outline:hover, .module4-btn-outline:focus { color: #5e3d0e; border-color: #d69c36; background: #fff2d3; }
+.module4-btn-muted { color: #78654d; border-color: #dfd2bd; background: #fff; }
+.module4-btn-muted:hover { color: #5a472d; background: #f8f1e7; }
+.module4-btn-reject { color: #a14335; border-color: #e6b5ac; background: #fffafa; }
+.module4-btn-reject:hover { color: #7f3025; border-color: #d99589; background: #fff0ed; }
+
+@media (max-width: 575.98px) {
+  .module4-page { padding-top: .75rem; }
+  .module4-hero { padding: 1.2rem; border-radius: .9rem; }
+  .module4-form-card { padding: 1rem; }
+}

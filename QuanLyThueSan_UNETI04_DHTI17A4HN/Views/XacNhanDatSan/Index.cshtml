@@ -6,18 +6,22 @@
 @model IReadOnlyList<QuanLyThueSan_UNETI04_DHTI17A4HN.Models.DatSan>
 @{ ViewData["Title"] = "Xác nhận đặt sân"; }
 
-<h1>Xác nhận đặt sân</h1>
-<p>Kiểm tra lại sân, lịch và giá trước khi xác nhận đơn.</p>
-@if (TempData["Success"] is string success) { <div class="alert alert-success">@success</div> }
-@if (TempData["Error"] is string error) { <div class="alert alert-danger">@error</div> }
-<div class="table-responsive">
-    <table class="table table-striped align-middle">
+<section class="module4-page">
+    <div class="module4-hero">
+        <span class="module4-eyebrow"><i class="bi bi-calendar2-check"></i> Module 4 · Vận hành sân</span>
+        <h1>Xác nhận đặt sân</h1>
+        <p>Kiểm tra lịch, sân và bảng giá trước khi duyệt đơn của khách.</p>
+    </div>
+@if (TempData["Success"] is string success) { <div class="alert alert-success module4-alert">@success</div> }
+@if (TempData["Error"] is string error) { <div class="alert alert-danger module4-alert">@error</div> }
+<div class="module4-panel table-responsive">
+    <table class="table module4-table align-middle mb-0">
         <thead><tr><th>Mã đơn</th><th>Khách hàng</th><th>Sân</th><th>Ngày</th><th>Giờ</th><th>Thao tác</th></tr></thead>
         <tbody>
         @foreach (var don in Model)
         {
             <tr>
-                <td>@don.MaDatSan</td>
+                <td><span class="module4-id">#@don.MaDatSan</span></td>
                 <td>@(don.KhachHang?.HoTen ?? $"#{don.MaKhachHang}")</td>
                 <td>@(don.SanTheThao?.TenSan ?? $"#{don.MaSan}")</td>
                 <td>@don.NgaySuDung.ToString("dd/MM/yyyy")</td>
@@ -25,12 +29,12 @@
                 <td>
                     <form asp-action="XacNhan" asp-route-id="@don.MaDatSan" method="post" class="mb-2">
                         @Html.AntiForgeryToken()
-                        <button class="btn btn-success btn-sm" type="submit">Xác nhận</button>
+                        <button class="btn module4-btn-confirm btn-sm" type="submit"><i class="bi bi-check2-circle"></i> Xác nhận</button>
                     </form>
                     <form asp-action="TuChoi" asp-route-id="@don.MaDatSan" method="post" class="d-flex gap-1">
                         @Html.AntiForgeryToken()
                         <input name="lyDo" class="form-control form-control-sm" aria-label="Lý do từ chối" placeholder="Lý do từ chối" maxlength="450" required />
-                        <button class="btn btn-outline-danger btn-sm" type="submit">Từ chối</button>
+                        <button class="btn module4-btn-reject btn-sm" type="submit">Từ chối</button>
                     </form>
                 </td>
             </tr>
@@ -39,3 +43,4 @@
         </tbody>
     </table>
 </div>
+</section>
